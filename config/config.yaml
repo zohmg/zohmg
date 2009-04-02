@@ -1,0 +1,19 @@
+project_name: peer
+
+dimensions:
+- d0
+- d1
+- d2
+
+units:
+ u0:
+   p0:
+    - d0
+   p1:
+    - d0
+    - d1
+ u1:
+   p0:
+     - d0
+     - d1
+     - d2
