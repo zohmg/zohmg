@@ -1,19 +1,21 @@
-project_name: peer
+project_name: webmetrics
 
 dimensions:
-- d0
-- d1
-- d2
+  - country
+  - host
+  - referer
+  - useragent
+  - usertype
 
 units:
- u0:
-   p0:
-    - d0
-   p1:
-    - d0
-    - d1
- u1:
-   p0:
-     - d0
-     - d1
-     - d2
+  pageviews:
+    country:
+      - country
+    country-useragent-usertype:
+      - country
+      - useragent
+      - usertype
+  visitors:
+    country-useragent:
+      - country
+      - useragent
