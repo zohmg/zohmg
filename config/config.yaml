@@ -1,9 +1,10 @@
-project_name: webmetrics
+project_name:
+ webmetrics
 
 dimensions:
   - country
   - host
-  - referer
+  - referrer
   - useragent
   - usertype
 
@@ -11,10 +12,12 @@ units:
   pageviews:
     country:
       - country
-    country-useragent-usertype:
+    domain:
+      - domain
+    country-domain-useragent:
       - country
+      - domain
       - useragent
-      - usertype
   visitors:
     country-useragent:
       - country

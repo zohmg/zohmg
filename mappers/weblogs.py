@@ -1,13 +1,16 @@
 def map(key, value):
     from lfm.data.parse import web
-    log = web.Log(value)
-    
-    ts      = log.timestamp.unixtime()
-    dimensions = {'country' : log.country(),
-                  'domain'  : log.domain,
-                  'useragent' : log.agent,
+
+    try: log = web.Log(value)
+    except ValueError: return
+    ua = web.UserAgent()
+
+    ts = log.timestamp.ymd()
+    dimensions = {'country'   : log.country(),
+                  'domain'    : log.domain,
+                  'useragent' : ua.classify(log.agent),
                   'usertype'  : ("user", "anon")[log.userid == None]
                   }
-    values = {'pageviews':1}
+    values = {'pageviews' : 1}
     
     yield ts, dimensions, values

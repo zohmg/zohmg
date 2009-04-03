@@ -7,8 +7,6 @@ import dumbo
 sys.path.append(os.path.abspath(".") + "/lib") # FIXME.
 from reducers import *
 
-# this script is acting as a go-between for 'dumbo start'.
-
 
 def usage():
     print "usage: " + sys.argv[0] + " <map.py> <dumboesque arguments>"
@@ -28,15 +26,6 @@ m = __import__(mapper.split(".")[0])
 # TODO: make sure module has method 'map'.
 
 
-# wrap user's mapper.
-def mapper_wrapper(m):
-    def g(k,v):
-        for r in m("yeah-"+str(k), v):
-            ts, dims, units = r
-            for u in units:
-                rk = '-'.join([u, str(ts)])
-                yield (rk, dims), units[u]
-    return g
 
 
 

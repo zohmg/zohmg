@@ -1,0 +1,109 @@
+hello!
+
+let's get started with zohmg.
+
+the outline of the working directory for your project looks like this:
+config/
+lib/
+mappers/
+scripts/
+
+
+you will write the configuration file config.yaml that goes into
+config, and you will write one or more mappers which go into the
+mappers directory.
+
+you will use the scripts in the scripts directory to make things
+happen. the code that runs behind the scenes is in lib.
+
+
+0)
+
+Pre-requisites:
+ - hadoop
+ - hbase, with a running thrift server
+ - dumbo
+
+
+1) setting things up.
+
+first, you'll want to define what dimensions your data has, and what
+projections of that data you are interested in.
+
+open up config/config.yaml and enter something like this:
+
+project_name:
+  webmetrics
+
+dimensions:
+  - country
+  - domain
+  - useragent
+  - usertype
+
+
+units:
+  pageviews:
+    country:
+      - country
+    country-useragent-usertype:
+      - country
+      - useragent
+      - usertype
+  visitors:
+    country-useragent:
+      - country
+      - useragent
+
+
+This defines four dimensions and two units. Your mapper will output
+measurements counted in these units, and each measurement will be put
+along the axes of the dimensions.
+
+You will also notice that we have defined three projections; country and
+country-useragent-usertype for 'pageviews', and 'country-useragent'
+for 'visitors'. This hints at what queries we will want to ask the
+system later.
+
+Run 'python scripts/setup.py' and lean back as it creates an hbase
+table for you project.
+
+
+2) Importing.
+
+Now we're ready to put some actual data into the data store!
+
+We will want to write a mapper that maps each line of your log
+file(s) to a measurement along the dimension axes. We put this file
+into the mapper directory. It might look something like this:
+
+def map(key, value):
+    from lfm.data.parse import web
+
+    try: log = web.Log(value)
+    except ValueError: return
+    ua = web.UserAgent()
+
+    ts = log.timestamp.ymd()
+    dimensions = {'country'   : log.country(),
+                  'domain'    : log.domain,
+                  'useragent' : ua.classify(log.agent),
+                  'usertype'  : ("user", "anon")[log.userid == None]
+                  }
+    values = {'pageviews' : 1}
+
+    yield ts, dimensions, values
+
+
+The map function is really a generator; it can yield none or more times
+for every line of the log file.
+
+The output of this mapper goes into a reducer that, for each
+dimension-tuple, sums the values of each unit, does a magical dance
+and eventually passes them along to the actual underlying data store.
+
+We rely on dumbo to run our job.
+
+
+3) Exporting.
+
