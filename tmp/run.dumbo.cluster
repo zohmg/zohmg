@@ -1,0 +1,30 @@
+#!/bin/bash
+
+echo "ok."
+echo "don't forget to put all of those jars on HADOOP_CLASSPATH either!"
+
+# how I ran stuff at the devcluster on Mon Apr  6 18:00:15 UTC 2009
+# fredrik@hadoopdev1:[~/zohmg]$> export PYTHONPATH=/home/fredrik/whoop/lib:/home/fredrik/zohmg/lib
+# fredrik@hadoopdev1:[~/zohmg]$> export HADOOP_CLASSPATH=/home/fredrik/whoop/lab/darling/build/darling-0.0.3.jar:/home/hadoop/hadoop/build/contrib/streaming/hadoop-0.19.2-dev-streaming.jar:/home/hadoop/hbase/hbase-0.19.0.jar
+# fredrik@hadoopdev1:[~/zohmg]$> tmp/run.dumbo.cluster
+
+input=/user/hadoop/data/weblogs/2007/01/01
+
+/home/fredrik/workspace/hadoop-0.19-patched/bin/hadoop dfs -rmr /tmp/whatever
+
+time dumbo start scripts/import.py \
+-input $input \
+-output /tmp/whatever \
+-hadoop /home/hadoop/hadoop \
+-libegg /home/fredrik/whoop/lib/lfm-some_svn_version-py2.5.egg \
+-file /home/fredrik/whoop/lab/darling/build/darling-0.0.3.jar \
+-file /home/hadoop/hadoop/build/contrib/streaming/hadoop-0.19.2-dev-streaming.jar \
+-file /home/hadoop/hbase/hbase-0.19.0.jar \
+-file config.yaml \
+-file lib/zohmg.py \
+-file lib/usermapper.py \
+-inputformat org.apache.hadoop.mapred.LzoTextInputFormat \
+-outputformat org.apache.hadoop.hbase.mapred.TableOutputFormat \
+-jobconf hbase.mapred.outputtable=webmetrics \
+-jobconf stream.io.identifier.resolver.class=fm.last.darling.HBaseIdentifierResolver \
+-streamoutput hbase
