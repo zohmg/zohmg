@@ -3,13 +3,13 @@
 echo "ok."
 echo "don't forget to put all of those jars on HADOOP_CLASSPATH either!"
 
-#/usr/bin/python tmp/proof.py mappers/weblogs.py \
-
 #input=weblogs/20090101-1m.log
-input=weblogs/20090101-50k.log
-#input=weblogs/small.log
+#input=weblogs/20090101-50k.log
+input=weblogs/small.log
 
-time dumbo start tmp/proof.py \
+/home/fredrik/workspace/hadoop-0.19-patched/bin/hadoop dfs -rmr /tmp/whatever
+
+time dumbo start scripts/import.py \
 -input $input \
 -output /tmp/whatever \
 -hadoop /home/fredrik/workspace/hadoop-0.19-patched \
@@ -18,9 +18,12 @@ time dumbo start tmp/proof.py \
 -file /home/fredrik/workspace/hadoop-0.19-patched/build/contrib/streaming/hadoop-0.19.2-dev-streaming.jar \
 -file /home/fredrik/workspace/hbase-0.19/build/hbase-0.19.2-dev.jar \
 -file config/config.yaml \
+-file lib/zohmg.py \
+-file lib/usermapper.py \
+-outputformat org.apache.hadoop.hbase.mapred.TableOutputFormat \
+-jobconf hbase.mapred.outputtable=webmetrics \
 -jobconf stream.io.identifier.resolver.class=fm.last.darling.HBaseIdentifierResolver \
--streamoutput hbase -outputformat table \
--jobconf hbase.mapred.outputtable=webmetrics 
+-streamoutput hbase
 
 # -inputformat org.apache.hadoop.mapred.LzoTextInputFormat
 

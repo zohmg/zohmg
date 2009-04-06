@@ -1,0 +1,1 @@
+../mappers/weblogs.py

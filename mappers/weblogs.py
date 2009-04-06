@@ -1,3 +1,4 @@
+# user's mapper.
 def map(key, value):
     from lfm.data.parse import web
 

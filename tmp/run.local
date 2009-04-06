@@ -4,10 +4,9 @@ echo "ok."
 echo "don't forget to put all of those jars on HADOOP_CLASSPATH either!"
 
 #/usr/bin/python tmp/proof.py mappers/weblogs.py \
-time dumbo start tmp/proof.py \
+time dumbo start scripts/import.py \
 -input /home/fredrik/logfiles/small.log \
 -output /tmp/whatever \
-#-hadoop /home/fredrik/workspace/hadoop-0.19-patched \
 -libegg /home/fredrik/whoop/lib/lfm-some_svn_version-py2.5.egg \
 -file /home/fredrik/whoop/lab/darling/build/darling-0.0.3.jar \
 -file /home/fredrik/workspace/hadoop-0.19-patched/build/contrib/streaming/hadoop-0.19.2-dev-streaming.jar \
