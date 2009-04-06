@@ -5,9 +5,12 @@ echo "don't forget to put all of those jars on HADOOP_CLASSPATH either!"
 
 #/usr/bin/python tmp/proof.py mappers/weblogs.py \
 
+#input=weblogs/20090101-1m.log
+input=weblogs/20090101-50k.log
+#input=weblogs/small.log
 
 time dumbo start tmp/proof.py \
--input weblogs/20090101-1m.log \
+-input $input \
 -output /tmp/whatever \
 -hadoop /home/fredrik/workspace/hadoop-0.19-patched \
 -libegg /home/fredrik/whoop/lib/lfm-some_svn_version-py2.5.egg \

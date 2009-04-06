@@ -13,7 +13,6 @@ def usage():
 #  what will the queries look like?
 
 
-
 # TMP
 class config(object):
     config_file = "config.yaml"
