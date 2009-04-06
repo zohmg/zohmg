@@ -20,19 +20,27 @@ def setup_transport(host):
 # set up some test data. should be quick.
 
 table = 'webmetrics'
-countries = ['US', 'SE', 'DE']
+
+units = ['bytes', 'pageviews']
+scaling = {'bytes': 1000, 'pageviews': 5}
+
+countries = ['US', 'SE', 'DE', 'ES', 'GB', 'FR']
+hashes = {} # pre-compute country hashes.
+for c in countries: hashes[c] = hash(c) % 255
+
 client = setup_transport('localhost')
 
 year="2009"
-for month in ['01', '02', '03']:
+for month in ['04', '05', '06']:
     for day in range(1,31):
-        ymd = year + month + "%02d" % day
-        rk = "pageviews-" + ymd
-        mutations = []
-        for c in countries:
-            h = hash(c) % 255
-            m = {}
-            m['column'] = "country:"+c
-            m['value']  = str(int(random() * h))
-            mutations.append(Mutation(m))
-        client.mutateRow(table, rk, mutations)
+        for unit in units:
+            ymd = year + month + "%02d" % day
+            rk = unit + "-" + ymd
+            mutations = []
+            for c in countries:
+                m = {}
+                m['column'] = "country:"+c
+                m['value']  = str(int(random() * hashes[c] * scaling[unit]))
+                mutations.append(Mutation(m))
+                print rk + " +> " + str(mutations)
+            client.mutateRow(table, rk, mutations)
