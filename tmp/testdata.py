@@ -30,8 +30,9 @@ for month in ['01', '02', '03']:
         rk = "pageviews-" + ymd
         mutations = []
         for c in countries:
+            h = hash(c) % 255
             m = {}
             m['column'] = "country:"+c
-            m['value']  = str(int(random() * 255))
+            m['value']  = str(int(random() * h))
             mutations.append(Mutation(m))
         client.mutateRow(table, rk, mutations)
