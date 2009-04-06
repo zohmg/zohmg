@@ -6,5 +6,10 @@ cd "$confdir/../lib"
 zohmglibpath=`pwd`
 
 echo adding \'$zohmglibpath\' to DOLLAR-PYTHONPATH.
-export PYTHONPATH="$PYTHONPATH:~/whoop/lib:$zohmglibpath"
-echo $PYTHONPATH
+
+if [ -z $PYTHONPATH ]; then
+    export PYTHONPATH=~/whoop/lib:$zohmglibpath
+else
+    export PYTHONPATH="$PYTHONPATH:~/whoop/lib:$zohmglibpath"
+fi
+
