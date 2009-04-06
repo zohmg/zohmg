@@ -10,8 +10,10 @@ class config(object):
         f = open(self.config_file, "r")
         self.config = yaml.load(f)
         f.close()
-        # TODO: sanity check config.
+        if not self.sanity_check():
+            return {} # TODO: exception, yes?
         return config
 
     def sanity_check(self):
+        # TODO:
         return True

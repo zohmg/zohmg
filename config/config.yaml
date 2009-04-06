@@ -1,15 +1,18 @@
 project_name:
- webmetrics
+ webbertricks
 
 dimensions:
   - country
-  - host
-  - referrer
+  - domain
   - useragent
   - usertype
+  - referrer
 
 units:
-  pageviews:
+  - pageviews
+  - visitors
+
+projections:
     country:
       - country
     domain:
@@ -18,7 +21,6 @@ units:
       - country
       - domain
       - useragent
-  visitors:
     country-useragent:
       - country
       - useragent
