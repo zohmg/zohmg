@@ -1,0 +1,4 @@
+make sure all jars are in place.
+set $HADOOP_PATH and $PYTHONPATH.
+make sure the hbase version is correct.
+have fun.
