@@ -3,10 +3,10 @@
 import os, sys
 
 sys.path.append(os.path.abspath(".") + "/lib") # FIXME.
-from read_config import *
+from zohmg import Config
 from utils import *
 
-c = config()
+c = Config()
 c.read_config()
 
 project = c.config['project_name']
