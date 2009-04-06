@@ -31,28 +31,28 @@ class zohmg:
             columns = []
             for q in d0val: columns.append(d0dim+":"+q)
 
-            scanner = HBaseScanner.HBaseScanner()
-            scanner.connect()
-            scanner.open("webmetrics", columns, startrow, stoprow)
+        scanner = HBaseScanner.HBaseScanner()
+        scanner.connect()
+        scanner.open("webmetrics", columns, startrow, stoprow)
 
-            data = {}
-            while scanner.has_next():
-                r = scanner.next()
-                ymd = r.row[-8:]
-                t = {}
-                for column in r.columns:
-                    cf, q = column.split(':')
-                    t[q] = r.columns[column].value
-                    data[ymd] = t
+        data = {}
+        while scanner.has_next():
+            r = scanner.next()
+            ymd = r.row[-8:]
+            t = {}
+            for column in r.columns:
+                cf, q = column.split(':')
+                t[q] = r.columns[column].value
+                data[ymd] = t
 
         # return a list of dicts sorted by ymd
         return [ {k:data[k]} for k in sorted(data) ]
-
 
     # strips whitespace
     def strip(self, str):
         return str.strip()
 
+    # entry-point of service.
     def app(self, environ, start_response):
         # check input.
         params = parse_formvars(environ)
