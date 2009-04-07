@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# assumes $HADOOP_HOME..XS
-
 echo "ok."
 echo "don't forget to put all of those jars on HADOOP_CLASSPATH either!"
 
@@ -10,8 +8,9 @@ echo "don't forget to put all of those jars on HADOOP_CLASSPATH either!"
 # fredrik@hadoopdev1:[~/zohmg]$> export HADOOP_CLASSPATH=/home/fredrik/whoop/lab/darling/build/darling-0.0.3.jar:/home/hadoop/hadoop/build/contrib/streaming/hadoop-0.19.2-dev-streaming.jar:/home/hadoop/hbase/hbase-0.19.0.jar
 # fredrik@hadoopdev1:[~/zohmg]$> tmp/run.dumbo.cluster
 
+input=/user/hadoop/data/weblogs/2007/01/0[4-7]
 
-
+export PYTHONPATH=/home/fredrik/whoop/lib:/home/fredrik/zohmg/lib
 export HADOOP_CLASSPATH=/home/hadoop/hadoop/hadoop-0.19.2-dev-core.jar:/home/hadoop/hadoop/build/contrib/streaming/hadoop-0.19.2-dev-streaming.jar:/home/hadoop/hbase/hbase-0.19.2-dev.jar:/home/fredrik/whoop/lab/darling/build/darling-0.0.3.jar
 export HADOOP_HOME=/home/hadoop/hadoop
 
@@ -19,7 +18,7 @@ export HADOOP_HOME=/home/hadoop/hadoop
 export ZOHMG_HOME=$HOME/zohmg
 # TODO: check sanity of $ZOHMG_HOME
 
-input=/user/hadoop/data/weblogs/2007/01/01
+
 
 # remove output.
 $HADOOP_HOME/bin/hadoop dfs -rmr /tmp/whatever

@@ -17,10 +17,11 @@ projections:
       - country
     domain:
       - domain
-    country-domain-useragent:
+    country-domain-useragent-usertype:
       - country
       - domain
       - useragent
+      - usertype
     country-useragent:
       - country
       - useragent
