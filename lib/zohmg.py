@@ -6,23 +6,25 @@ class Config(object):
     config_file = "config.yaml"
     def __init__(self):
         self.config = {}
-        self.has_read = False
+        self.has_config = False
         self.read_config()
     def read_config(self):
 
         f = open(self.config_file, "r")
         self.config = yaml.load(f)
-        self.has_read = True
+        self.has_config = True
         f.close()
         if not self.sanity_check():
-            return {} # TODO: exception, yes?
+            return {} # TODO: throw exception, yes?
         return self.config
     def sanity_check(self):
-        # TODO:
+        # TODO.
         return True
+    def project_name(self):
+        if not self.has_config: self.read_config()
+        return self.config['project_name']
     def requested_projections(self):
-        if not self.has_read:
-            self.read_config()
+        if not self.has_config: self.read_config()
         rps = []
         for projection_name in self.config['projections']:
             rps.append(self.config['projections'][projection_name])
