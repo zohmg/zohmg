@@ -23,33 +23,34 @@ class Config(object):
     def project_name(self):
         if not self.has_config: self.read_config()
         return self.config['project_name']
-    def requested_projections(self):
+    def dimensions(self):
         if not self.has_config: self.read_config()
-        rps = []
-        for projection_name in self.config['projections']:
-            rps.append(self.config['projections'][projection_name])
-        return rps
+        return self.config['dimensions']
+    def units(self):
+        if not self.has_config: self.read_config()
+        return self.config['units']
+    def projections(self):
+        if not self.has_config: self.read_config()
+        return self.config['projections']
 
 class Mapper():
     def __init__(self, usermapper):
         self.usermapper = usermapper
-        self.requested_projections = Config().requested_projections()
+        self.projections = Config().projections()
 
     def __call__(self, key, value):
         # wrapper around the user's mapper.
         for r in self.usermapper(key, value):
-            # for every yield from the user's mapper
+            # for every yield from the user's mapper,
             # we yield data points for all requested projections.
             ts, dims, units = r
             for u in units:
-                for req in self.requested_projections:
+                for p in self.projections.values():
                     newdims = {}
-                    for d in req:
-                        newdims[d] = dims[d]
+                    for d in p: newdims[d] = dims[d]
                     yield (ts, newdims, u), units[u]
 
 
-# we'll pass the output of the reducer along to HBaseOutputReader.
 class Reducer:
     def __init__(self):
         self.reduces = self.counters['reduces']
@@ -59,28 +60,10 @@ class Reducer:
         ts, dims, unit = key
         value = sum(values)
 
-        # rowkey is "unit-ymd";
+        # rowkey: "unit-ymd".
         rk = '-'.join([unit, str(ts)])
-        # column-family and qualifier are label and value of dimensions.
         cf = '-'.join(dims.keys())
         q  = '-'.join(dims.values())
-
+        
+        # remember, we'll pass the output of this reducer to HBaseOutputReader.
         yield rk, json.dumps({cf+":"+q : {'value':value}})
-
-
-
-
-    #okcfs = []
-    #for p in c.config['projections']:
-    #    projection = '-'.join(c.config['projections'][p])
-    #    okcfs.append(projection)
-
-    #if not cf in okcfs:
-    #    sys.stderr.write("dropping cf: %s\n" % cf)
-    #    return
-    #else:
-    #    #sys.stderr.write("keeping cf: %s\n" % cf)
-    #    pass
-
-
-
