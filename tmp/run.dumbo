@@ -17,7 +17,7 @@ time dumbo start scripts/import.py \
 -file /home/fredrik/whoop/lab/darling/build/darling-0.0.3.jar \
 -file /home/fredrik/workspace/hadoop-0.19-patched/build/contrib/streaming/hadoop-0.19.2-dev-streaming.jar \
 -file /home/fredrik/workspace/hbase-0.19/build/hbase-0.19.2-dev.jar \
--file config/config.yaml \
+-file config.yaml \
 -file lib/zohmg.py \
 -file lib/usermapper.py \
 -outputformat org.apache.hadoop.hbase.mapred.TableOutputFormat \
