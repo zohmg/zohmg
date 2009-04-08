@@ -1,5 +1,6 @@
 # zohmgapp.
 
+import sys, time
 import simplejson as json
 from paste.request import parse_formvars
 
@@ -149,6 +150,7 @@ class zohmg:
             return "missing arguments."
 
         filters = {}
+        # TODO: there must be a neater way of doing this.
         for n in range(1,5):
             try:
                 dim = params["d"+str(n)]
@@ -158,7 +160,10 @@ class zohmg:
                 continue
 
         # fetch data.
+        start = time.time()
         data = self.export(t0, t1, unit, d0, d0v, filters)
+        elapsed = (time.time() - start)
+        sys.stderr.write("hbase query+prep time: %s\n\n" % elapsed)
 
         # serve output.
         start_response('200 OK', [('content-type', 'text/html')])
