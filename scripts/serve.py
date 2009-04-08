@@ -12,6 +12,7 @@ if __name__ == '__main__':
     from paste import httpserver
     sys.stderr.write(time.asctime() + " - service ready.\n")
     
-    zohmg = zohmgapp.zohmg(Config().project_name)
+    c = Config()
+    zohmg = zohmgapp.zohmg(c.project_name)
     httpserver.serve(zohmg.app, host='localhost', port='8086')
     print "ok, done."
