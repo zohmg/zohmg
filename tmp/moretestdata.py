@@ -49,7 +49,6 @@ for year in range(2009, 2020):
                             m = {}
                             q = '-'.join([c,u,a])
                             m['column'] = "country-usertype-useragent:"+q
-                            print m['column']
                             extra_scaling = 1
                             if 'all' in [c,u,a]: extra_scaling = 20
                             m['value']  = str(int(random() * hashes[c] * scaling[unit] * extra_scaling))
