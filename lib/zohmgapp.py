@@ -62,7 +62,7 @@ class zohmg:
             elif d in filters.keys():
                 qs[d] = filters[d]
             else:
-                qs[d] = 'all'
+                qs[d] = ['all']
 
         print "qs: " + str(qs)
         
@@ -167,4 +167,4 @@ class zohmg:
 
         # serve output.
         start_response('200 OK', [('content-type', 'text/html')])
-        return json.dumps(data)
+        return "jsonZohmgFeed(" + json.dumps(data) + ")"
