@@ -1,5 +1,8 @@
 # zohmgapp.
 
+# paste-compatible application for serving.. yes, what exactly?
+# zohmg.app() is the entry-point. begin your code-reading journey there.
+
 import sys, time
 import simplejson as json
 from paste.request import parse_formvars
@@ -25,16 +28,18 @@ class zohmg:
         print "filters: " + str(filters)
         print "--------------"
 
+        # the row key is 'unit-ymd', i.e. "pageviews-20090410". 
         startrow = unit +"-"+ t0
         stoprow  = unit +"-"+ t1 + "~"
 
         # massage the filters.
-        # 'all' or '*' means we take away the dimension from the filter list.
         for k in filters.copy():
             if filters[k] in ['all', '*']:
+                # 'all' or '*' is equivalent to not filtering at all.
                 del filters[k]
             else:
-                filters[k] = filters[k].split(',') # make into list.
+                # turn it into a list.
+                filters[k] = filters[k].split(',')
 
         # pick the best-suiting projection p.
         # 1) p must contain all dimensions we specify.
@@ -48,6 +53,7 @@ class zohmg:
         # sort by length, then index; pick the first one.
         pick = sorted(ps, self.compare_tuples)[0][2]
         cf = '-'.join(pick)
+        idx = pick.index(d0dim) # used for dimension-squeezing a bit later.
         print "cf picked: " + cf
 
         # loop over every dimension in the target column-family
@@ -66,35 +72,34 @@ class zohmg:
 
         print "qs: " + str(qs)
         
-        # let's go recursive.
+        # make a list of cells we wish to extract from hbase.
         cells = map(lambda q: cf+":"+q,  map(lambda l: '-'.join(l), self.enumerate_cells(pick, qs)))
-
         print "cells: " + str(cells)
 
+        # connect to hbase.
         scanner = HBaseScanner.HBaseScanner()
         scanner.connect()
         scanner.open(self.table, cells, startrow, stoprow)
 
-        # we're getting columns back,
-        # and now we need to squeeze all values into a single dimension again. ah!
-        idx = pick.index(d0dim)
-
         data = {}
         while scanner.has_next():
+            t = {}
             r = scanner.next()
+            # extract date from row key.
             ymd = r.row[-8:]
-            t = {} # target.
             for column in r.columns:
+                # split.
                 cf, q = column.split(':')
                 dimensions = q.split('-')
+                # squash.
                 d = dimensions[idx]
                 t[d] = t.get(d, 0)
                 t[d] += int(r.columns[column].value)
+                # save.
                 data[ymd] = t
 
-
         # returns a list of dicts sorted by ymd.
-        return [ {k:data[k]} for k in sorted(data) ]
+        return [ {ymd:data[ymd]} for ymd in sorted(data) ]
 
     # strips whitespace
     def strip(self, str):
@@ -122,15 +127,17 @@ class zohmg:
 
         return self.enumerate_cells(dimensions[1:], values, newtarget)
 
+
     # x and y are three-tuples, like so: (4, 2, [..])
     # we sort by first element, then by the second one.
+    # return 1, 0, or -1 if x is larger than, equal to, or less than y.
     def compare_tuples(self, x, y):
         a,b,c = x
         d,e,f = y
-        if a < d: return -1
         if a > d: return 1
-        if b < e: return -1
+        if a < d: return -1
         if b > e: return 1
+        if b < e: return -1
         return 0
 
 
@@ -167,4 +174,4 @@ class zohmg:
 
         # serve output.
         start_response('200 OK', [('content-type', 'text/html')])
-        return "jsonZohmgFeed(" + json.dumps(data) + ")"
+        return "jsonZohmgFeed(" + json.dumps(data) + ")" # jsonp.
