@@ -112,3 +112,19 @@ We rely on dumbo to run our job.
 
 3) Exporting.
 
+Getting zohmg to serve data is as simple as running scripts/serve.py.
+
+The pre-requisites are that you have hbase's thrift server running, and
+- obviously - that there is some data in the store.
+
+try it out:
+~zohmg$> python scripts/serve.py
+Wed Apr  8 10:55:54 2009 - service ready.
+serving data on http://127.0.0.1:8086
+serving interface on http://127.0.0.1:8000
+
+ok, good!
+
+-- So, what's really is going on here? --
+
+
