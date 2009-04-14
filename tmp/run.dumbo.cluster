@@ -14,11 +14,8 @@ export PYTHONPATH=/home/fredrik/whoop/lib:/home/fredrik/zohmg/lib
 export HADOOP_CLASSPATH=/home/hadoop/hadoop/hadoop-0.19.2-dev-core.jar:/home/hadoop/hadoop/build/contrib/streaming/hadoop-0.19.2-dev-streaming.jar:/home/hadoop/hbase/hbase-0.19.2-dev.jar:/home/fredrik/whoop/lab/darling/build/darling-0.0.3.jar
 export HADOOP_HOME=/home/hadoop/hadoop
 
-
+# (shouldn't do this here, obv.)
 export ZOHMG_HOME=$HOME/zohmg
-# TODO: check sanity of $ZOHMG_HOME
-
-
 
 # remove output.
 $HADOOP_HOME/bin/hadoop dfs -rmr /tmp/whatever

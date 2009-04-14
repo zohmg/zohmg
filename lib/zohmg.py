@@ -1,4 +1,5 @@
 #!/usr/bin/python
+
 import yaml
 import simplejson as json
 
@@ -38,16 +39,17 @@ class Mapper():
         self.usermapper = usermapper
         self.projections = Config().projections()
 
+    # wrapper around the user's mapper.
     def __call__(self, key, value):
-        # wrapper around the user's mapper.
         for r in self.usermapper(key, value):
-            # for every yield from the user's mapper,
-            # we yield data points for all requested projections.
+            # for every yield from the user's mapper -- which represent a point in n-space -- 
+            # we perform dimensionality reduction, yielding data points for all requested projections.
             ts, dims, units = r
             for u in units:
                 for p in self.projections.values():
                     newdims = {}
-                    for d in p: newdims[d] = dims[d]
+                    for d in p:
+                        newdims[d] = dims[d]
                     yield (ts, newdims, u), units[u]
 
 
@@ -64,6 +66,6 @@ class Reducer:
         rk = '-'.join([unit, str(ts)])
         cf = '-'.join(dims.keys())
         q  = '-'.join(dims.values())
-        
+
         # remember, we'll pass the output of this reducer to HBaseOutputReader.
         yield rk, json.dumps({cf+":"+q : {'value':value}})

@@ -1,5 +1,6 @@
 make sure you're using the 'right' versions of hadoop and hbase (branch-0.19),
 and that hadoop is patched with 1722 and 5450.
-make sure all jars are 'in place'.
-set $HADOOP_CLASSPATH and $PYTHONPATH.
+
+set $HADOOP_CLASSPATH and $PYTHONPATH (see tmp/env for inspiration).
+
 have fun.
