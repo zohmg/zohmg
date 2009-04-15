@@ -77,7 +77,7 @@ table for you project.
 Now we're ready to put some actual data into the data store!
 
 We will want to write a mapper that maps each line of our log
-files to a measurement along the dimension axes. Your mapper goes in
+files to a measurement along the dimension axis. Your mapper goes in
 the mapper directory. It might look something like this:
 
 
