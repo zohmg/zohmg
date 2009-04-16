@@ -1,0 +1,316 @@
+<?xml version="1.0"?>
+
+<project name="darling" default="jar">
+  <property name="version" value="0.0.3"/>
+  <property name="Name" value="darling"/>
+  <property name="final.name" value="darling-${version}"/>
+  <property name="year" value="2009"/>
+ 
+  <property name="src.dir"  location="${basedir}/src"/>
+
+  <property name="lib.dir" value="${basedir}/lib"/>
+  <property name="conf.dir" value="${basedir}/conf"/>
+  <property name="docs.dir" value="${basedir}/docs"/>
+  <property name="docs.src" value="${basedir}/src/docs"/>
+
+  <property name="build.dir" location="${basedir}/build"/>
+  <property name="build.bin" location="${build.dir}/bin"/>
+  <property name="build.conf" location="${build.dir}/conf"/>
+  <property name="build.lib" location="${build.dir}/lib"/>
+  <property name="build.classes" location="${build.dir}/classes"/>
+  <property name="build.docs" value="${build.dir}/docs"/>
+  <property name="build.javadoc" value="${build.docs}/api"/>
+  <property name="build.encoding" value="ISO-8859-1"/>
+  <property name="build.src" value="${build.dir}/src"/>
+
+  <property name="test.build.dir" value="${build.dir}/test"/>
+  <property name="test.log.dir" value="${test.build.dir}/logs"/>
+  <property name="test.junit.output.format" value="plain"/>
+
+  <property name="dist.dir" value="${build.dir}/${final.name}"/>
+
+  <property name="javac.deprecation" value="off"/>
+  <property name="javac.debug" value="on"/>
+  <property name="javac.version" value="1.6"/>
+
+  <property name="javadoc.link.java" value="http://java.sun.com/javase/6/docs/api/"/>
+  <property name="javadoc.packages" value="fm.last.darling.*"/>
+  <property name="jarfile" value="${build.dir}/${final.name}.jar" />
+
+
+  <fileset id="lib.jars" dir="${basedir}" includes="lib/*.jar"/>
+  <path id="classpath">
+    <fileset refid="lib.jars"/>
+    <pathelement location="${build.classes}"/>
+    <pathelement location="${conf.dir}"/>
+  </path>
+
+  <target name="init">
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${build.classes}"/>
+    <mkdir dir="${build.lib}"/>
+
+  	<copy todir="${build.lib}">
+      <fileset dir="${lib.dir}" />
+    </copy>
+    <mkdir dir="${build.conf}"/>
+    <mkdir dir="${build.bin}"/>
+    <chmod perm="ugo+x" type="file">
+      <fileset dir="${build.bin}" />
+    </chmod>
+  </target>
+
+  <target name="compile" depends="init">
+   <!--Compile whats under src -->
+   <javac
+    encoding="${build.encoding}"
+    srcdir="${src.dir}"
+    includes="**/*.java"
+    destdir="${build.classes}"
+    debug="${javac.debug}"
+    target="${javac.version}"
+    source="${javac.version}"
+    deprecation="${javac.deprecation}">
+     <classpath refid="classpath"/>
+   </javac>
+  </target>
+	
+  <target name="jar" depends="compile" description="Build jar">
+    <!--Copy over any properties under src-->
+    <copy todir="${build.classes}">
+      <fileset dir="${src.dir}">
+        <include name="**/*.properties" />
+      </fileset>
+    </copy>
+    <jar jarfile="${jarfile}" basedir="${build.classes}" >
+    	<!--
+      <fileset file="${basedir}/conf/hbase-default.xml"/>
+      <zipfileset dir="${build.webapps}" prefix="webapps"/>
+   		<manifest>
+            <attribute name="Main-Class" value="org/apache/hadoop/hbase/mapred/Driver" />
+    	</manifest>
+    	-->
+    </jar>
+  </target>
+
+
+
+  <!-- ================================================================== -->
+  <!-- Package                                                            -->
+  <!-- ================================================================== -->
+  <target name="package" depends="jar,javadoc,compile-test" 
+      description="Build distribution"> 
+    <mkdir dir="${dist.dir}"/>
+    <copy todir="${dist.dir}" includeEmptyDirs="false" flatten="true">
+      <fileset dir="${build.dir}">
+        <include name="${final.name}.jar" />
+        <include name="${final.name}-test.jar" />
+      </fileset>
+    </copy>
+    <mkdir dir="${dist.dir}/webapps"/>
+    <copy todir="${dist.dir}/webapps">
+      <fileset dir="${build.webapps}" />
+    </copy>
+    <mkdir dir="${dist.dir}/lib"/>
+    <copy todir="${dist.dir}/lib">
+      <fileset dir="${build.lib}" />
+    </copy>
+    <mkdir dir="${dist.dir}/conf" />
+    <copy todir="${dist.dir}/conf">
+      <fileset dir="${build.conf}" />
+    </copy>
+    <mkdir dir="${dist.dir}/bin" />
+    <copy todir="${dist.dir}/bin">
+      <fileset dir="${build.bin}" />
+    </copy>
+    <chmod perm="ugo+x" type="file">
+      <fileset dir="${dist.dir}/bin" />
+    </chmod>
+    <mkdir dir="${dist.dir}/docs" />
+    <copy todir="${dist.dir}/docs">
+      <fileset dir="${docs.dir}" />
+      <fileset dir="${build.docs}"/>
+    </copy>
+    <copy todir="${dist.dir}">
+      <fileset dir=".">
+        <include name="*.txt" />
+        <include name="build.xml" />
+      </fileset>
+    </copy>
+    <mkdir dir="${dist.dir}/src" />
+    <copy todir="${dist.dir}/src" includeEmptyDirs="true">
+      <fileset dir="src" excludes="**/*.template **/docs/build/**/*"/>
+    </copy>
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Make release tarball                                               -->
+  <!-- ================================================================== -->
+  <macrodef name="macro_tar" description="Worker Macro for tar">
+    <attribute name="param.destfile"/>
+    <element name="param.listofitems"/>
+    <sequential>
+      <tar compression="gzip" longfile="gnu"
+      destfile="@{param.destfile}">
+      <param.listofitems/>
+      </tar>
+    </sequential>
+  </macrodef>
+  <target name="tar" depends="package" description="Make release tarball">
+    <macro_tar param.destfile="${build.dir}/${final.name}.tar.gz">
+      <param.listofitems>
+        <tarfileset dir="${build.dir}" mode="664">
+          <exclude name="${final.name}/bin/*" />
+          <include name="${final.name}/**" />
+        </tarfileset>
+        <tarfileset dir="${build.dir}" mode="755">
+          <include name="${final.name}/bin/*" />
+        </tarfileset>
+      </param.listofitems>
+    </macro_tar>
+  </target>
+
+  <target name="binary" depends="package" description="Make tarball without source and documentation">
+    <macro_tar param.destfile="${build.dir}/${final.name}-bin.tar.gz">
+      <param.listofitems>
+        <tarfileset dir="${build.dir}" mode="664">
+          <exclude name="${final.name}/bin/*" />
+          <exclude name="${final.name}/src/**" />
+          <exclude name="${final.name}/docs/**" />
+          <include name="${final.name}/**" />
+        </tarfileset>
+        <tarfileset dir="${build.dir}" mode="755">
+          <include name="${final.name}/bin/*" />
+        </tarfileset>
+      </param.listofitems>
+    </macro_tar>
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Doc                                                                -->
+  <!-- ================================================================== -->
+  <target name="docs" depends="forrest.check" description="Generate forrest-based documentation. To use, specify -Dforrest.home=&lt;base of Apache Forrest installation&gt; on the command line." if="forrest.home">
+    <exec dir="${docs.src}" executable="${forrest.home}/bin/forrest" failonerror="true" >
+      <env key="JAVA_HOME" value="${java5.home}"/>
+    </exec>
+    <copy todir="${docs.dir}">
+      <fileset dir="${docs.src}/build/site/" />
+    </copy>
+    <style basedir="${conf.dir}" destdir="${docs.dir}"
+           includes="hadoop-default.xml" style="conf/configuration.xsl"/>
+  </target>
+
+  <target name="forrest.check" unless="forrest.home" depends="java5.check">
+    <fail message="'forrest.home' is not defined. Please pass -Dforrest.home=&lt;base of Apache Forrest installation&gt; to Ant on the command-line." />
+  </target>
+
+  <target name="java5.check" unless="java5.home">
+    <fail message="'java5.home' is not defined.  Forrest requires Java 5.  Please pass -Djava5.home=&lt;base of Java 5 distribution&gt; to Ant on the command-line." />
+  </target>
+
+  <!-- Javadoc -->
+  <target name="javadoc" description="Generate javadoc">
+    <mkdir dir="${build.javadoc}"/>
+    <javadoc
+      overview="${src.dir}/overview.html"
+      packagenames="org.apache.hadoop.hbase.*"
+      destdir="${build.javadoc}"
+      author="true"
+      version="true"
+      use="true"
+      windowtitle="${Name} ${version} API"
+      doctitle="${Name} ${version} API"
+      bottom="Copyright &amp;copy; ${year} The Apache Software Foundation"
+      >
+    	<packageset dir="${src.dir}">
+          <include name="org/apache/**"/>
+          <exclude name="org/onelab/**"/>
+    	</packageset>
+        <link href="${javadoc.link.java}"/>
+        <classpath >
+          <path refid="classpath" />
+          <pathelement path="${java.class.path}"/>
+        </classpath>
+    </javadoc>
+  </target>	
+
+  <!-- ================================================================== -->
+  <!-- Run unit tests                                                     -->
+  <!-- ================================================================== -->
+  <path id="test.classpath">
+    <!-- ============  *  *  *  *  *  N O T E  *  *  *  *  * ============
+           ${src.test} *must* come before rest of class path. Otherwise
+                    the test hbase-site.xml will not be found.
+         ============  *  *  *  *  *  N O T E  *  *  *  *  * ============ -->
+    <pathelement location="${src.test}"/>
+    <pathelement location="${build.test}" />
+    <path refid="classpath"/>
+    <pathelement location="${build.dir}"/>
+    <pathelement path="${clover.jar}"/>
+  </path>
+
+  <!--'compile-test' used to depend on 'compile' but removed it. Hudson doesn't like
+      redoing init and jscpc at this stage of the game; i.e. the prereqs
+      for compile.  TODO: Investigate why.  For now, test will fail
+      if not preceeded by manual 'jar' or 'compile' invokation -->
+  <target name="compile-test" depends="compile" description="Build test jar">
+    <javac encoding="${build.encoding}" 
+       srcdir="${src.test}" 
+       includes="**/*.java" 
+       destdir="${build.test}" 
+       debug="${javac.debug}"
+       target="${javac.version}"
+       source="${javac.version}"
+       deprecation="${javac.deprecation}"> 
+    <classpath refid="test.classpath"/> 
+    </javac>
+    <jar jarfile="${build.dir}/${final.name}-test.jar" >
+      <fileset dir="${build.test}" includes="org/**" />
+      <fileset dir="${build.classes}" />
+      <fileset dir="${src.test}" includes="**/*.properties" />
+      <manifest>
+        <attribute name="Main-Class"
+          value="org/apache/hadoop/hbase/PerformanceEvaluation"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="test" depends="compile-test"
+  	description="Build test jar and run tests">
+    <delete dir="${test.log.dir}"/>
+    <mkdir dir="${test.log.dir}"/>
+    <junit
+      printsummary="yes" showoutput="${test.output}" 
+      haltonfailure="no" fork="yes" maxmemory="512m"
+      errorProperty="tests.failed" failureProperty="tests.failed"
+      timeout="${test.timeout}">
+      
+      <sysproperty key="test.build.data" value="${build.test}/data"/>
+      <sysproperty key="build.test" value="${build.test}"/>
+      <sysproperty key="src.testdata" value="${src.testdata}"/>
+      <sysproperty key="contrib.name" value="${name}"/>
+      
+      <sysproperty key="user.dir" value="${build.test}/data"/>
+      <sysproperty key="fs.default.name" value="${fs.default.name}"/>
+      <sysproperty key="hadoop.test.localoutputfile" value="${hadoop.test.localoutputfile}"/>
+      <sysproperty key="test.log.dir" value="${hadoop.log.dir}"/> 
+      <classpath refid="test.classpath"/>
+      <formatter type="${test.junit.output.format}" />
+      <batchtest todir="${build.test}" unless="testcase">
+        <fileset dir="${src.test}"
+                 includes="**/Test*.java" excludes="**/${test.exclude}.java" />
+      </batchtest>
+      <batchtest todir="${build.test}" if="testcase">
+        <fileset dir="${src.test}" includes="**/${testcase}.java"/>
+      </batchtest>
+    </junit>
+    <fail if="tests.failed">Tests failed!</fail>
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Clean.  Delete the build files, and their directories              -->
+  <!-- ================================================================== -->
+  <target name="clean" description="Clean all old builds">
+    <delete dir="${build.dir}"/>
+  </target>
+</project>
