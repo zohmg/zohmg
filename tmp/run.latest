@@ -1,0 +1,1 @@
+python scripts/z.py import mappers/weblogs.py weblogs/small.log -hadoop /home/fredrik/workspace/hadoop-0.19-patched -libegg /home/fredrik/whoop/lib/lfm-some_svn_version-py2.5.egg -libegg /home/fredrik/whoop/lib/hbase-0.19.0-py2.5.egg
