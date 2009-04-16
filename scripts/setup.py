@@ -7,7 +7,6 @@ from zohmg import Config
 from utils import *
 
 c = Config()
-c.read_config()
 
 project = c.config['project_name']
 

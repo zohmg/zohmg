@@ -22,16 +22,12 @@ class Config(object):
         # TODO.
         return True
     def project_name(self):
-        if not self.has_config: self.read_config()
         return self.config['project_name']
     def dimensions(self):
-        if not self.has_config: self.read_config()
         return self.config['dimensions']
     def units(self):
-        if not self.has_config: self.read_config()
         return self.config['units']
     def projections(self):
-        if not self.has_config: self.read_config()
         return self.config['projections']
 
 class Mapper():
