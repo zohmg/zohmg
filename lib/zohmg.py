@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os, sys
 import yaml
 import simplejson as json
 from utils import *
@@ -69,8 +70,6 @@ class Reducer:
 
 # reads conf, creates table.
 class Setup(object):
-    import os, sys
-
     def go(self):
         c = Config()
         project = c.config['project_name']
@@ -91,8 +90,6 @@ class Setup(object):
 
 class Import(object):
     def go(self, mapper, input, for_dumbo):
-        import os, sys
-
         opts = [('jobconf',"hbase.mapred.outputtable="+Config().project_name()),
                 ('jobconf','stream.io.identifier.resolver.class=fm.last.darling.HBaseIdentifierResolver'),
                 ('outputformat','org.apache.hadoop.hbase.mapred.TableOutputFormat'),
@@ -126,4 +123,12 @@ class Import(object):
 
 
 class Serve(object):
-    pass
+    def __init__(self,port=8086):
+        import zohmgapp
+        import simplejson as json
+        from paste import httpserver
+
+        c = Config()
+        print "[%s] Serving from table %s started on port %s." % (time.asctime(),c.project_name(),port)
+        zapp = zohmgapp.zohmg(c.project_name())
+        httpserver.serve(zapp.app,host="localhost",port=8086)

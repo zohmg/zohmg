@@ -10,12 +10,12 @@ from paste.request import parse_formvars
 from HBaseScanner import HBaseScanner
 from zohmg import Config
 
-class zohmg:
+class zohmg(object):
     def __init__(self, table):
         self.config = Config()
         self.table = self.config.project_name()
         self.projections = self.config.projections()
-        
+
     # fetches data from hbase,
     # returns sorted list of dictionaries suitable for json dumping.
     def export(self, t0, t1, unit, d0dim, d0val, filters={}):
@@ -71,7 +71,7 @@ class zohmg:
                 qs[d] = ['all']
 
         print "qs: " + str(qs)
-        
+
         # make a list of cells we wish to extract from hbase.
         cells = map(lambda q: cf+":"+q,  map(lambda l: '-'.join(l), self.enumerate_cells(pick, qs)))
         print "cells: " + str(cells)
@@ -142,6 +142,9 @@ class zohmg:
 
 
     # entry-point of service.
+
+    # example query:
+    # ?t0=20090120&t1=20090121&unit=pageviews&d0=country&d0v=US,DE
     def app(self, environ, start_response):
 
         params = parse_formvars(environ)
@@ -171,6 +174,9 @@ class zohmg:
         data = self.export(t0, t1, unit, d0, d0v, filters)
         elapsed = (time.time() - start)
         sys.stderr.write("hbase query+prep time: %s\n\n" % elapsed)
+
+        # transformers go here.
+        
 
         # serve output.
         start_response('200 OK', [('content-type', 'text/html')])

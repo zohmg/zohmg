@@ -47,6 +47,6 @@ elif cmd == 'serve':
     try:    port = sys.argv[2]
     except: port = 8086 # that's ok.
     from zohmg import Serve
-    Serve.serve(port)
+    Serve(port)
 else:
     usage()
