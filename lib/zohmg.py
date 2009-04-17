@@ -30,24 +30,24 @@ class Config(object):
     def projections(self):
         return self.config['projections']
 
-class Mapper():
+class Mapper:
     def __init__(self, usermapper):
         self.usermapper = usermapper
         self.projections = Config().projections()
 
     # wrapper around the user's mapper.
     def __call__(self, key, value):
-        for r in self.usermapper(key, value):
-            # for every yield from the user's mapper -- which represent a point in n-space -- 
-            # we perform dimensionality reduction, yielding data points for all requested projections.
-            ts, dims, units = r
-            for u in units:
-                for p in self.projections.values():
-                    newdims = {}
-                    for d in p:
-                        newdims[d] = dims[d]
-                    yield (ts, newdims, u), units[u]
-
+        # from the usermapper: a timestamp, a point in n-space, units and their values.
+        for (ts, point, units) in self.usermapper(key, value):
+            for pjs in self.projections.values():
+                # we perform dimensionality reduction,
+                reduced = {}
+                for d in pjs:
+                    reduced[d] = point[d]
+                # yielding for each requested projection.
+                for u in units:
+                    value = units[u]
+                    yield (ts, reduced, u), value
 
 class Reducer:
     def __init__(self):
@@ -99,7 +99,7 @@ class Import(object):
                 ('outputformat','org.apache.hadoop.hbase.mapred.TableOutputFormat'),
                 ('streamoutput','hbase'),
                 ('input',input),
-                ('output','/does/not/matter'),
+                ('output','/tmp/does-not-matter'),
                 ('file','lib/utils.py'),
                 ('file','lib/zohmg.py'),
                 ('file','lib/usermapper.py'),

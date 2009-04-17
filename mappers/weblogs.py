@@ -4,10 +4,12 @@ def map(key, value):
     from lfm.data.parse import web
 
     try: log = web.Log(value)
-    except: return
+    except:
+        sys.stderr.write("failed to parse line.")
+        return
     ua = web.UserAgent()
 
-    try: # been seeing too many AttributeErrors lately..
+    try:
         ts = log.timestamp.ymd()
         dimensions = {'country'   : log.country(),
                       'domain'    : log.domain,
