@@ -86,8 +86,7 @@ class Setup(object):
         print "".join((map( lambda cf: "  * "+str(cf)+"\n" , cfs)))
         print
 
-        client = setup_transport('localhost')
-        create_or_bust(client, project, cfs)
+        create_or_bust(project, cfs)
 
 
 class Import(object):
