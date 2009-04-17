@@ -4,5 +4,6 @@
   - project creation
 + serve html&js - maybe with paste.fileapp? => http://pythonpaste.org/modules/fileapp.html
 + connect metadata to select-dropdowns.
-+ transformers
-  - plugin to data server
++ port utils.py from Thrift to REST (HBase)
++ server
+  - transformers, plugin to data server
