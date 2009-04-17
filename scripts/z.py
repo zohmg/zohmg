@@ -6,8 +6,6 @@
 #  $> zohmg serve [--port <port>]
 
 import sys, os
-#sys.path.append(os.path.abspath(".") + "/lib") # FIXME.
-
 
 def usage(reason=None):
     if reason:
@@ -31,23 +29,22 @@ if cmd == "setup":
     Setup().go()
 elif cmd == 'import':
     # check for two arguments,
-    #
     try:
-        # XXX: only relative for now.
-        mapper = os.path.abspath(".")+"/"+sys.argv[2]
+        mapper = sys.argv[2]
+        # works only with relative paths for now.
+        mapperpath = os.path.abspath(".")+"/"+mapper
         inputdir = sys.argv[3]
-        for_dumbo = sys.argv[4:]
+        dumbo_args = sys.argv[4:]
     except:
         usage("import needs three arguments.")
         sys.exit(1)
     from zohmg import Import
-    Import().go(mapper, inputdir, for_dumbo)
+    Import().go(mapperpath, inputdir, dumbo_args)
 elif cmd == 'serve':
     # check for optional argument.
     try:    port = sys.argv[2]
     except: port = 8086 # that's ok.
     from zohmg import Serve
-    serve(port)
+    Serve.serve(port)
 else:
     usage()
-
