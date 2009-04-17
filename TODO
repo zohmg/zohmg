@@ -1,4 +1,8 @@
 + rename.
 + make sure it's easy to get zohmg up and running.
+  - shell script to install dependencies
+  - project creation
 + serve html&js - maybe with paste.fileapp? => http://pythonpaste.org/modules/fileapp.html
 + connect metadata to select-dropdowns.
++ transformers
+  - plugin to data server
