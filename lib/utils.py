@@ -1,37 +1,42 @@
-import string, time
+import httplib, socket, string, sys, time
 from random import Random
-from hbase.ttypes import *
 
-def setup_transport(host):
-  from thrift import Thrift
-  from thrift.transport import TSocket
-  from thrift.transport import TTransport
-  from thrift.protocol import TBinaryProtocol
-  from hbase import Hbase
-  transport = TSocket.TSocket(host, 9090)
-  transport = TTransport.TBufferedTransport(transport)
-  protocol = TBinaryProtocol.TBinaryProtocol(transport)
-  client = Hbase.Client(protocol)
-  transport.open()
-  return client
-def create_or_bust(c, t, cfs=['fam']):
-  print "creating table %s with %s or so cfs" % (t, len(cfs))
-  try:
-    cds = []
-    for cf in cfs:
-        cd = ColumnDescriptor({'name' : str(cf)+":" })
-        cds.append(cd)
-    c.createTable(t, cds)
-  except AlreadyExists:
-    print "oh noes, %s already exists." % t
-    exit(2)
-  except IOError:
-    print "bust: IOError"
-    exit(3)
-  except IllegalArgument, e:
-    print e
-    print "create_or_bust => bust"
-    exit(3)
+# HTTP headers for HBase REST communication.
+# Required: Accept
+headers = {"Accept":"*/*",
+           "User-Agent":"Zohmg (utils)/0.0.1"
+          }
+
+
+def create_table_xml(name,colfams):
+    # header
+    data = '<?xml version="1.0" encoding="UTF-8"?>\n<table>\n'
+    data += "    <name>%s</name>\n    <columnfamilies>\n" % name
+    # column-families
+    for colfam in colfams:
+        data += "    <columnfamily><name>%s:</name></columnfamily>\n" % colfam
+    # tail
+    data += "    </columnfamilies>\n</table>\n"
+    return data
+
+
+def create_or_bust(name, cfs=['fam'],host="localhost",port=60050):
+    print "I: creating table %s with %s or so cfs" % (name, len(cfs))
+    creation_payload = create_table_xml(name,cfs)
+    # hardwired hbase REST host and port
+    # TODO: put this in config and read it
+    # connect to HBase REST and POST our table creation data
+    try:
+        conn = httplib.HTTPConnection(host,port)
+        conn.request("POST","/api/",creation_payload,headers)
+        response = conn.getresponse()
+        if not response.status is 200:
+            print >> sys.stderr, "E: could not create table %s." % name
+            exit(2)
+    except socket.error:
+        print >> sys.stderr, "E: Could not connect to HBase REST on %s:%s" % (host,port)
+
+
 def random_string(size):
   # subopt for larger sizes.
   if size > len(string.letters):
@@ -53,29 +58,34 @@ def timing_p(func):
     return elapsed
   return wrapper
 
-def disable(c, table):
-    try:
-        c.disableTable(table)
-        print "%s disabled." % table
-    except IOError, e:
-        print "error: %s" % e
-        return False
-    return True
-def enable(c, table):
-    try:
-        c.enableTable(table)
-        print "%s enabled." % table
-    except IOError, e:
-        print "error: %s" % e
-        return False
-    return True
-def drop(c, table):
-    try:
-        c.deleteTable(table)
-        print "%s dropped." % table
-    except IOError, e:
-        print "IOError: %s" % e
-        exit(128)
-    except NotFound, e:
-        print "NotFound: %s" % e
 
+def change_table_mode(mode,table,host,port):
+    try:
+        conn = httplib.HTTPConnection(host,port)
+        conn.request("POST","/api/"+table+"/"+mode,"",headers) # alters table mode
+        response = conn.getresponse()
+        if not response.status is 202:
+            print >> sys.stderr, "E: Could not %s table %s." % (mode,table)
+    except socket.error:
+        print >> sys.stderr, "E: Could not connect to HBase REST on %s:%s." % (host,port)
+
+
+def enable(table,host="localhost",port="60050"):
+    print "I: Enabling table %s." % table
+    change_table_mode("enable",table,host,port)
+
+def disable(table,host="localhost",port="60050"):
+    print "I: Disabling table %s." % table
+    change_table_mode("disable",table,host,port)
+
+
+def drop(table,host="localhost",port=60050):
+    print "I: Dropping table %s." % table
+    try:
+        conn = httplib.HTTPConnection(host,port)
+        conn.request("DELETE","/api/"+table,"",headers) # drops table
+        response = conn.getresponse()
+        if not response.status is 202:
+            print >> sys.stderr, "E: Could not drop table %s" % table
+    except socket.error:
+        print >> sys.stderr, "E: Could not connet to HBase REST on %s:%s." % (host,port)
