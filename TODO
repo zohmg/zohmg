@@ -7,3 +7,5 @@
 + port utils.py from Thrift to REST (HBase)
 + server
   - transformers, plugin to data server
++ config
+  - put address and ports for servers and software in config (hbase REST et al)
