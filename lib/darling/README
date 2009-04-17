@@ -1,0 +1,10 @@
+The darling package contains an OutputReader and an IdentifierResolver.
+
+They are used to interpret JSON output and write to an TableOutputFormat.
+
+build requirements:
+hadoop-dev-core.jar
+hadoop-dev-streaming.jar
+hbase-dev.jar
+
+Use version 0.19.2 of these and Success is Certain (tm).

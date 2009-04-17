@@ -1,7 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import yaml
 import simplejson as json
+from utils import *
 
 class Config(object):
     config_file = "config.yaml"
@@ -10,7 +11,6 @@ class Config(object):
         self.has_config = False
         self.read_config()
     def read_config(self):
-
         f = open(self.config_file, "r")
         self.config = yaml.load(f)
         self.has_config = True
@@ -22,16 +22,12 @@ class Config(object):
         # TODO.
         return True
     def project_name(self):
-        if not self.has_config: self.read_config()
         return self.config['project_name']
     def dimensions(self):
-        if not self.has_config: self.read_config()
         return self.config['dimensions']
     def units(self):
-        if not self.has_config: self.read_config()
         return self.config['units']
     def projections(self):
-        if not self.has_config: self.read_config()
         return self.config['projections']
 
 class Mapper():
@@ -69,3 +65,66 @@ class Reducer:
 
         # remember, we'll pass the output of this reducer to HBaseOutputReader.
         yield rk, json.dumps({cf+":"+q : {'value':value}})
+
+
+# reads conf, creates table.
+class Setup(object):
+    import os, sys
+
+    def go(self):
+        c = Config()
+        project = c.config['project_name']
+
+        cfs = []
+        for p in c.config['projections']:
+            projection = '-'.join(c.config['projections'][p])
+            cfs.append(projection)
+
+        print "creating table:"
+        print "  * " + project
+        print " column families:"
+        print "".join((map( lambda cf: "  * "+str(cf)+"\n" , cfs)))
+        print
+
+        client = setup_transport('localhost')
+        create_or_bust(client, project, cfs)
+
+
+class Import(object):
+    def go(self, mapper, input, for_dumbo):
+        import os, sys
+
+        opts = [('jobconf',"hbase.mapred.outputtable="+Config().project_name()),
+                ('jobconf','stream.io.identifier.resolver.class=fm.last.darling.HBaseIdentifierResolver'),
+                ('outputformat','org.apache.hadoop.hbase.mapred.TableOutputFormat'),
+                ('streamoutput','hbase'),
+                ('input',input),
+                ('output','/does/not/matter'),
+                ('file','lib/utils.py'),
+                ('file','lib/zohmg.py'),
+                ('file','lib/usermapper.py'),
+                ('file','config.yaml')
+                ]
+
+        # read class path, attach
+        cp = os.getenv("CLASSPATH")
+        for jar in cp.split(':'):
+            opts.append(('file', jar))
+
+        dumboargs = ' '.join("-%s '%s'" % (key, value) for (key, value) in opts) + " " + ' '.join(for_dumbo)
+        print "giving dumbo these args: " + dumboargs
+
+
+        # has link-magic for usermapper.
+        usermapper = os.path.abspath(".")+"/lib/usermapper.py"
+        if os.path.isfile(usermapper):
+            os.unlink(usermapper)
+        os.symlink(mapper,usermapper)
+
+        # dispatch.
+        os.system("dumbo start tmp/import.py " + dumboargs)
+
+
+
+class Serve(object):
+    pass

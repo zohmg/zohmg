@@ -1,1 +1,1 @@
-../mappers/weblogs.py
+/home/fredrik/zohmg/mappers/weblogs.py
