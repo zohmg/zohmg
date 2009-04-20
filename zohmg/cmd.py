@@ -8,7 +8,7 @@ def usage(reason=None):
     print " %s setup" % sys.argv[0]
     print " %s process <mapper> <hdfs-input-dir>" % sys.argv[0]
     print " %s serve [--port <port>]" % sys.argv[0]
-        
+
 # the command line interface uses this as its entry-point.
 def zohmg():
     try:
@@ -16,7 +16,7 @@ def zohmg():
     except:
         usage()
         sys.exit(1)
-      
+
     if cmd == "create":
         try:
             path = sys.argv[2]
