@@ -23,9 +23,6 @@ except:
     usage()
     sys.exit(1)
 
-# XXX: hack to add `pwd`/lib to path.
-sys.path.append(os.path.abspath("lib"))
-
 if cmd == "setup":
     from zohmg import Setup
     Setup().go()

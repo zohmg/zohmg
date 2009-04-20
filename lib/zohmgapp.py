@@ -176,9 +176,6 @@ class zohmg(object):
         elapsed = (time.time() - start)
         sys.stderr.write("hbase query+prep time: %s\n" % elapsed)
 
-        # transformers go here.
-        
-
         # serve output.
         start_response('200 OK', [('content-type', 'text/html')])
         return "jsonZohmgFeed(" + json.dumps(data) + ")" # jsonp.
