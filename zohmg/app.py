@@ -8,9 +8,9 @@ import simplejson as json
 from paste.request import parse_formvars
 
 from HBaseScanner import HBaseScanner
-from zohmg import Config
+from zohmg.config import Config
 
-class zohmg(object):
+class App(object):
     def __init__(self, table):
         self.config = Config()
         self.table = self.config.project_name()

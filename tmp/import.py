@@ -2,6 +2,7 @@
 # the script we tell dumbo to run.
 
 import dumbo
-from zohmg import Mapper, Reducer
+from zohmg.mapper import Mapper
+from zohmg.reducer import Reducer
 from usermapper import map
-dumbo.run(Mapper(map), Reducer)
+dumbo.run(Mapper(map), Reducer())
