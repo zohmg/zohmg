@@ -3,34 +3,62 @@ hello!
 let's get started with zohmg.
 
 the outline of the working directory for your project looks like this:
-config/
-lib/
-mappers/
-scripts/
+
+    config/
+        datasets.yaml
+        environment.py
+    lib/
+    mappers/
+    scripts/
 
 
-you will write the configuration file config.yaml that goes into
-config, and you will write one or more mappers which go into the
-mappers directory.
+You will define some environment variables in environment.py and write the
+configuration file datasets.yaml-- both goes into config--and you will
+write one or more mappers which go into the mappers directory.
 
 you will use the scripts in the scripts directory to make things
 happen. the code that runs behind the scenes is in lib.
 
 
-0)
 
-Pre-requisites:
- - hadoop
- - hbase, with a running thrift server
- - dumbo
+0) pre-requisities.
+
+Install
+- hadoop
+- hbase, with a running thrift server
+- dumbo
 
 
-1) setting things up.
 
-first, you'll want to define what dimensions your data has and what
+1) creating a project.
+
+Create the project from the command line by invoking, choose a
+project name of your liking.
+
+    zohmg create <project name>
+
+If all goes well this creates a project directory in the your
+current directory with the name "project name".
+
+
+
+2) setting things up.
+
+In the project directory there is a subdirectory called "config",
+within there are two files: datasets.yaml and environment.py.
+
+environment.py
+--------------
+Enter paths to Hadoop and HBase directories as well as define the
+path to the required jar files.
+
+
+datasets.yaml
+-------------
+you'll want to define what dimensions your data has and what
 projections of that data you are interested in.
 
-open up config/config.yaml and enter something like this:
+open up config/datasets.yaml and enter something like this:
 
 project_name:
  webbertricks
@@ -67,12 +95,17 @@ to ask the system later.
 Your mapper will output measurements counted in these units, and each
 measurement will be put along the axes of the dimensions.
 
-Run 'python scripts/setup.py' and lean back as it creates an hbase
-table for you project.
+To create an HBase table for your project invoke the following and
+lean back and enjoy the melodies.
+
+    zohmg setup
+
+TODO: This step should also create jars and eggs for our required HBase
+interface (i.e. darling and zohmg.scanner).
 
 
 
-2) Importing.
+3) Importing.
 
 Now we're ready to put some actual data into the data store!
 
@@ -106,16 +139,23 @@ The output of this mapper goes into a reducer that, for each
 dimension-tuple, sums the values of each unit, does a magical dance
 and eventually passes them along to the actual underlying data store.
 
-We rely on dumbo to run our job.
+To run your import job invoke
+
+    zohmg import mapper/your-mapper.py input/from/hdfs
 
 
 
-3) Exporting.
+4) Exporting.
 
 Getting zohmg to serve data is as simple as running scripts/serve.py.
 
 The pre-requisites are that you have hbase's thrift server running, and
 - obviously - that there is some data in the store.
+
+Run the data server with
+
+    zohmg serve
+
 
 try it out:
 ~zohmg$> python scripts/serve.py
