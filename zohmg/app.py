@@ -89,14 +89,14 @@ class App(object):
             # extract date from row key.
             ymd = r.row[-8:]
             for column in r.columns:
-                # split.
+                # split,
                 cf, q = column.split(':')
                 dimensions = q.split('-')
-                # squash.
+                # squash,
                 d = dimensions[idx]
                 t[d] = t.get(d, 0)
                 t[d] += int(r.columns[column].value)
-                # save.
+                # and save.
                 data[ymd] = t
 
         # returns a list of dicts sorted by ymd.
@@ -158,7 +158,7 @@ class App(object):
             d0v = map(self.strip, params['d0v'].split(','))
         except:
             start_response('402 PAYMENT REQUIRED', [('content-type', 'text/html')])
-            return "missing arguments."
+            return "you might be looking for the helpful <a href='http://localhost/:8080/'>user interface</a>."
 
         filters = {}
         # TODO: there must be a neater way of doing this.
