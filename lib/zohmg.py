@@ -91,11 +91,16 @@ class Setup(object):
 
 class Import(object):
     def go(self, mapper, input, for_dumbo):
-        opts = [('jobconf',"hbase.mapred.outputtable="+Config().project_name()),
-                ('jobconf','stream.io.identifier.resolver.class=fm.last.darling.HBaseIdentifierResolver'),
-                ('outputformat','org.apache.hadoop.hbase.mapred.TableOutputFormat'),
-                ('streamoutput','hbase'),
-                ('input',input),
+
+        table = Config().project_name()
+        resolver = 'fm.last.darling.HBaseIdentifierResolver'
+        outputformat = 'org.apache.hadoop.hbase.mapred.TableOutputFormat'
+
+        opts = [('jobconf',"hbase.mapred.outputtable=" + table),
+                ('jobconf','stream.io.identifier.resolver.class=' + resolver),
+                ('streamoutput','hbase'), # resolved by identifier.resolver
+                ('outputformat', outputformat),
+                ('input', input),
                 ('output','/tmp/does-not-matter'),
                 ('file','lib/utils.py'),
                 ('file','lib/zohmg.py'),
@@ -103,33 +108,36 @@ class Import(object):
                 ('file','config.yaml')
                 ]
 
-        # read class path, attach
+        # read class path, attach.
         cp = os.getenv("CLASSPATH")
         for jar in cp.split(':'):
             opts.append(('file', jar))
 
-        dumboargs = ' '.join("-%s '%s'" % (key, value) for (key, value) in opts) + " " + ' '.join(for_dumbo)
+        # stringify arguments.
+        opts_args = ' '.join("-%s '%s'" % (k, v) for (k, v) in opts)
+        more_args = ' '.join(for_dumbo)
+        dumboargs = "%s %s" % (opts_args, more_args)
         print "giving dumbo these args: " + dumboargs
 
-
-        # has link-magic for usermapper.
+        # link-magic for usermapper.
         usermapper = os.path.abspath(".")+"/lib/usermapper.py"
         if os.path.isfile(usermapper):
+            # TODO: need to be *very* certain we're not unlinking the wrong file.
             os.unlink(usermapper)
         os.symlink(mapper,usermapper)
 
         # dispatch.
+        # TODO: is this where we will source config/env.sh, then?
         os.system("dumbo start tmp/import.py " + dumboargs)
 
 
-
 class Serve(object):
-    def __init__(self,port=8086):
+    def __init__(self, port=8086, host = 'localhost'):
         import zohmgapp
-        import simplejson as json
         from paste import httpserver
 
         c = Config()
-        print "[%s] Serving from table %s started on port %s." % (time.asctime(),c.project_name(),port)
+        print "[%s] dataset: %s." % (time.asctime(), c.project_name())
+
         zapp = zohmgapp.zohmg(c.project_name())
-        httpserver.serve(zapp.app,host="localhost",port=8086)
+        httpserver.serve(zapp.app, host=host, port=port)
