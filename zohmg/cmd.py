@@ -9,15 +9,21 @@ def usage(reason = None):
     print zohmg + " setup"
     print zohmg + " process <mapper> <hdfs-input-dir>"
     print zohmg + " serve [--port <port>]"
-        
-# the command line interface uses this as its entry-point.
+    print zohmg + " help"
+
+def print_version():
+    v = '0.0.30.4204-0'
+    print "zohmg version " + v
+
+# cli entry-point.
 def zohmg():
     try:
+        # read the first argument.
         cmd=sys.argv[1]
     except:
         usage()
         sys.exit(1)
-      
+
     if cmd == "create":
         try:
             path = sys.argv[2]
@@ -51,7 +57,10 @@ def zohmg():
         except: port = 8086 # that's ok.
         from zohmg.serve import Serve
         Serve(port)
-
+    elif cmd == "version" or cmd == "--version":
+        print_version()
+    elif cmd == "help" or cmd == '--help':
+        print "wha?"
     else:
         usage()
 
