@@ -19,6 +19,7 @@ class zohmg(object):
     # fetches data from hbase,
     # returns sorted list of dictionaries suitable for json dumping.
     def export(self, t0, t1, unit, d0dim, d0val, filters={}):
+        print ""
         print "--- export ---"
         print "t0: " + t0
         print "t1: " + t1
@@ -173,7 +174,7 @@ class zohmg(object):
         start = time.time()
         data = self.export(t0, t1, unit, d0, d0v, filters)
         elapsed = (time.time() - start)
-        sys.stderr.write("hbase query+prep time: %s\n\n" % elapsed)
+        sys.stderr.write("hbase query+prep time: %s\n" % elapsed)
 
         # serve output.
         start_response('200 OK', [('content-type', 'text/html')])
