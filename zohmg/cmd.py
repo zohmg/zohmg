@@ -1,13 +1,14 @@
 import sys, os
 
-def usage(reason=None):
+def usage(reason = None):
+    zohmg = os.path.basename(sys.argv[0])
     if reason:
         print "error: " + reason
     print "usage:"
-    print " %s create <dir>" % sys.argv[0]
-    print " %s setup" % sys.argv[0]
-    print " %s process <mapper> <hdfs-input-dir>" % sys.argv[0]
-    print " %s serve [--port <port>]" % sys.argv[0]
+    print zohmg + " create <dir>"
+    print zohmg + " setup"
+    print zohmg + " process <mapper> <hdfs-input-dir>"
+    print zohmg + " serve [--port <port>]"
         
 # the command line interface uses this as its entry-point.
 def zohmg():
