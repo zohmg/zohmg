@@ -11,4 +11,4 @@
   - put address and ports for servers and software in config (hbase REST et al)
 + cache JSON and CHARTS.
 + some update step for post-setup alterations to datasets.yaml
-
++ add support for data sets.
