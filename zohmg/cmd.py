@@ -15,6 +15,10 @@ def print_version():
     v = '0.0.30.4204-0'
     print "zohmg version " + v
 
+def print_help():
+    # TODO: offer help.
+    print "wha?"
+
 # cli entry-point.
 def zohmg():
     try:
@@ -52,15 +56,19 @@ def zohmg():
         Process().go(mapperpath, inputdir, dumbo_args)
 
     elif cmd == 'serve':
-        # check for optional argument.
-        try:    port = sys.argv[2]
-        except: port = 8086 # that's ok.
-        from zohmg.serve import Serve
-        Serve(port)
+        serve()
     elif cmd == "version" or cmd == "--version":
         print_version()
     elif cmd == "help" or cmd == '--help':
-        print "wha?"
+        print_help()
     else:
         usage()
 
+
+
+def serve():
+    from zohmg.serve import Serve
+    # check for optional argument.
+    try:    port = sys.argv[2]
+    except: port = 8086 # that's ok.
+    Serve(port)
