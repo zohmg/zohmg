@@ -8,7 +8,7 @@ def install():
     # check for rootness.
     if os.geteuid() != 0:
         print "you need to be root. please sudo."
-        return
+        sys.exit(1)
     print "installing!"
 
     # mkdir.
@@ -34,6 +34,8 @@ def setup():
         print "try again, it could work the second (or third) time."
         sys.exit(r)
     os.system("egrep '(Installing|Copying) zohmg' tmp/zohmg-install.log")
+    # clean up.
+    os.system("rm -rf build dist zohmg.egg-info")
 
 def create_share_dir(dir):
     if not os.path.exists(dir):
