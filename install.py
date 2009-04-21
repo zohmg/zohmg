@@ -6,9 +6,9 @@ def install():
     # TODO: this is really ugly, but works for now.
     python_version = sys.version[:3]
     system_target = '/usr/lib/python'+python_version+'/site-packages'
-    target = '/usr/share/zohmg'
-    doc_target = '/usr/share/doc/zohmg'
-    lib_target = '/usr/lib/zohmg'
+    target = '/usr/local/share/zohmg'
+    doc_target = '/usr/local/share/doc/zohmg'
+    lib_target = '/usr/local/lib/zohmg'
 
     # check for rootness.
     if os.geteuid() != 0:

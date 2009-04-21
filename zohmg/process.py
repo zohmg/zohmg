@@ -57,4 +57,4 @@ class Process(object):
         os.symlink(mapper,usermapper)
 
         # dispatch.
-        os.system("dumbo start /usr/lib/zohmg/import.py " + dumboargs)
+        os.system("dumbo start /usr/local/lib/zohmg/import.py " + dumboargs)
