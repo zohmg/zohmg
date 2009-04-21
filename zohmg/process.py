@@ -58,4 +58,6 @@ class Process(object):
         os.symlink(mapper,usermapper)
 
         # dispatch.
-        os.system("dumbo start /usr/local/lib/zohmg/import.py " + dumboargs)
+        # PYTHONPATH is added because dumbo makes a local run before
+        # engaging with hadoop.
+        os.system("PYTHONPATH=lib; dumbo start /usr/local/lib/zohmg/import.py " + dumboargs)

@@ -21,3 +21,9 @@ priority due:
 + sanity check for files shipped off to dumbo/hadoop.
   - check for existance.
   - especially for environment stuff (*_HOME and CLASSPATH).
++ better way of importing usermapper.
+  - adding -pyfile to dumbo.core?
+    * dumbo always does a local run before hadoop, can fail if file is not
+      in PYTHONPATH (-file does not put files in PYTHONPATH, naturally).
+    * set PYTHONPATH locally is the requirement.
+  - "more careful" way of importing usermapper (think Mapper constructor).
