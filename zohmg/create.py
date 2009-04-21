@@ -21,6 +21,10 @@ CLASSPATH = (
 )
 """
 
+README = """This is your zohmg application! Write mappers and put them in the mappers directory,
+configure things in the config directory and run 'zohmg setup' to set things up.
+"""
+
 
 class Create(object):
     def __init__(self, path):
@@ -58,6 +62,9 @@ class Create(object):
                       + "projections:\n  p0:\n    -d0\n    -d1\n" \
                       + "units:\n  u0\n"
         self.__write_to_file(self.abspath+"/config/datasets.yaml", datasetconfig)
+
+        # Write README.
+        self.__write_to_file(self.abspath+"/README", README)
 
         # Put environment script down.
         self.__write_to_file(self.abspath+"/config/environment.py", ENV_SCRIPT)
