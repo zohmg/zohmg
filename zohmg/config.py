@@ -1,9 +1,19 @@
 from zohmg.utils import fail
-import sys
+import os, sys
+
+# TODO: is it a safe assumption that HADOOP_HOME is in os.environ when
+# running dumbo?
+# figure out if we are run inside dumbo.
+# files shipped to dumbo are all put in cwd.
+if "HADOOP_HOME" in os.environ:
+    config_path = ""
+else:
+    config_path = "config/"
+
 
 class Config(object):
     # TODO: multiple dataset files
-    config_file = "config/datasets.yaml"
+    config_file = config_path+"datasets.yaml"
 
     def __init__(self):
         self.config = {}
@@ -45,9 +55,9 @@ class Environ(object):
     def read_environ(self):
         sys.path.append("") # add cwd so we can import from it.
         try:
-            env = __import__("config/environment")
+            env = __import__(config_path+"environment")
         except ImportError, ioe:
-            msg = "E: Could not import config/environment.py. %s." % ioe.strerror
+            msg = "E: Could not import %senvironment.py. %s." % (config_path,ioe.strerror)
             fail(msg,ioe.errno)
 
         for key in dir(env):
