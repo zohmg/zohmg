@@ -65,12 +65,6 @@ class Create(object):
         print "ok."
 
 
-    # something did not work during project creation, clean up.
-    def __fail(self,msg):
-        print >>sys.stderr, msg
-        exit(1)
-
-
     def __write_to_file(self,file,str):
         try:
             f = open(file,"w")
