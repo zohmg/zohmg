@@ -23,8 +23,11 @@ CLASSPATH = (
 )
 """
 
-README = """This is your zohmg application! Write mappers and put them in the mappers directory,
-configure things in the config directory and run 'zohmg setup' to set things up.
+README = """This is your zohmg application! Write mappers and put them in the mappers
+directory, configure things in the config directory and run 'zohmg setup' to
+set things up.
+
+Take a look in /usr/share/doc/zohmg for further documentation.
 """
 
 
