@@ -27,3 +27,5 @@ priority due:
       in PYTHONPATH (-file does not put files in PYTHONPATH, naturally).
     * set PYTHONPATH locally is the requirement.
   - "more careful" way of importing usermapper (think Mapper constructor).
++ add lfm.data.parse egg.
+  - document how user contributed code is shipped to dumbo/hadoop.
