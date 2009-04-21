@@ -10,6 +10,7 @@ priority uno:
 + some update step for post-setup alterations to datasets.yaml
 + add support for data sets.
 + define exact dependencies, including patches, etc.
++ hbase and thrift eggs system-wideness necessary in order to keep zohmg.utils happy.
 
 priority due:
 + serve html&js - maybe with paste.fileapp? => http://pythonpaste.org/modules/fileapp.html

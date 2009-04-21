@@ -3,6 +3,9 @@ import os, sys
 
 def install():
     build_darling = False
+    # TODO: this is really ugly, but works for now.
+    python_version = sys.version[:3]
+    system_target = '/usr/lib/python'+python_version+'/site-packages'
     target = '/usr/share/zohmg'
 
     # check for rootness.
@@ -18,11 +21,16 @@ def install():
     if build_darling:
         build_darling(target)
     else:
-        copy_bundled_darling(target)
+        copy_bundle("pre-built darling jar","lib/darling-*.jar",target)
 
     # thrift & hbase
-    copy_bundled_thrift(target)
-    copy_bunded_hbase(target)
+    # TODO: fix this better.
+    # copies thrift egg.
+    copy_bundle("bundled thrift egg","lib/thrift-*.egg",system_target)
+    # copies hbase egg.
+    copy_bundle("bundled hbase egg","lib/hbase-*.egg",system_target)
+    # copies hbase thrift interface.
+    copy_bundle("bundled hbase thrift interface","lib/Hbase.thrift",target)
 
 
 def setup():
@@ -53,20 +61,10 @@ def build_darling(target):
         sys.exit(r)
     os.system("cp -v java/darling/build/darling-.jar " + target)
 
-def copy_bundled_darling(target):
-    print "copying pre-built darling.jar"
-    os.system("cp -v lib/darling-*.jar " + target)
-
-# copies thrift egg.
-def copy_bundled_thrift(target):
-    print "copying bundled thrift egg"
-    os.system("cp -v lib/thrift-*.egg " + target)
-    os.system("cp -v lib/Hbase.thrift " + target)
-
-# copies hbase egg.
-def copy_bunded_hbase(target):
-    print "copying bundled hbase egg"
-    os.system("cp -v lib/hbase-*.egg " + target)
+# copies bundle (file) to target, printing msg.
+def copy_bundle(msg,file,target):
+    print "copying",msg
+    os.system("cp -v %s %s" % (file,target))
 
 
 if __name__ == "__main__":
