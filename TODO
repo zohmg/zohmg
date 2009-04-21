@@ -18,3 +18,6 @@ priority due:
 + serve html&js - maybe with paste.fileapp? => http://pythonpaste.org/modules/fileapp.html
 + cache JSON and CHARTS.
 + connect metadata to select-dropdowns.
++ sanity check for files shipped off to dumbo/hadoop.
+  - check for existance.
+  - especially for environment stuff (*_HOME and CLASSPATH).
