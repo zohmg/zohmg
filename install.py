@@ -8,6 +8,7 @@ def install():
     system_target = '/usr/lib/python'+python_version+'/site-packages'
     target = '/usr/share/zohmg'
     doc_target = '/usr/share/doc/zohmg'
+    lib_target = '/usr/lib/zohmg'
 
     # check for rootness.
     if os.geteuid() != 0:
@@ -16,7 +17,7 @@ def install():
     print "installing!"
 
     # create share and doc directories.
-    for dir in [target,doc_target]:
+    for dir in [target,doc_target,lib_target]:
         if not os.path.isdir(dir):
             os.mkdir(dir)
 
@@ -42,6 +43,9 @@ def install():
 
     # examples.
     shutil.copytree("examples",target+"/examples")
+
+    # libs.
+    copy_bundle("dumbo mapper import script","src/import.py",lib_target)
 
 
 def setup():

@@ -51,10 +51,10 @@ class Process(object):
         # link-magic for usermapper.
         usermapper = os.path.abspath(".")+"/lib/usermapper.py"
         if os.path.isfile(usermapper):
-            # XXX: SECURITY
             # TODO: need to be *very* certain we're not unlinking the wrong file.
             os.unlink(usermapper)
+        # TODO: SECURITY, need to be certain that we symlink correct file.
         os.symlink(mapper,usermapper)
 
         # dispatch.
-        os.system("dumbo start tmp/import.py " + dumboargs)
+        os.system("dumbo start /usr/lib/zohmg/import.py " + dumboargs)
