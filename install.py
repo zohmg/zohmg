@@ -6,6 +6,7 @@ def install():
     # TODO: this is really ugly, but works for now.
     python_version = sys.version[:3]
     system_target = '/usr/lib/python'+python_version+'/site-packages'
+    # trying to respect FHS here.
     target = '/usr/local/share/zohmg'
     doc_target = '/usr/local/share/zohmg/doc'
     lib_target = '/usr/local/lib/zohmg'
@@ -25,7 +26,7 @@ def install():
     if build_darling:
         build_darling(target)
     else:
-        copy_bundle("pre-built darling jar","lib/darling-*.jar",target)
+        copy_bundle("pre-built darling jar","lib/darling-*.jar",lib_target)
 
     # thrift & hbase.
     # TODO: fix this better.

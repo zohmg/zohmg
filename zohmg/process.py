@@ -14,9 +14,10 @@ class Process(object):
                 ('outputformat', outputformat),
                 ('input', input),
                 ('output','/tmp/does-not-matter'),
-                # Push zohmg egg.
+                # Push zohmg egg and darling jar.
                 ('libegg','/usr/lib/python2.5/site-packages/zohmg-0.0.1-py2.5.egg'),
-                ]
+                ('libjar','/usr/local/lib/zohmg/darling-0.0.3.jar')
+               ]
 
         # read environment and attach.
         env = Environ()
@@ -26,7 +27,7 @@ class Process(object):
         classpath = env.get("CLASSPATH")
         if classpath is not None:
             for jar in classpath:
-                opts.append(('file', jar))
+                opts.append(('libjar', jar))
         else:
             msg = "E: CLASSPATH in config/environment is empty."
             fail(msg)
