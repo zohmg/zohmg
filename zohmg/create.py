@@ -27,7 +27,7 @@ README = """This is your zohmg application! Write mappers and put them in the ma
 directory, configure things in the config directory and run 'zohmg setup' to
 set things up.
 
-Take a look in /usr/share/doc/zohmg for further documentation.
+Take a look in /usr/local/share/zohmg for further documentation.
 """
 
 
