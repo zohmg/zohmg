@@ -1,14 +1,17 @@
+priority uno:
 + rename.
 + make sure it's easy to get zohmg up and running.
   - shell script to install dependencies
   - project creation [DONE]
-+ serve html&js - maybe with paste.fileapp? => http://pythonpaste.org/modules/fileapp.html
-+ connect metadata to select-dropdowns.
-+ port utils.py from Thrift to REST (HBase)  [RESET]
 + server
   - transformers, plugin to data server
 + config
   - put address and ports for servers and software in config (hbase REST et al)
-+ cache JSON and CHARTS.
 + some update step for post-setup alterations to datasets.yaml
 + add support for data sets.
++ define exact dependencies, including patches, etc.
+
+priority due:
++ serve html&js - maybe with paste.fileapp? => http://pythonpaste.org/modules/fileapp.html
++ cache JSON and CHARTS.
++ connect metadata to select-dropdowns.
