@@ -1,5 +1,5 @@
 from zohmg.config import Config, Environ
-import os
+import os, re
 
 class Process(object):
     def go(self, mapper, input, for_dumbo):
@@ -23,19 +23,24 @@ class Process(object):
 
         opts.append(('hadoop',env.get("HADOOP_HOME")))
 
-        cp = env.get("CLASSPATH")
-        if cp is not None:
-            for jar in cp.split(':'):
+        classpath = env.get("CLASSPATH")
+        if classpath is not None:
+            for jar in classpath:
                 opts.append(('file', jar))
         else:
             msg = "E: CLASSPATH in config/environment is empty."
             fail(msg)
 
-
         # pull everything in config and lib.
-        # TODO
-        print os.walk("lib")
-        print os.walk("config")
+        # XXX: assuming we only have one directory level here.
+        # ignore .pyc files.
+        for entry in os.walk("lib"):
+            dir,dirnames,files = entry
+            opts.extend([('file','lib/'+f) for f in files if not f[-4:] == ".pyc"])
+
+        for entry in os.walk("config"):
+            dir,dirnames,files = entry
+            opts.extend([('file','config/'+f) for f in files if not f[-4:] == ".pyc"])
 
         # stringify arguments.
         opts_args = ' '.join("-%s '%s'" % (k, v) for (k, v) in opts)
@@ -46,7 +51,7 @@ class Process(object):
         # link-magic for usermapper.
         usermapper = os.path.abspath(".")+"/lib/usermapper.py"
         if os.path.isfile(usermapper):
-            # SECURITY
+            # XXX: SECURITY
             # TODO: need to be *very* certain we're not unlinking the wrong file.
             os.unlink(usermapper)
         os.symlink(mapper,usermapper)
