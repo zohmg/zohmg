@@ -14,17 +14,21 @@ HBASE_HOME = ''
 
 # Jars for Hadoop Core, Hadoop Streaming and HBase
 CLASSPATH = (
-    # '/path/to/file.jar',
+  # be sure to set these correctly!
+  '/home/hadoop/hadoop-0.19/hadoop-0.19.0-core.jar',
+  '/home/hadoop/hadoop-0.19/build/contrib/streaming/hadoop-0.19.0-streaming.jar
+  '/home/hadoop/hbase-0.19/hbase-0.19.0.jar'
 )
 """
 
 
 class Create(object):
     def __init__(self, path):
+        self.basename = os.path.basename(path)
         self.path = path
         self.abspath = os.path.abspath(path)
 
-        print "Creating zohmg app in %s ..." % self.path
+        print "Creating %s" % self.basename
 
         # Create project directories with 0755.
         try:
@@ -48,11 +52,17 @@ class Create(object):
         # Create empty zohmg app identification file.
         self.__write_to_file(self.abspath+"/.zohmg","")
 
-        # Create empty config/datasets.yaml
-        self.__write_to_file(self.abspath+"/config/datasets.yaml","")
+        # Create skeleton config/datasets.yaml
+        datasetconfig = "project_name: %s\n" % self.basename \
+                      + "dimensions:\n  -d0\n  -d1\n" \
+                      + "projections:\n  p0:\n    -d0\n    -d1\n" \
+                      + "units:\n  u0\n"
+        self.__write_to_file(self.abspath+"/config/datasets.yaml", datasetconfig)
 
         # Put environment script down.
-        self.__write_to_file(self.abspath+"/config/environment.py",ENV_SCRIPT)
+        self.__write_to_file(self.abspath+"/config/environment.py", ENV_SCRIPT)
+
+        print "ok."
 
 
     # something did not work during project creation, clean up.
