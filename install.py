@@ -7,6 +7,7 @@ def install():
     python_version = sys.version[:3]
     system_target = '/usr/lib/python'+python_version+'/site-packages'
     target = '/usr/share/zohmg'
+    doc_target = '/usr/share/doc/zohmg'
 
     # check for rootness.
     if os.geteuid() != 0:
@@ -14,8 +15,10 @@ def install():
         sys.exit(1)
     print "installing!"
 
-    # mkdir.
-    create_share_dir(target)
+    # create share and doc directories.
+    for dir in [target,doc_target]:
+        if not os.path.isdir(dir):
+            os.mkdir(dir)
 
     # darling.
     if build_darling:
@@ -23,7 +26,7 @@ def install():
     else:
         copy_bundle("pre-built darling jar","lib/darling-*.jar",target)
 
-    # thrift & hbase
+    # thrift & hbase.
     # TODO: fix this better.
     # copies thrift egg.
     copy_bundle("bundled thrift egg","lib/thrift-*.egg",system_target)
@@ -31,6 +34,11 @@ def install():
     copy_bundle("bundled hbase egg","lib/hbase-*.egg",system_target)
     # copies hbase thrift interface.
     copy_bundle("bundled hbase thrift interface","lib/Hbase.thrift",target)
+
+    # docs.
+    docs = ['README','TODO','QUICKSTART']
+    for doc in docs:
+        copy_bundle(doc,doc,doc_target)
 
 
 def setup():
@@ -44,10 +52,6 @@ def setup():
     os.system("egrep '(Installing|Copying) zohmg' tmp/zohmg-install.log")
     # clean up.
     os.system("rm -rf build dist zohmg.egg-info")
-
-def create_share_dir(dir):
-    if not os.path.exists(dir):
-        os.system('mkdir ' + dir)
 
 # not used atm; user would have to specify classpath == jobbigt.
 def build_darling(target):
