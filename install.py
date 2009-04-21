@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os, sys
+import os, shutil, sys
 
 def install():
     build_darling = False
@@ -39,6 +39,9 @@ def install():
     docs = ['README','TODO','QUICKSTART']
     for doc in docs:
         copy_bundle(doc,doc,doc_target)
+
+    # examples.
+    shutil.copytree("examples",target+"/examples")
 
 
 def setup():
