@@ -7,7 +7,7 @@ import sys, time
 import simplejson as json
 from paste.request import parse_formvars
 
-from HBaseScanner import HBaseScanner
+from zohmg.scanner import HBaseScanner
 from zohmg.config import Config
 
 class App(object):
@@ -158,7 +158,7 @@ class App(object):
             d0v = map(self.strip, params['d0v'].split(','))
         except:
             start_response('402 PAYMENT REQUIRED', [('content-type', 'text/html')])
-            return "you might be looking for the helpful <a href='http://localhost/:8080/'>user interface</a>."
+            return "you might be looking for the helpful <a href='http://localhost:8080/'>user interface</a>."
 
         filters = {}
         # TODO: there must be a neater way of doing this.

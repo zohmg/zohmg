@@ -63,8 +63,8 @@ class HBaseScanner(object):
             else:
                 self.__scannerid = self.__client.scannerOpenWithStop(table, startrow, stoprow, columns)
         except IOError:
-            # TODO: raise custom error describing what went wrong, if possible.
-            raise IOError
+            # TODO: describe what went wrong, if possible.
+            raise ScannerError
 
         # pre-fetch the first row.
         self.__fetch_row()
@@ -72,6 +72,11 @@ class HBaseScanner(object):
 
     def scanner_ready(self):
         return self.__scannerid != None
+
+
+    # next/has_next iterator style interface.
+    def has_next(self):
+        return self.__next_row != None
 
 
     def next(self):
@@ -82,15 +87,24 @@ class HBaseScanner(object):
         return r
 
 
+    # TODO: Make this work.
+    # Exception based generator style interface.
+    def scan(self):
+        try:
+            while 1:
+                r = self.__next_row
+                self.__fetch_row()
+                yield r
+        except StopIteration:
+            raise # No more rows.
+
+
+
 #
 # Private interface
 #
 
     # only used internally since HBaseScanner raises StopIteration when done.
-    def __has_next(self):
-        return self.__next_row != None
-
-
     def __fetch_row(self):
         try:
             self.__next_row = self.__client.scannerGet(self.__scannerid)
@@ -100,6 +114,8 @@ class HBaseScanner(object):
             # scanner finished, presumably.
             self.__scannerid  = None
             self.__next_row = None
+            # TODO: Leaving this out for now.
+            #raise StopIteration
 
 
 #
@@ -110,3 +126,6 @@ class RowFetchError(Exception):
         self.parameter = value
     def __str__(self):
         return repr(self.parameter)
+
+class ScannerError(Exception):
+    pass
