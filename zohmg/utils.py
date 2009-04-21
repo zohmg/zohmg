@@ -1,4 +1,4 @@
-import string, time
+import string, sys, time
 from random import Random
 from hbase.ttypes import *
 
@@ -106,3 +106,8 @@ def compare_triples(p,q):
     if a > x or b > y: return 1
     if a < x or b < y: return -1
     return -1
+
+
+def fail(msg,errno=1):
+    print >>sys.stderr, msg
+    exit(errno)

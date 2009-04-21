@@ -1,5 +1,7 @@
 import os, sys
 
+from zohmg.utils import fail
+
 
 DIRS = ["config","lib","mappers","transformers"]
 
@@ -41,17 +43,8 @@ class Create(object):
                 os.mkdir(self.abspath+"/"+dir)
         # Something went wrong, act accordingly.
         except OSError, ose:
-            import errno
-            msg = "E: Could not create project directories. "
-
-            if ose.errno is errno.EEXIST:
-                msg += "Directory '%s' already exists." % self.abspath
-                self.__fail(msg)
-            elif ose.errno is errno.EACCES:
-                msg += "Permission denied to create '%s' in '%s'." % (self.path,os.path.dirname(self.abspath))
-                self.__fail(msg)
-
-            self.__fail(msg)
+            msg = "E: Could not create project directories. %s" % ose.strerror
+            fail(msg,ose.errno)
 
         # Create empty zohmg app identification file.
         self.__write_to_file(self.abspath+"/.zohmg","")
@@ -83,5 +76,6 @@ class Create(object):
             f = open(file,"w")
             f.write(str)
             f.close()
-        except:
-            self.__fail("E: Internal error, could not write to '%s'." % file)
+        except IOError, ioe:
+            msg = "E: Internal error. %z." % ioe.strerror
+            fail(msg,ioe.errno)
