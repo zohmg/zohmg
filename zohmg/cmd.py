@@ -7,7 +7,7 @@ def usage(reason = None):
     print "usage:"
     print zohmg + " create <dir>"
     print zohmg + " setup"
-    print zohmg + " process <mapper> <hdfs-input-dir>"
+    print zohmg + " import <mapper> <hdfs-input-dir>"
     print zohmg + " serve [--port <port>]"
     print zohmg + " help"
 
@@ -28,12 +28,12 @@ def zohmg():
         usage()
         sys.exit(1)
 
-    if   cmd == "create":  create()
-    elif cmd == "setup":   setup()
-    elif cmd == 'process': process()
+    if   cmd == 'create':  create()
+    elif cmd == 'setup':   setup()
+    elif cmd == 'import':  process()
     elif cmd == 'serve':   serve()
-    elif cmd == "version" or cmd == "--version": print_version()
-    elif cmd == "help"    or cmd == '--help':    print_help()
+    elif cmd == 'version' or cmd == '--version': print_version()
+    elif cmd == 'help'    or cmd == '--help':    print_help()
     else:
         usage()
 
@@ -50,11 +50,13 @@ def create():
 
 
 def setup():
+    refuse_to_act_in_nonzohmg_directory()
     from zohmg.setup import Setup
     Setup().go()
 
-
+# import.
 def process():
+    refuse_to_act_in_nonzohmg_directory()
     from zohmg.process import Process
     try:
         # check for two arguments,
@@ -71,9 +73,18 @@ def process():
 
 
 def serve():
+    refuse_to_act_in_nonzohmg_directory()
     from zohmg.serve import Serve
     # check for optional argument.
     try:    port = sys.argv[2]
     except: port = 8086 # that's ok.
 
     Serve(port)
+
+
+# exits if 'zohmg' was run in a directory without the special .zohmg-file.
+def refuse_to_act_in_nonzohmg_directory():
+    cwd = os.getcwd()
+    if not os.path.exists(cwd+"/.zohmg"):
+        print "hey!, this is not a proper zohmg app."
+        sys.exit(1)

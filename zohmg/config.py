@@ -3,6 +3,9 @@ import os, sys
 
 # TODO: is it a safe assumption that HADOOP_HOME is in os.environ when
 # running dumbo?
+# ALSO: is it safe to assume that HADOOP_HOME is *not* defined when
+# running locally?
+# TODO: why are we doing this in a global variable?
 # figure out if we are run inside dumbo.
 # files shipped to dumbo are all put in cwd.
 if "HADOOP_HOME" in os.environ:
@@ -13,7 +16,7 @@ else:
 
 class Config(object):
     # TODO: multiple dataset files
-    config_file = config_path+"datasets.yaml"
+    config_file = config_path+"dataset.yaml"
 
     def __init__(self):
         self.config = {}
@@ -32,17 +35,12 @@ class Config(object):
 
     def project_name(self):
         return self.config['project_name']
-
     def dimensions(self):
         return self.config['dimensions']
-
     def units(self):
         return self.config['units']
-
     def projections(self):
         return self.config['projections']
-
-
 
 class Environ(object):
     def __init__(self):

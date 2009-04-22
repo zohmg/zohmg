@@ -5,7 +5,7 @@ let's get started with zohmg.
 the outline of the working directory for your project looks like this:
 
     config/
-        datasets.yaml
+        dataset.yaml
         environment.py
     lib/
     mappers/
@@ -13,7 +13,7 @@ the outline of the working directory for your project looks like this:
 
 
 You will define some environment variables in environment.py and write the
-configuration file datasets.yaml-- both goes into config--and you will
+configuration file dataset.yaml-- both goes into config--and you will
 write one or more mappers which go into the mappers directory.
 
 you will use the scripts in the scripts directory to make things
@@ -45,7 +45,7 @@ current directory with the name "project name".
 2) setting things up.
 
 In the project directory there is a subdirectory called "config",
-within there are two files: datasets.yaml and environment.py.
+within there are two files: dataset.yaml and environment.py.
 
 environment.py
 --------------
@@ -53,12 +53,12 @@ Enter paths to Hadoop and HBase directories as well as define the
 path to the required jar files.
 
 
-datasets.yaml
+dataset.yaml
 -------------
 you'll want to define what dimensions your data has and what
 projections of that data you are interested in.
 
-open up config/datasets.yaml and enter something like this:
+open up config/dataset.yaml and enter something like this:
 
 project_name:
  webbertricks

@@ -7,12 +7,13 @@ priority uno:
   - transformers, plugin to data server
 + config
   - put address and ports for servers and software in config (hbase REST et al)
-+ some update step for post-setup alterations to datasets.yaml
++ some update step for post-setup alterations to dataset.yaml
 + add support for data sets.
 + define exact dependencies, including patches, etc.
 + hbase and thrift eggs system-wideness necessary in order to keep zohmg.utils happy.
   - add the eggs to site-packages/easy-install.pth (using setuptools?!)
   - bundle generated code and build eggs?
++ in config, rename 'project_name' to 'dataset'.
 
 priority due:
 + serve html&js - maybe with paste.fileapp? => http://pythonpaste.org/modules/fileapp.html
@@ -29,3 +30,4 @@ priority due:
   - "more careful" way of importing usermapper (think Mapper constructor).
 + add lfm.data.parse egg.
   - document how user contributed code is shipped to dumbo/hadoop.
++ verify dimensions and units outputted by mapper against those in config.
