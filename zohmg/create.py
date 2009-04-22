@@ -22,19 +22,25 @@ CLASSPATH = (
 )
 """
 
-README = """This is your zohmg application! Write mappers and put them in the mappers
-directory, configure things in the config directory and run 'zohmg setup' to
-set things up.
+README = """This is your zohmg application!
+
+Configure dataset.yaml to match your data,
+run 'zohmg setup' to create an hbase table.
+
+Then write a mapper and run it with 'zohmg import'.
 
 Take a look in /usr/local/share/zohmg for further documentation.
 """
 
+MAPPER = """# identity mapper.
+def map(key, value):
+    yield key, value
+"""
 
 class Create(object):
     def __init__(self, path):
         self.basename = os.path.basename(path)
-        self.path = path
-        self.abspath = os.path.abspath(path)
+        self.abspath  = os.path.abspath(path)
 
         print "Creating %s" % self.basename
 
@@ -45,33 +51,32 @@ class Create(object):
                 os.mkdir(self.abspath+"/"+dir)
         # Something went wrong, act accordingly.
         except OSError, ose:
-            msg = "E: Could not create project directories. %s" % ose.strerror
-            fail(msg,ose.errno)
+            msg = "Error: Could not create project directories. %s" % ose.strerror
+            fail(msg, ose.errno)
 
-        # Create empty zohmg app identification file.
-        self.__write_to_file(self.abspath+"/.zohmg","")
+        # Create .zohmg, README, mapper, env.
+        self.__write_to_file('.zohmg')
+        self.__write_to_file('README', README)
+        self.__write_to_file('mappers/identity_mapper.py', MAPPER)
+        self.__write_to_file('config/environment.py', ENV_SCRIPT)
 
-        # Create skeleton config/datasets.yaml
+        # Create skeleton config/dataset.yaml
         datasetconfig = "project_name: %s\n" % self.basename \
                       + "dimensions:\n  -d0\n  -d1\n" \
                       + "projections:\n  p0:\n    -d0\n    -d1\n" \
                       + "units:\n  u0\n"
-        self.__write_to_file(self.abspath+"/config/datasets.yaml", datasetconfig)
-
-        # Write README.
-        self.__write_to_file(self.abspath+"/README", README)
-
-        # Put environment script down.
-        self.__write_to_file(self.abspath+"/config/environment.py", ENV_SCRIPT)
+        self.__write_to_file("config/dataset.yaml", datasetconfig)
+        # TODO: consider using Config.config_file instead of hardcoded path.
 
         print "ok."
 
 
-    def __write_to_file(self,file,str):
+    def __write_to_file(self, filename, contents = ''):
+        file = self.abspath + '/' + filename
         try:
-            f = open(file,"w")
-            f.write(str)
+            f = open(file, "w")
+            f.write(contents)
             f.close()
         except IOError, ioe:
-            msg = "E: Internal error. %z." % ioe.strerror
-            fail(msg,ioe.errno)
+            msg = "Kernel malfunction: %s (%s)." % (ioe.strerror, file)
+            fail(msg, ioe.errno)

@@ -7,7 +7,7 @@ priority uno:
   - transformers, plugin to data server
 + config
   - put address and ports for servers and software in config (hbase REST et al)
-+ some update step for post-setup alterations to datasets.yaml
++ some update step for post-setup alterations to dataset.yaml
 + add support for data sets.
 + define exact dependencies, including patches, etc.
 + hbase and thrift eggs system-wideness necessary in order to keep zohmg.utils happy.
@@ -29,3 +29,5 @@ priority due:
   - "more careful" way of importing usermapper (think Mapper constructor).
 + add lfm.data.parse egg.
   - document how user contributed code is shipped to dumbo/hadoop.
++ verify dimensions and units outputted by mapper against those in config.
++ why do we need HBASE_HOME?
