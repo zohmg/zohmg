@@ -66,7 +66,7 @@ def process():
         inputdir = sys.argv[3]
         dumbo_args = sys.argv[4:]
     except:
-        usage("%s needs two arguments." + cmd)
+        usage("import needs two arguments.")
         sys.exit(1)
 
     Process().go(mapperpath, inputdir, dumbo_args)

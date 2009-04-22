@@ -2,7 +2,7 @@ priority uno:
 + rename.
 + make sure it's easy to get zohmg up and running.
   - shell script to install dependencies
-  - project creation [DONE]
+DONE>  - project creation
 + server
   - transformers, plugin to data server
 + config
@@ -15,6 +15,8 @@ priority uno:
   - bundle generated code and build eggs?
 + in config, rename 'project_name' to 'dataset'.
 + creation of dist tarball
+DONE> in config, rename 'project_name' to 'dataset'.
++ sanity check of environment; issue warning if HADOOP_HOME missing, jars not files, etc.
 
 priority due:
 + serve html&js - maybe with paste.fileapp? => http://pythonpaste.org/modules/fileapp.html

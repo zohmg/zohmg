@@ -33,8 +33,8 @@ class Config(object):
             msg = "E: Could not read %s. %s." % (self.config_file,ioe.strerror)
             fail(msg,ioe.errno)
 
-    def project_name(self):
-        return self.config['project_name']
+    def dataset(self):
+        return self.config['dataset']
     def dimensions(self):
         return self.config['dimensions']
     def units(self):

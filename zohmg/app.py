@@ -13,7 +13,7 @@ from zohmg.config import Config
 class App(object):
     def __init__(self, table):
         self.config = Config()
-        self.table = self.config.project_name()
+        self.table = self.config.dataset()
         self.projections = self.config.projections()
 
     # fetches data from hbase,

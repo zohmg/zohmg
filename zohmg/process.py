@@ -4,7 +4,7 @@ import os, re
 class Process(object):
     def go(self, mapper, input, for_dumbo):
 
-        table = Config().project_name()
+        table = Config().dataset()
         resolver = 'fm.last.darling.HBaseIdentifierResolver'
         outputformat = 'org.apache.hadoop.hbase.mapred.TableOutputFormat'
 

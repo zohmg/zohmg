@@ -60,7 +60,7 @@ projections of that data you are interested in.
 
 open up config/dataset.yaml and enter something like this:
 
-project_name:
+dataset:
  webbertricks
 
 dimensions:
@@ -99,9 +99,6 @@ To create an HBase table for your project invoke the following and
 lean back and enjoy the melodies.
 
     zohmg setup
-
-TODO: This step should also create jars and eggs for our required HBase
-interface (i.e. darling and zohmg.scanner).
 
 
 
