@@ -13,7 +13,7 @@ priority uno:
 + hbase and thrift eggs system-wideness necessary in order to keep zohmg.utils happy.
   - add the eggs to site-packages/easy-install.pth (using setuptools?!)
   - bundle generated code and build eggs?
-+ in config, rename 'project_name' to 'dataset'.
+DONE> in config, rename 'project_name' to 'dataset'.
 + sanity check of environment; issue warning if HADOOP_HOME missing, jars not files, etc.
 
 priority due:

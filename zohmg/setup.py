@@ -5,7 +5,7 @@ from utils import *
 class Setup(object):
     def go(self):
         c = Config()
-        project = c.config['project_name']
+        dataset = c.config['dataset']
 
         cfs = []
         for p in c.config['projections']:
@@ -13,10 +13,10 @@ class Setup(object):
             cfs.append(projection)
 
         print "creating table:"
-        print "  * " + project
+        print "  * " + dataset
         print " column families:"
         print "".join((map( lambda cf: "  * "+str(cf)+"\n" , cfs)))
         print
 
         c = setup_transport("localhost")
-        create_or_bust(c,project, cfs)
+        create_or_bust(c, dataset, cfs)

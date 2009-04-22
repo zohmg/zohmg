@@ -58,7 +58,7 @@ class Create(object):
         self.__write_to_file('config/environment.py', ENV_SCRIPT)
 
         # Create skeleton config/dataset.yaml
-        datasetconfig = "project_name: %s\n" % self.basename \
+        datasetconfig = "dataset: %s\n" % self.basename \
                       + "dimensions:\n  -d0\n  -d1\n" \
                       + "projections:\n  p0:\n    -d0\n    -d1\n" \
                       + "units:\n  u0\n"
