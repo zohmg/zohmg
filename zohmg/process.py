@@ -16,7 +16,8 @@ class Process(object):
                 ('output','/tmp/does-not-matter'),
                 # Push zohmg egg and darling jar.
                 ('libegg','/usr/lib/python2.5/site-packages/zohmg-0.0.1-py2.5.egg'),
-                ('libjar','/usr/local/lib/zohmg/darling-0.0.3.jar')
+                ('libjar','/usr/local/lib/zohmg/darling-0.0.3.jar'),
+                ('file','lib/usermapper.py') # TODO: handle this more betterer.
                ]
 
         # read environment and attach.
