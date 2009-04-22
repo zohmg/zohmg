@@ -1,4 +1,4 @@
-How to install zohmg
+HOW TO INSTALL ZOHMG
 --------------------
 
 
@@ -9,7 +9,7 @@ Contents:
 
 
 
-zohmg done QUICK
+ZOHMG DONE QUICK
 ----------------
 Screw all those dependencies and details, huh?
 
@@ -25,7 +25,7 @@ and get the usage printed. (The app is installed.)
 
 
 
-Dependencies
+DEPENDENCIES
 ------------
 zohmg depends on several pieces of software:
 
@@ -78,7 +78,7 @@ zohmg depends on several pieces of software:
 
 
 
-Installing zohmg
+INSTALLING ZOHMG
 ----------------
 Make sure you have the dependencies installed correctly on your system.
 
