@@ -78,7 +78,7 @@ class App(object):
         print "cells: " + str(cells)
 
         # connect to hbase.
-        scanner = HBaseScanner.HBaseScanner()
+        scanner = HBaseScanner()
         scanner.connect()
         scanner.open(self.table, cells, startrow, stoprow)
 
