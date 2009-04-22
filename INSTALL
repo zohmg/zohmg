@@ -17,11 +17,11 @@ Just run
 
     python install.py
 
-You should be able to run
+Afterwards it should be possible to run
 
    zohmg
 
-and get the usage printed. (The app is installed.)
+and get the usage printed. (The application is installed.)
 
 
 
