@@ -23,12 +23,21 @@ class Process(object):
         # read environment and attach.
         env = Environ()
 
-        opts.append(('hadoop',env.get("HADOOP_HOME")))
+        hadoop_home = env.get("HADOOP_HOME")
+        if not os.path.isdir(hadoop_home):
+            msg = "E: HADOOP_HOME not set in config/environment.py."
+            fail(msg)
+        else:
+            opts.append(('hadoop',env.get("HADOOP_HOME")))
 
         classpath = env.get("CLASSPATH")
         if classpath is not None:
             for jar in classpath:
-                opts.append(('libjar', jar))
+                if not os.path.isfile(jar):
+                    msg = "E: File not found, %s." % jar
+                    fail(msg)
+                else:
+                    opts.append(('libjar', jar))
         else:
             msg = "E: CLASSPATH in config/environment is empty."
             fail(msg)
@@ -67,6 +76,10 @@ class Process(object):
                 dir,dirnames,files = entry
                 # for each file add it with correct option.
                 for file in files:
+                    if not os.path.isfile(file):
+                        msg = "E: File not found, %s." % file
+                        fail(msg)
+
                     option = None
                     suffix = file.split(".")[-1] # infer file suffix.
 
