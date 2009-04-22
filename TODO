@@ -14,6 +14,7 @@ priority uno:
   - add the eggs to site-packages/easy-install.pth (using setuptools?!)
   - bundle generated code and build eggs?
 + in config, rename 'project_name' to 'dataset'.
++ creation of dist tarball
 
 priority due:
 + serve html&js - maybe with paste.fileapp? => http://pythonpaste.org/modules/fileapp.html
