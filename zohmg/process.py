@@ -33,15 +33,8 @@ class Process(object):
             fail(msg)
 
         # pull everything in config and lib.
-        # XXX: assuming we only have one directory level here.
-        # ignore .pyc files.
-        for entry in os.walk("lib"):
-            dir,dirnames,files = entry
-            opts.extend([('file','lib/'+f) for f in files if not f[-4:] == ".pyc"])
-
-        for entry in os.walk("config"):
-            dir,dirnames,files = entry
-            opts.extend([('file','config/'+f) for f in files if not f[-4:] == ".pyc"])
+        file_opts = self.__add_files(["config","lib"])
+        opts.extend(file_opts)
 
         # stringify arguments.
         opts_args = ' '.join("-%s '%s'" % (k, v) for (k, v) in opts)
@@ -61,3 +54,30 @@ class Process(object):
         # PYTHONPATH is added because dumbo makes a local run before
         # engaging with hadoop.
         os.system("PYTHONPATH=lib; dumbo start /usr/local/lib/zohmg/import.py " + dumboargs)
+
+
+    # reads directories and returns list of tuples of
+    # file/libegg/libjar options for dumbo.
+    def __add_files(self,dirs):
+        opts = []
+        # TODO: optimize. this is now O(n^3).
+        for dir in dirs:
+            for entry in os.walk(dir):
+                dir,dirnames,files = entry
+                # for each file add it with correct option.
+                for file in files:
+                    option = None
+                    suffix = file.split(".")[-1] # infer file suffix.
+
+                    # ignore all other files but egg/jar/yaml.
+                    if   suffix == "egg":  option = "libegg"
+                    elif suffix == "jar":  option = "libjar"
+                    elif suffix == "yaml": option = "file"
+                    #elif suffix == "py":   option = "pyfile" # TODO: implement this in dumbo maybe?
+                    # TODO: what about text files or other files the user wants?
+                    #       we still want to ignore certain files (e.g. .pyc).
+
+                    if option:
+                        opts.append(option,file)
+
+        return opts
