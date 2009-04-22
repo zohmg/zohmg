@@ -10,9 +10,6 @@ ENV_SCRIPT = """# Please define the following environment variables.
 # Path to Hadoop directory.
 HADOOP_HOME = ''
 
-# Path to HBase directory.
-HBASE_HOME = ''
-
 # Jars for Hadoop Core, Hadoop Streaming and HBase
 CLASSPATH = (
   # be sure to set these correctly!
@@ -25,9 +22,9 @@ CLASSPATH = (
 README = """This is your zohmg application!
 
 Configure dataset.yaml to match your data,
-run 'zohmg setup' to create an hbase table.
-
-Then write a mapper and run it with 'zohmg import'.
+run 'zohmg setup' to create an hbase table,
+write a mapper that maps each line of data to n-space (what?),
+and run it with 'zohmg import'.
 
 Take a look in /usr/local/share/zohmg for further documentation.
 """

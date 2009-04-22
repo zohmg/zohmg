@@ -30,4 +30,3 @@ priority due:
 + add lfm.data.parse egg.
   - document how user contributed code is shipped to dumbo/hadoop.
 + verify dimensions and units outputted by mapper against those in config.
-+ why do we need HBASE_HOME?
