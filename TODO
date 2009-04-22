@@ -13,6 +13,8 @@ DONE>  - project creation
 + hbase and thrift eggs system-wideness necessary in order to keep zohmg.utils happy.
   - add the eggs to site-packages/easy-install.pth (using setuptools?!)
   - bundle generated code and build eggs?
+    * Build HBase thrift interface from actual installed version of thrift
+    * Ask user for path to Hbase.thrift and build hbase-*.egg from it.
 + in config, rename 'project_name' to 'dataset'.
 DONE> + creation of dist tarball
 DONE> in config, rename 'project_name' to 'dataset'.
@@ -35,4 +37,3 @@ priority due:
   - "more careful" way of importing usermapper (think Mapper constructor).
 + add lfm.data.parse egg.
   - document how user contributed code is shipped to dumbo/hadoop.
-
