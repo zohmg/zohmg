@@ -7,7 +7,7 @@ def usage(reason = None):
     print "usage:"
     print zohmg + " create <dir>"
     print zohmg + " setup"
-    print zohmg + " process <mapper> <hdfs-input-dir>"
+    print zohmg + " import <mapper> <hdfs-input-dir>"
     print zohmg + " serve [--port <port>]"
     print zohmg + " help"
 
@@ -28,12 +28,12 @@ def zohmg():
         usage()
         sys.exit(1)
 
-    if   cmd == "create":  create()
-    elif cmd == "setup":   setup()
-    elif cmd == 'process': process()
+    if   cmd == 'create':  create()
+    elif cmd == 'setup':   setup()
+    elif cmd == 'import':  process()
     elif cmd == 'serve':   serve()
-    elif cmd == "version" or cmd == "--version": print_version()
-    elif cmd == "help"    or cmd == '--help':    print_help()
+    elif cmd == 'version' or cmd == '--version': print_version()
+    elif cmd == 'help'    or cmd == '--help':    print_help()
     else:
         usage()
 
@@ -54,7 +54,7 @@ def setup():
     from zohmg.setup import Setup
     Setup().go()
 
-
+# import.
 def process():
     refuse_to_act_in_nonzohmg_directory()
     from zohmg.process import Process
