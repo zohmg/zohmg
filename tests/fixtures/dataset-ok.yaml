@@ -1,0 +1,31 @@
+dataset:
+ webmetrics
+
+dimensions:
+  - country
+  - domain
+  - useragent
+  - usertype
+  - referrer
+
+units:
+  - pageviews
+  - visitors
+
+projections:
+    country:
+      - country
+    domain:
+      - domain
+    country-domain-useragent-usertype:
+      - country
+      - domain
+      - useragent
+      - usertype
+    country-usertype-useragent:
+      - country
+      - usertype
+      - useragent
+    country-useragent:
+      - country
+      - useragent

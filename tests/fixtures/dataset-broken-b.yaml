@@ -1,0 +1,15 @@
+# can't have funny names!
+dataset: hokay!
+
+dimensions:
+ - a
+ - b
+
+projections:
+ oneandonly:
+  - a
+  - b
+
+units:
+ - x
+ 
