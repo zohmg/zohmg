@@ -78,6 +78,6 @@ class Process(object):
                     #       we still want to ignore certain files (e.g. .pyc).
 
                     if option:
-                        opts.append((option,file))
+                        opts.append((option,dir+"/"+file))
 
         return opts
