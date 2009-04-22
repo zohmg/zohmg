@@ -80,7 +80,7 @@ class HBaseScanner(object):
 
 
     def next(self):
-        if (not self.scanner_ready()) or (not self.__has_next()):
+        if (not self.scanner_ready()) or (not self.has_next()):
             raise StopIteration
         r = self.__next_row
         self.__fetch_row()
