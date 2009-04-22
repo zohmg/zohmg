@@ -14,9 +14,9 @@ DONE>  - project creation
   - add the eggs to site-packages/easy-install.pth (using setuptools?!)
   - bundle generated code and build eggs?
 + in config, rename 'project_name' to 'dataset'.
-+ creation of dist tarball
+DONE> + creation of dist tarball
 DONE> in config, rename 'project_name' to 'dataset'.
-+ sanity check of environment; issue warning if HADOOP_HOME missing, jars not files, etc.
+DONE> + sanity check of environment; issue warning if HADOOP_HOME missing, jars not files, etc.
 DONE> sanity check configuration.
 + verify dimensions and units outputted by mapper against those in config.
 
