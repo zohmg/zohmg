@@ -17,6 +17,8 @@ DONE>  - project creation
 + creation of dist tarball
 DONE> in config, rename 'project_name' to 'dataset'.
 + sanity check of environment; issue warning if HADOOP_HOME missing, jars not files, etc.
+DONE> sanity check configuration.
++ verify dimensions and units outputted by mapper against those in config.
 
 priority due:
 + serve html&js - maybe with paste.fileapp? => http://pythonpaste.org/modules/fileapp.html
@@ -33,4 +35,4 @@ priority due:
   - "more careful" way of importing usermapper (think Mapper constructor).
 + add lfm.data.parse egg.
   - document how user contributed code is shipped to dumbo/hadoop.
-+ verify dimensions and units outputted by mapper against those in config.
+
