@@ -109,7 +109,7 @@ class Environ(object):
         try:
             env = __import__(config_path+"environment")
         except ImportError, ioe:
-            msg = "E: Could not import %senvironment.py. %s." % (config_path,ioe.strerror)
+            msg = "Error: Could not import %senvironment.py. %s." % (config_path,ioe.strerror)
             fail(msg,ioe.errno)
 
         for key in dir(env):
