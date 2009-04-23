@@ -1,5 +1,5 @@
-from zohmg.utils import fail
 from zohmg.config import Config, Environ
+from zohmg.util import fail
 import os, re
 
 class Process(object):
@@ -44,6 +44,7 @@ class Process(object):
             fail(msg)
 
         # pull everything in config and lib.
+        # TODO: why everything in config?
         file_opts = self.__add_files(["config","lib"])
         opts.extend(file_opts)
 
@@ -64,7 +65,7 @@ class Process(object):
         # dispatch.
         # PYTHONPATH is added because dumbo makes a local run before
         # engaging with hadoop.
-        os.system("PYTHONPATH=lib; dumbo start /usr/local/lib/zohmg/import.py " + dumboargs)
+        os.system("PYTHONPATH=lib dumbo start /usr/local/lib/zohmg/import.py " + dumboargs)
 
 
     # reads directories and returns list of tuples of
@@ -77,7 +78,7 @@ class Process(object):
                 dir,dirnames,files = entry
                 # for each file add it with correct option.
                 for file in files:
-                    if not os.path.isfile(file):
+                    if not os.path.isfile(dir+"/"+file):
                         msg = "Error: File not found, %s." % file
                         fail(msg)
 

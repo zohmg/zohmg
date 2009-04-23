@@ -4,4 +4,6 @@ tims har problem:
      tim vill inte patcha hadoop, men maste for att kunna anvanda dumbo 0.21. fungerar zohmg med dumbo 0.20?
      om man har ett felaktigt datasetnamn som projektnamn sa blir det fel. forstas.
      environment.py bor citera 0.19.1
-     
+     identity_mapper.py ar helt missledande!
+     tim behover battre felmeddelanden nar config/environment.py 
+     tim far ett fel nar environment.pyc finns i config. vi borde lagga till enbart de filer i config som vi vet med oss att vi behover.

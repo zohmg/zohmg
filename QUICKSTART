@@ -19,7 +19,6 @@ DEPENDENCIES
 The following software and versions are required:
 - Apache Hadoop 0.19.1 with patches 1722 and 5450.
 - Apache HBase 0.19.1
-- Apache Thrift, 20080420 (wtf, this is the egg we're shipping)
 - Dumbo, git clone suffices.
 - Python Setup Tools
 
@@ -29,15 +28,15 @@ INSTALLING
 ----------
 Download the distribution tar archive
 
-    wget someurl/zohmg-alpha.tar.gz
+    wget someurl/zohmg-alpha-*.tar.gz
 
 Extract the contents
 
-    tar zxvf zohmg-alpha.tar.gz
+    tar zxvf zohmg-alpha-*.tar.gz
 
 Install zohmg
 
-    cd zohmg-alpha
+    cd zohmg-alpha-*
     sudo python install.py
 
 
@@ -56,7 +55,7 @@ By running
 
     zohmg create project-name
 
-a project named project-name is created. A project directory is created
+a project named "project-name" is created. A project directory is created
 from the project skeleton. The contents:
 
 - config/, project environment and dataset configuration.
@@ -71,13 +70,20 @@ Configuring a project
 When the project is created the files environment.py and dataset.yaml in
 the config directory will need to be configured.
 
-In config/environment.py define the path to HADOOP_HOME and the path to the
-three required jars (hadoop-*-dev-core.jar, hadoop-*-dev-streaming.jar and
-hbase-*-dev.jar).
+In config/environment.py define the path to the hadoop directory and the
+path to the three required jars (hadoop-*-dev-core.jar,
+hadoop-*-dev-streaming.jar and hbase-*-dev.jar).
 
 In config/dataset.yaml define your data set. This means setting up what
 dimensions and what projections of these dimensions will be used in by the
-project.
+project. The dimensions and projections defines how data can be imported
+later, it also hints what queries can be made to extract data.
+
+During import the mapper will output measurements based on the input data
+into these defined dimensions.
+
+Below two dimensions, three projections and one unit is defined in a
+dataset yaml file.
 
     dataset: weblogs
 
@@ -105,7 +111,8 @@ Importing data
 --------------
 After the project is created and setup correctly it is time to import some
 data. This is done in two steps: Write a mapper and then running that
-mapper.
+mapper. The mapper maps each line of the log file to a measurement along
+the dimension axes.
 
 Firstly, writing the mapper. (Assuming Apache common log format, see
 http://httpd.apache.org/docs/2.0/logs.html for more information.)
@@ -118,7 +125,7 @@ The access time, user (HTTP auth) and the status for each request are
 requested and passed along to the data store.
 
     def map(key,value):
-        # parse time string, extract year, month and day
+        # parse log string, extract year, month and day
         import re
         mo = re.search(r"\[(\d{2})/(\w{3})/(\d{4})",value) # [20/Apr/2009
         year  = mo.group(3)
@@ -133,6 +140,13 @@ requested and passed along to the data store.
 
         yield time,dimensions,values
 
+
+The map function is really a generator; it can yield zero or more times for
+every line of the log file.
+
+The output of the mapper goes into a reducir that, for each
+dimension-tuple, sums the values of each unit and passes them along to the
+actual underlying data stare.
 
 Secondly, run the mapper
 
@@ -160,9 +174,3 @@ data to retrieve:
 
 The result returned is a JSON feed of the data with the pageviews done by
 users goldman and kropotkin.
-
-
-
-DOCUMENTATION
--------------
-See the README for more documentation.

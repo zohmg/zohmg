@@ -29,7 +29,9 @@ Install
 - hadoop streaming (it's a contrib!)
 - hbase 0.19, with a running thrift server
 
-
+# ALSO:
+python's yaml library
+python's simplejson library
 
 
 1) creating a project.
