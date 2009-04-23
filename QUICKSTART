@@ -1,0 +1,50 @@
+ZOHMG QUICK START
+-----------------
+
+First a few dependencies need to be fulfilled:
+
+- Apache Hadoop 0.19.1 with patches HADOOP-1722 and HADOOP-5450.
+- Apache HBase 0.19.1
+- Dumbo, git clone suffices.
+- Python Setup Tools
+- Python simplejson
+- PyYAML
+
+Now download and install:
+
+    wget someurl/zohmg-alpha-*.tar.gz
+    tar zxvf zohmg-alpha-*.tar.gz
+    cd zohmg-alpa-*
+    sudo python install.py
+
+The zohmg application is now installed system-wide.
+
+Creating a project and using it:
+
+    zohmg create project-name
+
+Change to the newly created zohmg project directory and edit the
+configuration files. (See examples for inspiration.)
+
+    cd project-name
+    vim config/environment.py
+    vim config/dataset.yaml
+
+Commit the configuration to the project (this creates HBase tables).
+
+    zohmg setup
+
+Next step is to write a mapper and put it in the mappers directory. When
+this step is fulfilled import data from HDFS with the mapper by invoking
+
+    zohmg import mappers/mapper.py hdfs/input/path
+
+Serving already imported data with zohmg by invoking
+
+    zohmg serve
+
+Visit the URL for extracting data and supply a query string
+
+    http://127.0.0.1/?t0=20090420&t1=20090422&unit=pageviews&d0=user&d0v=goldman,kropotkin
+
+and the result returned is JSON.
