@@ -40,3 +40,4 @@ priority due:
   - "more careful" way of importing usermapper (think Mapper constructor).
 + add lfm.data.parse egg.
   - document how user contributed code is shipped to dumbo/hadoop.
++ support for installing in user-home

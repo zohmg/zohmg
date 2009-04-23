@@ -17,9 +17,8 @@ Contents:
 DEPENDENCIES
 ------------
 The following software and versions are required:
-- Apache Hadoop, svn branch-0.19.
-- Apache HBase, same version as Hadoop.
-- Apache Thrift, 20080420
+- Apache Hadoop 0.19.1 with patches 1722 and 5450.
+- Apache HBase 0.19.1
 - Dumbo, git clone suffices.
 - Python Setup Tools
 
@@ -38,7 +37,7 @@ Extract the contents
 Install zohmg
 
     cd zohmg-alpha-*
-    python install.py
+    sudo python install.py
 
 
 

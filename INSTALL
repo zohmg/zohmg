@@ -15,7 +15,7 @@ Screw all those dependencies and details, huh?
 
 Just run
 
-    python install.py
+    sudo python install.py
 
 Afterwards it should be possible to run
 
@@ -84,7 +84,7 @@ Make sure you have the dependencies installed correctly on your system.
 
 Asserting that all the dependencies are ok run
 
-    python install.py
+    sudo python install.py
 
 The above command creates a python egg out of zohmg and puts it in
 system-wide site-packages directory.
