@@ -6,6 +6,7 @@ First a few dependencies need to be fulfilled:
 - Apache Hadoop 0.19.1 with patches HADOOP-1722 and HADOOP-5450.
 - Apache HBase 0.19.1
 - Dumbo, git clone suffices.
+- Python Paste
 - Python Setup Tools
 - Python simplejson
 - PyYAML
