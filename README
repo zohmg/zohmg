@@ -24,9 +24,11 @@ happen. the code that runs behind the scenes is in lib.
 0) pre-requisities.
 
 Install
-- hadoop
-- hbase, with a running thrift server
-- dumbo
+- dumbo 0.21
+- hadoop 0.19 (patched with 1722 and 5450 as per http://wiki.github.com/klbostee/dumbo/building-and-installing)
+- hadoop streaming (it's a contrib!)
+- hbase 0.19, with a running thrift server
+
 
 
 

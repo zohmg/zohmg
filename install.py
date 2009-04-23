@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import os, shutil, sys
 
+# known limitations:
+#  does not like being run more than once, ever.
+
 def install():
     build_darling = False
     # TODO: this is really ugly, but works for now.
@@ -30,6 +33,7 @@ def install():
 
     # thrift & hbase.
     # TODO: fix this better.
+    print "sorry, this won't work"
     # copies thrift egg.
     copy_bundle("bundled thrift egg","lib/thrift-*.egg",system_target)
     # copies hbase egg.
