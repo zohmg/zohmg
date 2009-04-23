@@ -1,5 +1,5 @@
-# TODO: import fail, plox.
 from zohmg.config import Config, Environ
+from zohmg.util import fail
 import os, re
 
 class Process(object):
