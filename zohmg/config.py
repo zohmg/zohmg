@@ -17,7 +17,7 @@ else:
 # TODO: multiple dataset files
 class Config(object):
     def __init__(self, config_file=None):
-        if yaml:
+        if config_file:
             self.config_file = config_file
         else:
             self.config_file = config_path + "dataset.yaml"
