@@ -1,0 +1,44 @@
+BUILDING ZOHMG
+--------------
+
+Contents:
+- Dependencies
+- Build process
+  - Quick way
+  - Detailed way
+
+
+
+DEPENDENCIES
+------------
+- Apache Ant
+- Apache HBase
+- Apache Thrift
+- Python
+- Python Setup Tools
+- Java (OpenJDK or Sun JDK)
+
+
+
+BUILD PROCESS
+-------------
+
+Quick way
+---------
+When Ant, HBase and Thrift is installed run
+
+    python source_compile.py
+
+This builds the sources. To prepare binary distribution files run
+
+    python setup.py bdist_egg
+    python setup-hbase.py bdist_egg
+    python setup-thrift.py bdist_egg
+
+Resulting files end up in the build directory.
+
+
+
+Detailed way
+------------
+What really happens in source_compile?!
