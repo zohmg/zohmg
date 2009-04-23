@@ -34,7 +34,7 @@ public class TBOutputReader extends OutputReader<Text, Text> {
 	  private TypedBytesWritable tbkey;
 	  private TypedBytesWritable tbvalue;
 	  private TypedBytesInput in;
-	  
+	
 	  @Override
 	  public void initialize(PipeMapRed pipeMapRed) throws IOException {
 	    super.initialize(pipeMapRed);
@@ -43,7 +43,7 @@ public class TBOutputReader extends OutputReader<Text, Text> {
 	    tbvalue = new TypedBytesWritable();
 	    in = new TypedBytesInput(clientIn);
 	  }
-	  
+	
 	  @Override
 	  public boolean readKeyValue() throws IOException {
 	    bytes = in.readRaw();
@@ -55,12 +55,12 @@ public class TBOutputReader extends OutputReader<Text, Text> {
 	    tbvalue.set(bytes, 0, bytes.length);
 	    return true;
 	  }
-	  
+	
 	  @Override
 	  public Text getCurrentKey() throws IOException {
 	    return new Text(tbkey.toString());
 	  }
-	  
+	
 	  @Override
 	  public Text getCurrentValue() throws IOException {
 		  return new Text(tbvalue.toString());

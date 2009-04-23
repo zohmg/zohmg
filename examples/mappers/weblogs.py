@@ -21,5 +21,5 @@ def map(key, value):
     except AttributeError:
         sys.stderr.write("AttributeError!\n")
         return
-    
+
     yield ts, dimensions, values
