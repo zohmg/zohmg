@@ -168,7 +168,7 @@ Start the data server with
 
     zohmg serve
 
-Visiting the url for extracting data and supplying query string with what
+Visiting the URL for extracting data and supplying query string with what
 data to retrieve:
 
     http://127.0.0.1:8086/?t0=20090420&t1=20090423&unit=pageviews&d0=user&d0v=goldman,kropotkin
