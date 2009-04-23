@@ -1,0 +1,176 @@
+ZOHMG QUICK START
+-----------------
+
+
+Contents:
+- Dependencies
+- Installing
+- Running
+  - Creating a project
+  - Configuring a project
+  - Importing data
+  - Serving data
+- Documentation
+
+
+
+DEPENDENCIES
+------------
+The following software and versions are required:
+- Apache Hadoop 0.19.1 with patches 1722 and 5450.
+- Apache HBase 0.19.1
+- Dumbo, git clone suffices.
+- Python Setup Tools
+
+
+
+INSTALLING
+----------
+Download the distribution tar archive
+
+    wget someurl/zohmg-alpha-*.tar.gz
+
+Extract the contents
+
+    tar zxvf zohmg-alpha-*.tar.gz
+
+Install zohmg
+
+    cd zohmg-alpha-*
+    sudo python install.py
+
+
+
+RUNNING
+-------
+During installation the zohmg script is installed system-wide. This is the
+interface to zohmg. Try it out by running
+
+    zohmg
+
+
+Creating a project
+------------------
+By running
+
+    zohmg create project-name
+
+a project named "project-name" is created. A project directory is created
+from the project skeleton. The contents:
+
+- config/, project environment and dataset configuration.
+- lib/, user eggs or jars to be used by the import step (mappers).
+- mappers/, user defined map part of the mapreduce import procedure.
+- transformers/, user defined transformations of the data to extract.
+- README, mentions where to find additional documentation.
+
+
+Configuring a project
+---------------------
+When the project is created the files environment.py and dataset.yaml in
+the config directory will need to be configured.
+
+In config/environment.py define the path to the hadoop directory and the
+path to the three required jars (hadoop-*-dev-core.jar,
+hadoop-*-dev-streaming.jar and hbase-*-dev.jar).
+
+In config/dataset.yaml define your data set. This means setting up what
+dimensions and what projections of these dimensions will be used in by the
+project. The dimensions and projections defines how data can be imported
+later, it also hints what queries can be made to extract data.
+
+During import the mapper will output measurements based on the input data
+into these defined dimensions.
+
+Below two dimensions, three projections and one unit is defined in a
+dataset yaml file.
+
+    dataset: weblogs
+
+    dimensions:
+     - user
+     - status
+
+    projections:
+     - user
+     - status
+     - user-status
+
+    units:
+     - pageviews
+
+
+When the configuration is done run
+
+    zohmg setup
+
+to execute the changes and create the needed infrastructure (HBase tables).
+
+
+Importing data
+--------------
+After the project is created and setup correctly it is time to import some
+data. This is done in two steps: Write a mapper and then running that
+mapper. The mapper maps each line of the log file to a measurement along
+the dimension axes.
+
+Firstly, writing the mapper. (Assuming Apache common log format, see
+http://httpd.apache.org/docs/2.0/logs.html for more information.)
+
+In the arguments to map there are key and value. The argument key is the
+row number in the file being processed, the value argument is the actual
+line data from the file.
+
+The access time, user (HTTP auth) and the status for each request are
+requested and passed along to the data store.
+
+    def map(key,value):
+        # parse log string, extract year, month and day
+        import re
+        mo = re.search(r"\[(\d{2})/(\w{3})/(\d{4})",value) # [20/Apr/2009
+        year  = mo.group(3)
+        month = mo.group(2)
+        day   = mo.group(1)
+
+        time  = year + month + day
+        dimensions = {'user'   : value.split(" ")[2],
+                      'status' : value.split(" ")[8]
+                     }
+        values = {'pageviews' : 1}
+
+        yield time,dimensions,values
+
+
+The map function is really a generator; it can yield zero or more times for
+every line of the log file.
+
+The output of the mapper goes into a reducir that, for each
+dimension-tuple, sums the values of each unit and passes them along to the
+actual underlying data stare.
+
+Secondly, run the mapper
+
+    zohmg import mappers/mapper.py input
+
+where mappers/mapper.py is defined above and input is a path to a file on
+HDFS on the Hadoop cluster.
+
+When the above is done data has been processed and stored.
+
+
+Serving the data
+----------------
+Data is served out of HBase. The data server uses the Thrift interface to
+HBase so make sure it is on (i.e. run hbase thrift start).
+
+Start the data server with
+
+    zohmg serve
+
+Visiting the url for extracting data and supplying query string with what
+data to retrieve:
+
+    http://127.0.0.1:8086/?t0=20090420&t1=20090423&unit=pageviews&d0=user&d0v=goldman,kropotkin
+
+The result returned is a JSON feed of the data with the pageviews done by
+users goldman and kropotkin.
