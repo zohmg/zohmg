@@ -1,7 +1,6 @@
 ZOHMG
 -----
 
-
 Contents:
 - Dependencies
 - Installing
@@ -21,10 +20,10 @@ The following software and versions are required:
 - Apache HBase 0.19.1
 - Dumbo, git clone suffices.
 - Python Setup Tools
+- Python simplejson
+- PyYAML
 
-# ALSO:
-python's yaml library
-python's simplejson library
+
 
 INSTALLING
 ----------
