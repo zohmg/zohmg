@@ -1,4 +1,4 @@
-# TODO: import fail, plox.
+from zohmg.utils import fail
 from zohmg.config import Config, Environ
 import os, re
 
