@@ -1,5 +1,5 @@
 priority uno:
-+ rename.
++ rename. (zonotoop)
 + make sure it's easy to get zohmg up and running.
   - shell script to install dependencies
 DONE>  - project creation
