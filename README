@@ -18,7 +18,7 @@ DEPENDENCIES
 The following software and versions are required:
 - Apache Hadoop 0.19.1 with patches HADOOP-1722 and HADOOP-5450.
 - Apache HBase 0.19.1
-- Dumbo, git clone suffices.
+- Dumbo 0.21.x
 - Python Paste
 - Python Setup Tools
 - Python simplejson
@@ -55,9 +55,9 @@ Creating a project
 ------------------
 By running
 
-    zohmg create project-name
+    zohmg create project
 
-a project named "project-name" is created. A project directory is created
+a project named "project" is created. A project directory is created
 from the project skeleton. The contents:
 
 - config/, project environment and dataset configuration.
@@ -108,6 +108,8 @@ When the configuration is done run
 
 to execute the changes and create the needed infrastructure (HBase tables).
 
+[Per: TODO: add section on using the hbase shell to verify tables were created, etc.]
+
 
 Importing data
 --------------
@@ -142,6 +144,7 @@ requested and passed along to the data store.
 
         yield time,dimensions,values
 
+[Per: I think this sample code should replace the one we have in examples.]
 
 The map function is really a generator; it can yield zero or more times for
 every line of the log file.
@@ -163,7 +166,7 @@ When the above is done data has been processed and stored.
 Serving the data
 ----------------
 Data is served out of HBase. The data server uses the Thrift interface to
-HBase so make sure it is on (i.e. run hbase thrift start).
+HBase so make sure the thrift server is on (i.e. run hbase thrift start).
 
 Start the data server with
 
@@ -176,3 +179,10 @@ data to retrieve:
 
 The result returned is a JSON feed of the data with the pageviews done by
 users goldman and kropotkin.
+
+
+[TODO:]
+Plotting the data
+-----------------
+
+[Using html+js, plot with google charts.]

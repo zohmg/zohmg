@@ -29,19 +29,23 @@ DEPENDENCIES
 ------------
 zohmg depends on several pieces of software:
 
-- Apache Hadoop (branch-0.19)
+- Apache Hadoop (0.19.1)
 
     MapReduce framework implemented in Java.
+
+    [Per: det ar inte nodvandigt att anvanda branch-0.19; tarbollen med 0.19.1 funkar lika bra.)
 
     The required way for acquiring a supported version is to do a svn
     checkout of branch-0.19.
 
         svn co http://svn.apache.org/repos/asf/hadoop/core/branches/branch-0.19/ hadoop-branch-0.19
 
+    [Per: vi maste namna patcharn.]
+
     For more information see http://hadoop.org/.
 
 
-- Apache HBase (branch-0.19)
+- Apache HBase (0.19.1)
 
     BigTable inspired database implemented in Java.
 
@@ -50,16 +54,20 @@ zohmg depends on several pieces of software:
     For more information see http://hbase.org/.
 
 
-- Apache Thrift (20090420)
+- Apache Thrift
 
     Framework for scalable cross-language service development.
+ 
+    [Per: det finns inga definerade versioner av thrift, och det ar lite knasigt att
+    vi refererar till vart packade egg som 20090420. det ar ok att egget heter sa tycker jag,
+    men vi kan inte saga att det ar den 'versionen' som kravs.]
 
     zohmg is tested to work with version 20090420 of Thrift.
 
     For more information see http://incubator.thrift.org/thrift/.
 
 
-- Dumbo
+- Dumbo (0.21.x)
 
     Python module which wraps around Hadoop Streaming and makes it possible
     to write MapReduce programs in Python.
@@ -76,6 +84,8 @@ zohmg depends on several pieces of software:
 
     For more information see http://pypi.python.org/pypi/setuptools.
 
+
+[Per: ska vi saga nagot om de tre eller fyra pythonmoduler (yaml, simplejson, paste) vi anvander?]
 
 
 INSTALLING ZOHMG
