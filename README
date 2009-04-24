@@ -9,6 +9,7 @@ Contents:
   - Configuring a project
   - Importing data
   - Serving data
+  - Plotting the data
 - Documentation
 
 
@@ -108,7 +109,30 @@ When the configuration is done run
 
 to execute the changes and create the needed infrastructure (HBase tables).
 
-[Per: TODO: add section on using the hbase shell to verify tables were created, etc.]
+Verify that the HBase tables were created correctly by using the HBase
+shell and use the "list" and "describe" commands
+
+    hbase shell
+    HBase Shell; enter 'help<RETURN>' for list of supported commands.
+    Version: 0.19.2-dev, r756275, Tue Mar 31 12:41:29 BST 2009
+    hbase(main):001:0> list
+    weblogs
+    1 row(s) in 0.1337 seconds
+    hbase(main):003:0> describe 'weblogs'
+    {NAME => 'weblogs', IS_ROOT => 'false', IS_META => 'false', FAMILIES =>
+    [{NAME => 'user', BLOOMFILTER => 'false', COMPRESSION => 'NONE',
+    VERSIONS => '3', LENGTH => '2147483647', TTL => '-1', IN_MEMORY =>
+    'false', BLOCKCACHE => 'false'}, {NAME => 'status', BLOOMFILTER =>
+    'false', COMPRESSION => 'NONE', VERSIONS => '3', LENGTH =>
+    '2147483647', TTL => '-1', IN_MEMORY => 'false', BLOCKCACHE =>
+    'false'}, {NAME => 'user-status' , BLOOMFILTER => 'false', COMPRESSION
+    => 'NONE', VERSIONS => '3', LENGTH => '2 147483647', TTL => '-1',
+    IN_MEMORY => 'false', BLOCKCACHE => 'false'}], INDEXES => []}
+    1 row(s) in 0.1337 seconds
+
+
+These two commands shows first, what tables you have, and, second,
+describes the structure of the table "weblogs".
 
 
 Importing data
