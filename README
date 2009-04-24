@@ -2,6 +2,7 @@ ZOHMG
 -----
 
 Contents:
+- What zohmg is
 - Dependencies
 - Installing
 - Running
@@ -11,6 +12,15 @@ Contents:
   - Serving data
   - Plotting the data
 - Documentation
+
+
+
+WHAT ZOHMG IS
+-------------
+TODO: An about three or four sentance paragraph stating what zohmg is and
+the long term goal.
+
+TODO: A longer description, describing what zohmg *actually* is.
 
 
 
