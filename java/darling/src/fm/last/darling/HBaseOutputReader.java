@@ -55,12 +55,6 @@ public class HBaseOutputReader extends OutputReader<ImmutableBytesWritable, Batc
 		numKeyFields = pipeMapRed.getNumOfKeyFields();
 		separator    = pipeMapRed.getFieldSeparator();
 		
-		/*
-		System.err.println("HBaseOutputReader");
-		System.err.println("numkeyfields: " + new Integer(numKeyFields));
-		System.err.println("separator: " + separator);
-		*/
-		
 		lineReader = new LineReader((InputStream) datainput, conf);
 	}
 
@@ -68,7 +62,6 @@ public class HBaseOutputReader extends OutputReader<ImmutableBytesWritable, Batc
 	public boolean readKeyValue() throws IOException {
 		if (lineReader.readLine(line) <= 0)
 			return false;	
-		// populate member variables rowkey and batchupdate
 		bytes = line.getBytes();
 		interpretKeyandValue(bytes, line.getLength());
 		line.clear();
@@ -99,28 +92,19 @@ public class HBaseOutputReader extends OutputReader<ImmutableBytesWritable, Batc
 			throw new IOException(StringUtils.stringifyException(e));
 		}
 
-		// and now, los interpretaziones.
 
 		// FIXME: ouch, that's ugly!
 		String rk    = k.toString().substring(1, k.toString().length() - 1);
 
 		rowkey = new ImmutableBytesWritable(rk.getBytes());
 		batchupdate = new BatchUpdate(rk.getBytes());
-	
-		/*
-		System.err.println("HBaseOutputReader#interpretKeyandValue");
-		System.err.println("k: " + k.toString());
-		System.err.println("v: " + v.toString());
-		System.err.println("rowkey: " + rk);
-		*/
 				
 		String json = v.toString().substring(1, v.toString().length() - 1);
 		Map<String, Map> payload;
 		try {
 			payload = (Map<String, Map>) ObjectBuilder.fromJSON(json); // the 'erased' type?
-			System.err.println("payload: " + payload.getClass());
 		} catch (Exception e) {
-			System.err.println("fromJson: " + e.toString());
+			System.err.println("error, fromJson: " + e.toString());
 			return;
 		}
 		
@@ -129,21 +113,19 @@ public class HBaseOutputReader extends OutputReader<ImmutableBytesWritable, Batc
 			String cfq = entry.getKey();
 			Map dict   = entry.getValue(); // unchecked.
 			
-			// expecting dict to carry 'value' and possibly 'timestamp'
+			// expecting dict to carry 'value',
 			if (!dict.containsKey("value"))
 				return; // no good.
 			Object value = dict.get("value");
 			
+			// ..and possibly 'timestamp'.
 			Object ts = 0;
 			if (dict.containsKey("timestamp"))
 				ts = dict.get("timestamp");
 			
-			System.err.println("cfq: " + cfq + " has value " + value + " (and possibly timestamp: "+ts+").");
-					
 			batchupdate.put(cfq, value.toString().getBytes());
 		}
 	}
-
 
 	@Override
 	public ImmutableBytesWritable getCurrentKey() throws IOException {
@@ -163,5 +145,4 @@ public class HBaseOutputReader extends OutputReader<ImmutableBytesWritable, Batc
 			return "<undecodable>";
 		}
 	}
-
 }

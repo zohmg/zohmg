@@ -18,12 +18,14 @@ DONE>  - project creation
   - bundle generated code and build eggs?
     * Build HBase thrift interface from actual installed version of thrift
     * Ask user for path to Hbase.thrift and build hbase-*.egg from it.
-+ in config, rename 'project_name' to 'dataset'.
+DONE> in config, rename 'project_name' to 'dataset'.
 DONE> + creation of dist tarball
 DONE> in config, rename 'project_name' to 'dataset'.
 DONE> + sanity check of environment; issue warning if HADOOP_HOME missing, jars not files, etc.
 DONE> sanity check configuration.
 + verify dimensions and units outputted by mapper against those in config.
+DONE> darling: remove grat. prints.
+
 
 priority due:
 + serve html&js - maybe with paste.fileapp? => http://pythonpaste.org/modules/fileapp.html
