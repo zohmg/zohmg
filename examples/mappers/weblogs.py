@@ -1,25 +1,21 @@
 # user's mapper.
-def map(key, value):
-    import sys
-    from lfm.data.parse import web
+#
+# this piece of code assumes that the Apache common log format,
+# see http://httpd.apache.org/docs/2.0/logs.html for more info.
 
-    try: log = web.Log(value)
-    except:
-        sys.stderr.write("failed to parse line.")
-        return
-    ua = web.UserAgent()
 
-    try:
-        ts = log.timestamp.ymd()
-        dimensions = {'country'   : log.country(),
-                      'domain'    : log.domain,
-                      'useragent' : ua.classify(log.agent),
-                      'usertype'  : ("user", "anon")[log.userid == None]
-                      }
-        values = {'pageviews' : 1}
+def map(key,value):
+    # parse log string, extract year, month and day
+    import re
+    mo = re.search(r"\[(\d{2})/(\w{3})/(\d{4})",value) # [20/Apr/2009
+    year  = mo.group(3)
+    month = mo.group(2)
+    day   = mo.group(1)
 
-    except AttributeError:
-        sys.stderr.write("AttributeError!\n")
-        return
+    time  = year + month + day
+    dimensions = {'user'   : value.split(" ")[2],
+                  'status' : value.split(" ")[8]
+                 }
+    values = {'pageviews' : 1}
 
-    yield ts, dimensions, values
+    yield time,dimensions,values

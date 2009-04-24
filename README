@@ -144,7 +144,6 @@ requested and passed along to the data store.
 
         yield time,dimensions,values
 
-[Per: I think this sample code should replace the one we have in examples.]
 
 The map function is really a generator; it can yield zero or more times for
 every line of the log file.
