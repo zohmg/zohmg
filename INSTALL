@@ -33,14 +33,8 @@ zohmg depends on several pieces of software:
 
     MapReduce framework implemented in Java.
 
-    [Per: det ar inte nodvandigt att anvanda branch-0.19; tarbollen med 0.19.1 funkar lika bra.)
-
-    The required way for acquiring a supported version is to do a svn
-    checkout of branch-0.19.
-
-        svn co http://svn.apache.org/repos/asf/hadoop/core/branches/branch-0.19/ hadoop-branch-0.19
-
-    [Per: vi maste namna patcharn.]
+    Additionally Hadoop source has to be patched with the patches
+    HADOOP-1722 and HADOOP-5450.
 
     For more information see http://hadoop.org/.
 
@@ -57,12 +51,9 @@ zohmg depends on several pieces of software:
 - Apache Thrift
 
     Framework for scalable cross-language service development.
- 
-    [Per: det finns inga definerade versioner av thrift, och det ar lite knasigt att
-    vi refererar till vart packade egg som 20090420. det ar ok att egget heter sa tycker jag,
-    men vi kan inte saga att det ar den 'versionen' som kravs.]
 
-    zohmg is tested to work with version 20090420 of Thrift.
+    zohmg is tested to work with svn revision [TODO: add revision here.] of
+    Thrift.
 
     For more information see http://incubator.thrift.org/thrift/.
 
@@ -75,6 +66,15 @@ zohmg depends on several pieces of software:
     For more information see http://wiki.github.com/klbostee/dumbo.
 
 
+- Python Paste
+
+    Tools for using a Web Server Gateway Interface stack.
+
+    There is a debian package called python-paste.
+
+    For more information see http://pythonpaste.org/.
+
+
 - Python Setup Tools
 
     Framework for building, installing, upgrading and uninstalling Python
@@ -85,7 +85,22 @@ zohmg depends on several pieces of software:
     For more information see http://pypi.python.org/pypi/setuptools.
 
 
-[Per: ska vi saga nagot om de tre eller fyra pythonmoduler (yaml, simplejson, paste) vi anvander?]
+- Python simplejson
+
+    Simple, fast, extensible JSON encoder/decoder for Python.
+
+    There is a Debian package called python-simplejson.
+
+    For more information see http://undefined.org/python/#simplejson.
+
+- PyYAML
+
+    YAML parser and emitter for Python.
+
+    There is a Debian package called python-yaml.
+
+    For more information see http://pyyaml.org/.
+
 
 
 INSTALLING ZOHMG
