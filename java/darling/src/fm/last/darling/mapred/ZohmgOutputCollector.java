@@ -5,7 +5,7 @@ import java.util.Map;
 
 // encapsulator of data emitted from mapper.
 public class ZohmgOutputCollector {
-	private int timestamp;
+	private long timestamp;
 	private Map<String, String> dimensions; // point in n-space,
 	private Map<String, Integer> values;    // value(s) at that point.
 	
@@ -14,10 +14,10 @@ public class ZohmgOutputCollector {
 		values     = new HashMap<String, Integer>();
 	}
 	
-	public void setTimestamp(int epoch) {
+	public void setTimestamp(long epoch) {
 		timestamp = epoch;
 	}
-	public int getTimestamp() {
+	public long getTimestamp() {
 		return timestamp;
 	}
 	
@@ -26,8 +26,19 @@ public class ZohmgOutputCollector {
 	public void addDimension(String dimension, String value) {
 		dimensions.put(dimension, value);
 	}
+	public Map<String, String> getDimensions() {
+		return dimensions;
+	}
 	
 	public void addValue(String unit, Integer value) {
 		values.put(unit, value);
+	}
+	public Map<String, Integer> getValues() {
+		return values;
+	}
+	
+	// TODO.
+	public boolean valid() {
+		return true;
 	}
 }
