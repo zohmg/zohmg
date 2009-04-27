@@ -72,7 +72,7 @@ class Process(object):
     # file/libegg/libjar options for dumbo.
     def __add_files(self,dirs):
         opts = []
-        # TODO: optimize. this is now O(n^3).
+        # TODO: optimize? this is now O(dirs*entries*files).
         for dir in dirs:
             for entry in os.walk(dir):
                 dir,dirnames,files = entry
@@ -88,8 +88,9 @@ class Process(object):
                     # ignore all other files but egg/jar/yaml.
                     if   suffix == "egg":  option = "libegg"
                     elif suffix == "jar":  option = "libjar"
-                    elif suffix == "yaml": option = "file"
+                    elif suffix == "py":   option = "file"
                     #elif suffix == "py":   option = "pyfile" # TODO: implement this in dumbo maybe?
+                    elif suffix == "yaml": option = "file"
                     # TODO: what about text files or other files the user wants?
                     #       we still want to ignore certain files (e.g. .pyc).
 
