@@ -5,7 +5,7 @@ import simplejson as json
 
 from paste.request import parse_formvars
 
-from HBaseScanner import HBaseScanner
+from zohmg.scanner import HBaseScanner
 from zohmg.config import Config
 
 
