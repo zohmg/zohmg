@@ -144,7 +144,7 @@ class data(object):
     # example query:
     # ?t0=20090120&t1=20090121&unit=pageviews&d0=country&d0v=US,DE
     def __call__(self, environ, start_response):
-        print "[%s] Call to data app. Table: %s." % (time.asctime(),self.table)
+        print "[%s] Data, serving from table: %s." % (time.asctime(),self.table)
 
         params = parse_formvars(environ)
 

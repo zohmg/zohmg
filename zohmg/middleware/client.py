@@ -7,7 +7,8 @@ class client(object):
     """
     def __call__(self,environ,start_response):
         from paste.urlparser import make_static
-        print "[%s] Client, serving static file." % time.asctime()
-        project_dir = environ.get("zohmg_project_dir","")
+        project_dir = environ["zohmg_project_dir"]
+        file = environ["PATH_INFO"]
         client = make_static({},project_dir+"/clients")
+        print "[%s] Client, serving static file %s%s." % (time.asctime(),project_dir,file)
         return client(environ,start_response)
