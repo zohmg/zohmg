@@ -32,7 +32,7 @@ def install():
         copy_bundle("pre-built darling jar","lib/darling-*.jar",lib_target)
 
     # thrift & hbase.
-    # TODO: fix this better.
+    # TODO: don't bundle these eggs; easy_install them.
     print "sorry, this won't work"
     # copies thrift egg.
     copy_bundle("bundled thrift egg","lib/thrift-*.egg",system_target)
@@ -47,6 +47,7 @@ def install():
         copy_bundle(doc,doc,doc_target)
 
     # examples.
+    # TODO: fails if directory exists.
     shutil.copytree("examples",target+"/examples")
 
     # libs.
