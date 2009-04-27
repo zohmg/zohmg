@@ -1,17 +1,14 @@
-# zohmgapp.
-
-# paste-compatible application for serving.. yes, what exactly?
-# zohmg.app() is the entry-point. begin your code-reading journey there.
-
 import sys, time
 import simplejson as json
+
 from paste.request import parse_formvars
 
 from zohmg.scanner import HBaseScanner
 from zohmg.config import Config
 
-class App(object):
-    def __init__(self, table):
+
+class data(object):
+    def __init__(self):
         self.config = Config()
         self.table = self.config.dataset()
         self.projections = self.config.projections()
@@ -146,7 +143,8 @@ class App(object):
 
     # example query:
     # ?t0=20090120&t1=20090121&unit=pageviews&d0=country&d0v=US,DE
-    def app(self, environ, start_response):
+    def __call__(self, environ, start_response):
+        print "[%s] Call to data app. Table: %s." % (time.asctime(),self.table)
 
         params = parse_formvars(environ)
 
