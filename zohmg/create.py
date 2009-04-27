@@ -2,7 +2,7 @@ from zohmg.utils import fail
 import os, sys
 
 
-DIRS = ["config","lib","mappers","transformers"]
+DIRS = ["clients","config","lib","mappers","transformers"]
 
 # config/environment.py
 ENV_SCRIPT = """# Please define the following environment variables.
@@ -29,6 +29,13 @@ and run it with 'zohmg import'.
 Take a look in /usr/local/share/zohmg for further documentation.
 """
 
+CLIENT = """<html>
+<body>
+Static pages here will be served from the url client/filename.
+</body>
+</html>
+"""
+
 MAPPER = """# identity mapper.
 def map(key, value):
     yield key, value
@@ -39,7 +46,7 @@ class Create(object):
         self.basename = os.path.basename(path)
         self.abspath  = os.path.abspath(path)
 
-        print "Creating %s" % self.basename
+        sys.stdout.write("Creating %s... " % self.basename)
 
         # Create project directories with 0755.
         try:
@@ -54,8 +61,9 @@ class Create(object):
         # Create .zohmg, README, mapper, env.
         self.__write_to_file('.zohmg')
         self.__write_to_file('README', README)
-        self.__write_to_file('mappers/identity_mapper.py', MAPPER)
+        self.__write_to_file("clients/client.html",CLIENT)
         self.__write_to_file('config/environment.py', ENV_SCRIPT)
+        self.__write_to_file('mappers/identity_mapper.py', MAPPER)
 
         # Create skeleton config/dataset.yaml
         datasetconfig = "dataset: %s\n" % self.basename \
