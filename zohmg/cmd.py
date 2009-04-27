@@ -1,9 +1,11 @@
+from zohmg.utils import fail
 import sys, os
+
 
 def usage(reason = None):
     zohmg = os.path.basename(sys.argv[0])
     if reason:
-        print "error: " + reason
+        print "Error: " + reason
     print "usage:"
     print zohmg + " create <dir>"
     print zohmg + " setup"
@@ -17,7 +19,7 @@ def print_version():
 
 def print_help():
     # TODO: offer help.
-    print "wha?"
+    usage()
 
 # cli entry-point.
 def zohmg():
@@ -86,5 +88,5 @@ def serve():
 def refuse_to_act_in_nonzohmg_directory():
     cwd = os.getcwd()
     if not os.path.exists(cwd+"/.zohmg"):
-        print "hey!, this is not a proper zohmg app."
-        sys.exit(1)
+        msg = "Error: This is not a proper zohmg app."
+        fail(msg)
