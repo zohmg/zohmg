@@ -3,8 +3,9 @@ import simplejson as json
 
 from paste.request import parse_formvars
 
-from zohmg.scanner import HBaseScanner
 from zohmg.config import Config
+from zohmg.scanner import HBaseScanner
+from zohmg.utils import compare_triples
 
 
 class data(object):
@@ -49,7 +50,7 @@ class data(object):
             if set(p).issuperset(wanted):
                 ps.append((len(p), p.index(d0dim), p))
         # sort by length, then index; pick the first one.
-        pick = sorted(ps, self.compare_tuples)[0][2]
+        pick = sorted(ps, compare_triples)[0][2]
         cf = '-'.join(pick)
         idx = pick.index(d0dim) # used for dimension-squeezing a bit later.
         print "cf picked: " + cf
@@ -99,10 +100,6 @@ class data(object):
         # returns a list of dicts sorted by ymd.
         return [ {ymd:data[ymd]} for ymd in sorted(data) ]
 
-    # strips whitespace
-    def strip(self, str):
-        return str.strip()
-
     # dimensions is a list of dimensions: ['country', 'usertype', 'useragent']
     # values is a dictionary of lists, describing the possible values for each dimension,
     # like so: {'country': ['SE', 'DE', 'IT'], 'useragent': ['*'], 'usertype': ['anon']}
@@ -124,19 +121,6 @@ class data(object):
                     newtarget.append(t + [value])
 
         return self.enumerate_cells(dimensions[1:], values, newtarget)
-
-
-    # x and y are three-tuples, like so: (4, 2, [..])
-    # we sort by first element, then by the second one.
-    # return 1, 0, or -1 if x is larger than, equal to, or less than y.
-    def compare_tuples(self, x, y):
-        a,b,c = x
-        d,e,f = y
-        if a > d: return 1
-        if a < d: return -1
-        if b > e: return 1
-        if b < e: return -1
-        return 0
 
 
     # entry-point of service.

@@ -101,13 +101,34 @@ def drop(c, table):
 # General helpers
 #
 def compare_triples(p,q):
+    """
+    p and q are triples, like so: (4, 2, [..])
+    sort by first element, then by the second one.
+    return 1, 0, or -1 if x is larger than, equal to, or less than y.
+    """
     a,b,c = p
     x,y,z = q
     if a > x or b > y: return 1
     if a < x or b < y: return -1
-    return -1
+    return 0
 
 
 def fail(msg,errno=1):
     print >>sys.stderr, msg
     exit(errno)
+
+
+def http_get(url,query,host="localhost",port=8086):
+    import httplib
+
+    # connect to service and query for data.
+    h = httplib.HTTPConnection(host,port)
+    h.request("GET",url+"?"+query)
+    r = h.getresponse()
+
+    # return result or handle error.
+    if r.status == 200:
+        return r.read()
+    else:
+        return "Error: Encountered a \"%s %s\" while performing\nhttp://%s:%s%s?%s." % (
+                    r.status, r.reason, host, port, url, query)
