@@ -49,6 +49,9 @@ def install():
     # examples.
     shutil.copytree("examples",target+"/examples")
 
+    # data server middleware.
+    shutil.copytree("zohmg/middleware",lib_target+"/middleware")
+
     # libs.
     copy_bundle("dumbo mapper import script","src/import.py",lib_target)
 

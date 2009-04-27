@@ -34,10 +34,26 @@ def zohmg():
     elif cmd == 'setup':   setup()
     elif cmd == 'import':  process()
     elif cmd == 'serve':   serve()
+    elif cmd == 'newserver': newserver() # XXX
     elif cmd == 'version' or cmd == '--version': print_version()
     elif cmd == 'help'    or cmd == '--help':    print_help()
     else:
         usage()
+
+
+def newserver():
+    refuse_to_act_in_nonzohmg_directory()
+    import zohmg.server
+
+    # check for optional argument.
+    try:    port = sys.argv[2]
+    except: port = 8086 # that's ok.
+
+    # get cwd.
+    project_dir = os.path.abspath("")
+
+    # fire off data/transformer/client server.
+    zohmg.server.start(project_dir,host="localhost",port=port)
 
 
 def create():
@@ -88,5 +104,5 @@ def serve():
 def refuse_to_act_in_nonzohmg_directory():
     cwd = os.getcwd()
     if not os.path.exists(cwd+"/.zohmg"):
-        msg = "Error: This is not a proper zohmg app."
+        msg = "Error: This is not a proper zohmg project."
         fail(msg)
