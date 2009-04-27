@@ -132,3 +132,8 @@ def http_get(url,query,host="localhost",port=8086):
     else:
         return "Error: Encountered a \"%s %s\" while performing\nhttp://%s:%s%s?%s." % (
                     r.status, r.reason, host, port, url, query)
+
+
+# strip whitespaces.
+def strip(str):
+    return str.strip()

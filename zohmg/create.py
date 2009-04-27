@@ -41,6 +41,12 @@ def map(key, value):
     yield key, value
 """
 
+TRANSFORMER = """# identity transformer.
+def transform(payload):
+    return payload
+"""
+
+
 class Create(object):
     def __init__(self, path):
         self.basename = os.path.basename(path)
@@ -58,12 +64,13 @@ class Create(object):
             msg = "Error: Could not create project directories. %s" % ose.strerror
             fail(msg, ose.errno)
 
-        # Create .zohmg, README, mapper, env.
+        # Create .zohmg, README, client, environment, mapper and transformer.
         self.__write_to_file('.zohmg')
         self.__write_to_file('README', README)
         self.__write_to_file("clients/client.html",CLIENT)
         self.__write_to_file('config/environment.py', ENV_SCRIPT)
         self.__write_to_file('mappers/identity_mapper.py', MAPPER)
+        self.__write_to_file("transformers/identity_transformer.py",TRANSFORMER)
 
         # Create skeleton config/dataset.yaml
         datasetconfig = "dataset: %s\n" % self.basename \
