@@ -1,5 +1,5 @@
 from zohmg.utils import fail
-import os, sys, re
+import os, re, sys, time
 
 # TODO: is it a safe assumption that HADOOP_HOME is in os.environ when
 # running dumbo?
@@ -25,6 +25,7 @@ class Config(object):
         self.config = {}
         self.__read_config()
 
+
     def __read_config(self):
         import yaml
         try:
@@ -32,13 +33,12 @@ class Config(object):
             self.config = yaml.load(f)
             f.close()
         except IOError, ioe:
-            msg = "Error: Could not read %s. %s." % (self.config_file, ioe.strerror)
+            msg = "[%s] Error: Could not read %s. %s." % (time.asctime(),self.config_file, ioe.strerror)
             fail(msg, ioe.errno)
 
-        #if not self.sanity_check():
-        #    # (how) do we force the caller to sanity check?
-        #    # throw exception?
-        #    pass
+        if not self.sanity_check():
+            msg = "[%s] Error: Could not parse %s." % (time.asctime(),self.config_file)
+            fail(msg)
 
         return self.config
 
@@ -109,7 +109,7 @@ class Environ(object):
         try:
             env = __import__(config_path+"environment")
         except ImportError, ioe:
-            msg = "Error: Could not import %senvironment.py. %s." % (config_path,ioe.strerror)
+            msg = "[%s] Error: Could not import %senvironment.py. %s." % (time.asctime(),config_path,ioe.strerror)
             fail(msg,ioe.errno)
 
         for key in dir(env):

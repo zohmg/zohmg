@@ -1,9 +1,11 @@
+from zohmg.utils import fail
 import sys, os
+
 
 def usage(reason = None):
     zohmg = os.path.basename(sys.argv[0])
     if reason:
-        print "error: " + reason
+        print "Error: " + reason
     print "usage:"
     print zohmg + " create <dir>"
     print zohmg + " setup"
@@ -17,7 +19,7 @@ def print_version():
 
 def print_help():
     # TODO: offer help.
-    print "wha?"
+    usage()
 
 # cli entry-point.
 def zohmg():
@@ -74,17 +76,22 @@ def process():
 
 def serve():
     refuse_to_act_in_nonzohmg_directory()
-    from zohmg.serve import Serve
+    import zohmg.serve
+
     # check for optional argument.
     try:    port = sys.argv[2]
     except: port = 8086 # that's ok.
 
-    Serve(port)
+    # get cwd.
+    project_dir = os.path.abspath("")
+
+    # fire off data/transformer/client server.
+    zohmg.serve.start(project_dir,host="localhost",port=port)
 
 
 # exits if 'zohmg' was run in a directory without the special .zohmg-file.
 def refuse_to_act_in_nonzohmg_directory():
     cwd = os.getcwd()
     if not os.path.exists(cwd+"/.zohmg"):
-        print "hey!, this is not a proper zohmg app."
-        sys.exit(1)
+        msg = "Error: This is not a proper zohmg project."
+        fail(msg)
