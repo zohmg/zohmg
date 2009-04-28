@@ -15,6 +15,7 @@ def clean():
 	for dir in [target, doc_target, lib_target]:
 		os.system("rm -rf %s" % dir)
 
+# hey, what's the difference between install and setup?
 def install():
     build_darling = False
 
@@ -24,10 +25,15 @@ def install():
         sys.exit(1)
     print "installing!"
 
-    # create share and doc directories.
-    for dir in [target,doc_target,lib_target]:
+    # creating directories.
+    for dir in [target, doc_target, lib_target]:
         if not os.path.isdir(dir):
             os.mkdir(dir)
+
+    # copy docs.
+    docs = ['README','TODO','QUICKSTART']
+    for doc in docs:
+        copy_bundle(doc,doc,doc_target)
 
     # darling.
     if build_darling:
@@ -35,23 +41,14 @@ def install():
     else:
         copy_bundle("pre-built darling jar","lib/darling-*.jar",lib_target)
 
-    # thrift & hbase.
-    # TODO: don't bundle these eggs; easy_install them.
+    # thrift & hbase, etc.
+	print "installing libraries with no installation mechanism of their own - the eggdance."
+	os.system("sh eggs/eggdance.sh")
 
-    # copies thrift egg.
-    copy_bundle("bundled thrift egg","lib/thrift-*.egg",system_target)
-    # copies hbase egg.
-    copy_bundle("bundled hbase egg","lib/hbase-*.egg",system_target)
-    # copies hbase thrift interface.
+	# HBase.thrift
     copy_bundle("bundled hbase thrift interface","lib/Hbase.thrift",target)
 
-    # docs.
-    docs = ['README','TODO','QUICKSTART']
-    for doc in docs:
-        copy_bundle(doc,doc,doc_target)
-
-    # examples.
-    # TODO: fails if directory exists.
+    # copy examples.
     shutil.copytree("examples",target+"/examples")
 
     # data server middleware.
