@@ -1,5 +1,7 @@
 priority zero:
-+ ImportError: No module named hbase.ttypes
++ make sure all dependent eggs (paste, json, yaml, dumbo) are installed.
++ ImportError: No module named setuptools
+DONE> ImportError: No module named hbase.ttypes
 
 priority uno:
 + rename. (zonotoop)
