@@ -4,19 +4,28 @@ import fm.last.darling.mapred.ZohmgOutputCollector;
 
 // this is what the user's mapper will look like.
 public class ExampleMapper implements UserMapper {
-	public void map(String key, String value, ZohmgOutputCollector collector) {
+	public void map(long key, String value, ZohmgOutputCollector collector) {
 		String parts[] = value.split("\t");
 		if (parts.length < 4) {
 			System.err.println("split failed." + parts.length);
 			return;
 		}
 
-		collector.setTimestamp(new Long(parts[0]));
+		Long ts;
+		Integer bytes;
+		try {
+			ts = new Long(parts[0]);
+			bytes = new Integer(parts[3]);
+		} catch (Exception e) {
+			System.err.println("malformated data on key " + key);
+			return;
+		}
+
+		collector.setTimestamp(ts); // unix time, obv.
 		collector.addDimension("country", parts[1]);
 		collector.addDimension("service", parts[2]);
-		collector.addValue("hits", 1);
-		collector.addValue("bytes", new Integer(parts[3]));
-		
-		System.out.println("example-mapper done.");
+		collector.addDimension("generator", "SR400");
+		collector.addMeasurement("hits", 1);
+		collector.addMeasurement("bytes", bytes);
 	}
 }

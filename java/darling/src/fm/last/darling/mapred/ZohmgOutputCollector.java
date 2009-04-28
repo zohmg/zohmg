@@ -1,17 +1,24 @@
 package fm.last.darling.mapred;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.TreeMap;
 
-// encapsulator of data emitted from mapper.
+import org.apache.hadoop.io.IntWritable;
+
+/**
+ * encapsulator of data emitted from mapper.
+ * 
+ * current limitations:
+ *   user can specify only a single point in n-space for every invocation.
+ *
+ */
 public class ZohmgOutputCollector {
 	private long timestamp;
-	private Map<String, String> dimensions; // point in n-space,
-	private Map<String, Integer> values;    // value(s) at that point.
+	private TreeMap<String, String> dimensions;		// point in n-space,
+	private TreeMap<String, IntWritable> measurements;	// value(s) at that point.
 	
 	public ZohmgOutputCollector() {
-		dimensions = new HashMap<String, String>();
-		values     = new HashMap<String, Integer>();
+		dimensions   = new TreeMap<String, String>();
+		measurements = new TreeMap<String, IntWritable>();
 	}
 	
 	public void setTimestamp(long epoch) {
@@ -26,15 +33,21 @@ public class ZohmgOutputCollector {
 	public void addDimension(String dimension, String value) {
 		dimensions.put(dimension, value);
 	}
-	public Map<String, String> getDimensions() {
+	public TreeMap<String, String> getDimensions() {
 		return dimensions;
 	}
 	
-	public void addValue(String unit, Integer value) {
-		values.put(unit, value);
+	public void addMeasurement(String unit, Integer value) {
+		measurements.put(unit, new IntWritable(value));
 	}
-	public Map<String, Integer> getValues() {
-		return values;
+	public TreeMap<String, IntWritable> getMeasurements() {
+		return measurements;
+	}
+	public IntWritable getMeasurement(String unit) {
+		return measurements.get(unit);
+	}
+	public Iterable<String> measurementUnits() {
+		return measurements.keySet();
 	}
 	
 	// TODO.
