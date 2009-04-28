@@ -5,6 +5,7 @@ if __name__ == "__main__":
 	zohmg.install.clean()
 	zohmg.install.install()
 	zohmg.install.setup()
+	zohmg.install.test()
 
 	print
 	print "ok, that should do it!"

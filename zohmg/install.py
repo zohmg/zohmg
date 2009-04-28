@@ -75,6 +75,19 @@ def setup():
     # clean up.
     os.system("rm -rf build dist zohmg.egg-info")
 
+def test():
+	sys.stdout.write('testing zohmg script..')
+	r = os.system('zohmg &> /dev/null')
+	if r != 0:
+		# fail!
+		print 'fail.'
+		print 'test run failed; it seems something is the matter with the installation :-|'
+		sys.exit(r)
+	else:
+		print 'ok!'
+
+
+
 # not used atm; user would have to specify classpath == jobbigt.
 def build_darling(target):
     print 'building java hook-ups'
