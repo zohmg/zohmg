@@ -2,6 +2,7 @@ import string, sys, time
 from random import Random
 from hbase.ttypes import *
 
+# TODO: move all hbase utils to it's own module.
 
 #
 # HBase helpers
@@ -100,17 +101,17 @@ def drop(c, table):
 #
 # General helpers
 #
-def compare_triples(p,q):
+def compare_triples(p, q):
     """
-    p and q are triples, like so: (4, 2, [..])
-    sort by first element, then by the second one.
-    return 1, 0, or -1 if x is larger than, equal to, or less than y.
+    p and q are triples, like so: (4, 2, ..)
+    sort by first the element, then by the second. don't care about the third element.
+    return 1, 0, or -1 if p is larger than, equal to, or less than q, respectively.
     """
-    a,b,c = p
-    x,y,z = q
-    if a > x: return 1
+    a, b, dontcare = p
+    x, y, dontcare = q
+    if a > x: return  1
     if a < x: return -1
-    if b > y: return 1
+    if b > y: return  1
     if b < y: return -1
     return 0
 
