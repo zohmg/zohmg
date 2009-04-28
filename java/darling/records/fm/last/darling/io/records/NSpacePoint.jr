@@ -1,0 +1,9 @@
+module fm.last.darling.io.records {
+
+  class NSpacePoint {
+     long timestamp;
+	 map<ustring,ustring> dimensions;
+	 ustring unit;
+  }
+
+}

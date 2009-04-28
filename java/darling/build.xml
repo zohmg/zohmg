@@ -37,6 +37,9 @@
   <property name="javadoc.packages" value="fm.last.darling.*"/>
   <property name="jarfile" value="${build.dir}/${final.name}.jar" />
 
+  <property name="records.src.dir" location="records"/>
+  <property name="java.src.dir" location="src"/>
+
 
   <fileset id="lib.jars" dir="${basedir}" includes="lib/*.jar"/>
   <path id="classpath">
@@ -58,6 +61,14 @@
     <chmod perm="ugo+x" type="file">
       <fileset dir="${build.bin}" />
     </chmod>
+  </target>
+
+  <target name="compile-records">
+    <taskdef name="recordcc" classname="org.apache.hadoop.record.compiler.ant.RccTask"/>
+	<recordcc destdir="${java.src.dir}">
+	  <fileset dir="${records.src.dir}" includes="**/*.jr"/>
+	</recordcc>
+	<echo>compiled records to ${java.src.dir}</echo>
   </target>
 
   <target name="compile" depends="init">
