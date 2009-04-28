@@ -10,10 +10,10 @@ system_target  = '/usr/lib/python'+python_version+'/site-packages'
 
 
 def clean():
-	"""cleans things a bit."""
-	print 'cleaning previous zohmg installation.'
-	for dir in [target, doc_target, lib_target]:
-		os.system("rm -rf %s" % dir)
+    """cleans things a bit."""
+    print 'cleaning previous zohmg installation.'
+    for dir in [target, doc_target, lib_target]:
+        os.system("rm -rf %s" % dir)
 
 # hey, what's the difference between install and setup?
 def install():
@@ -41,11 +41,15 @@ def install():
     else:
         copy_bundle("pre-built darling jar","lib/darling-*.jar",lib_target)
 
-    # thrift & hbase, etc.
-	print "installing libraries with no installation mechanism of their own - the eggdance."
-	os.system("sh eggs/eggdance.sh")
+    # setuptools.
+    install_setuptools()
 
-	# HBase.thrift
+    # thrift & hbase, etc.
+    #requires setuptools.
+    print "installing libraries with no installation mechanism of their own - the eggdance."
+    os.system("sh eggs/eggdance.sh")
+
+    # HBase.thrift
     copy_bundle("bundled hbase thrift interface","lib/Hbase.thrift",target)
 
     # copy examples.
@@ -61,27 +65,27 @@ def install():
 def setup():
     print
     print "installing zohmg: python setup.py install"
-	# install,
+    # install,
     r = os.system('python setup.py install > tmp/zohmg-install.log')
     if r != 0:
         print "errors?!"
         print "try again, it could work the second (or third) time."
         sys.exit(r)
-	# let the user know what happened,
+    # let the user know what happened,
     os.system("egrep '(Installing|Copying) zohmg' tmp/zohmg-install.log")
     # clean up.
     os.system("rm -rf build dist zohmg.egg-info")
 
 def test():
-	sys.stdout.write('testing zohmg script..')
-	r = os.system('zohmg &> /dev/null')
-	if r != 0:
-		# fail!
-		print 'fail.'
-		print 'test run failed; it seems something is the matter with the installation :-|'
-		sys.exit(r)
-	else:
-		print 'ok!'
+    sys.stdout.write('testing zohmg script..')
+    r = os.system('zohmg 2>&1 /dev/null')
+    if r != 0:
+        # fail!
+        print 'fail.'
+        print 'test run failed; it seems something is the matter with the installation :-|'
+        sys.exit(r)
+    else:
+        print 'ok!'
 
 
 
@@ -96,6 +100,14 @@ def build_darling(target):
         print 'please add them to $CLASSPATH and try again.'
         sys.exit(r)
     os.system("cp -v java/darling/build/darling-.jar " + target)
+
+def install_setuptools():
+    print 'will now install setuptools.'
+    # if debian/ubuntu, use apt.
+    if True:
+        os.system('sudo apt-get install python-setuptools')
+        # TODO: check return code.
+    # else.. download egg (or bundle it), install.
 
 # copies bundle (file) to target, printing msg.
 def copy_bundle(msg,file,target):
