@@ -108,8 +108,10 @@ def compare_triples(p,q):
     """
     a,b,c = p
     x,y,z = q
-    if a > x or b > y: return 1
-    if a < x or b < y: return -1
+    if a > x: return 1
+    if a < x: return -1
+    if b > y: return 1
+    if b < y: return -1
     return 0
 
 
