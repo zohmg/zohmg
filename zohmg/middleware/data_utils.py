@@ -1,6 +1,12 @@
+import simplejson as json
 from paste.request import parse_formvars
 from zohmg.utils import compare_triples, strip
 from zohmg.scanner import HBaseScanner
+
+
+# returns jsonp which can be used in clients.
+def dump_jsonp(payload):
+    return "jsonZohmgFeed(" + json.dumps(payload) + ")"
 
 
 # dimensions is a list of dimensions: ['country', 'usertype', 'useragent']
@@ -130,4 +136,4 @@ def hbase_get(table,projections,environ):
             data[ymd] = t
 
     # returns a list of dicts sorted by ymd.
-    return [ {ymd:data[ymd]} for ymd in sorted(data) ]
+    return [ (ymd,data[ymd]) for ymd in sorted(data) ]

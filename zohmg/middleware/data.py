@@ -28,4 +28,5 @@ class data(object):
 
         # serve output.
         start_response('200 OK', [('content-type', 'text/html')])
-        return "jsonZohmgFeed(" + json.dumps(data) + ")" # jsonp.
+        return data_utils.dump_jsonp(data)
+        #"jsonZohmgFeed(" + json.dumps(data) + ")" # jsonp.

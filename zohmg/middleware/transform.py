@@ -30,7 +30,7 @@ class transform(object):
         payload = data_utils.hbase_get(self.table,self.projections,environ)
         if payload:
             start_response("200 OK",[("Content-type","text/html")])
-            return "jsonZohmgFeed(" + str(transform(payload)) + ")" #jsonp.
+            return data_utils.dump_jsonp(transform(payload))
         else:
             start_response("404 Not Found",[("Content-type","text/html")])
             return "Bad query or no data found."
