@@ -31,7 +31,7 @@ Take a look in /usr/local/share/zohmg for further documentation.
 
 CLIENT = """<html>
 <body>
-Static pages here will be served from the url client/filename.
+Static files here will be served from the url http://host:port/client/filename.
 </body>
 </html>
 """
