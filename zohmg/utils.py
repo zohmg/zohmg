@@ -121,22 +121,6 @@ def fail(msg,errno=1):
     exit(errno)
 
 
-def http_get(url,query,host="localhost",port=8086):
-    import httplib
-
-    # connect to service and query for data.
-    h = httplib.HTTPConnection(host,port)
-    h.request("GET",url+"?"+query)
-    r = h.getresponse()
-
-    # return result or handle error.
-    if r.status == 200:
-        return r.read()
-    else:
-        return "Error: Encountered a \"%s %s\" while performing\nhttp://%s:%s%s?%s." % (
-                    r.status, r.reason, host, port, url, query)
-
-
 # strip whitespaces.
 def strip(str):
     return str.strip()
