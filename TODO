@@ -1,15 +1,16 @@
+priority zero:
++ ImportError: No module named hbase.ttypes
+
 priority uno:
 + rename. (zonotoop)
 + make sure it's easy to get zohmg up and running.
   - shell script to install dependencies
-DONE>  - project creation
 + server
   - transformers, plugin to data server
 + config
   - put address and ports for servers and software in config (hbase REST et al)
 + some update step for post-setup alterations to dataset.yaml
 + add support for data sets.
-DONE> + define exact dependencies, including patches, etc.
 + create a source dist and a binary dist.
  - source dist, would distribute source and depend on thrift etc to build.
  - binary dist, ready to use eggs.
@@ -18,12 +19,14 @@ DONE> + define exact dependencies, including patches, etc.
   - bundle generated code and build eggs?
     * Build HBase thrift interface from actual installed version of thrift
     * Ask user for path to Hbase.thrift and build hbase-*.egg from it.
+	+ verify dimensions and units outputted by mapper against those in config.
+DONE> project creation
+DONE> define exact dependencies, including patches, etc.
 DONE> in config, rename 'project_name' to 'dataset'.
-DONE> + creation of dist tarball
+DONE> creation of dist tarball
 DONE> in config, rename 'project_name' to 'dataset'.
-DONE> + sanity check of environment; issue warning if HADOOP_HOME missing, jars not files, etc.
+DONE> sanity check of environment; issue warning if HADOOP_HOME missing, jars not files, etc.
 DONE> sanity check configuration.
-+ verify dimensions and units outputted by mapper against those in config.
 DONE> darling: remove grat. prints.
 
 
