@@ -16,14 +16,17 @@ function usage() {
     echo "Options:"
     echo "    --download-only      Only download software, do not build."
     echo "    --files=FILES        Directory with already downloaded files."
-    echo "                         Usually resides in /tmp/zohmg-deps.XXXXX."
+    echo "                         Files are downloaded to /tmp/zohmg-deps.XXXXXX."
     echo "    --hadoop-dir=HADOOP  Changes Apache Hadoop installation dir to HADOOP."
+    echo "                         This option overrides the --prefix option."
     echo "    --hbase-dir=HBASE    Changes Apache HBase installation dir to HBASE."
+    echo "                         This option overrides the --prefix option."
     echo "    --hadoop-only        Installs only Apache Hadoop."
     echo "                         Cannot be used with --hbase-only."
     echo "    --hbase-only         Installs only Apache HBase."
     echo "                         Cannot be used with --hadoop-only."
     echo "    --help               Prints this help and exits."
+    echo "    --keep-files         Keeps downloaded files."
     echo "    --prefix=PREFIX      Changes installation prefix to PREFIX."
     echo "                         Defaults to /opt."
 }
@@ -31,10 +34,12 @@ function usage() {
 
 # set default variables.
 prefix="/opt"
-hadoop_tar="hadoop-0.19.1.tar.gz"
+hadoop_version="hadoop-0.19.1"
+hadoop_tar="$hadoop_version.tar.gz"
 patch_1722="HADOOP-1722-branch-0.19.patch"
 patch_5450="HADOOP-5450.patch"
-hbase_tar="hbase-0.19.1.tar.gz"
+hbase_version="hbase-0.19.1"
+hbase_tar="$hbase_version.tar.gz"
 hadoop_release="http://mirrors.ukfast.co.uk/sites/ftp.apache.org/hadoop/core/hadoop-0.19.1/$hadoop_tar"
 hadoop_1722="https://issues.apache.org/jira/secure/attachment/12401426/$patch_1722"
 hadoop_5450="https://issues.apache.org/jira/secure/attachment/12401846/$patch_5450"
@@ -47,7 +52,7 @@ while [ $1 ]; do
     arg=$(echo $1 | sed 's/.*=//')
     case $opt in
         "--download-only")
-            download_only=true
+            download_only="true"
             ;;
         "--files")
             files="$arg"
@@ -58,7 +63,7 @@ while [ $1 ]; do
                 usage
                 exit 1
             fi
-            hadoop_only=true
+            hadoop_only="true"
             ;;
         "--hbase-only")
             if [ $hadoop_only ]; then
@@ -66,7 +71,7 @@ while [ $1 ]; do
                 usage
                 exit 1
             fi
-            hbase_only=true
+            hbase_only="true"
             ;;
         "--hadoop-dir")
             hadoop="$arg"
@@ -77,6 +82,9 @@ while [ $1 ]; do
         "--help")
             usage
             exit 0
+            ;;
+        "--keep-files")
+            keep_files="true"
             ;;
         "--prefix")
             prefix="$arg"
@@ -165,27 +173,59 @@ done
 # hadoop
 printf "Extracting Apache Hadoop... "
 mkdir -p $hadoop
-tar zxf $files/hadoop-0.19.1.tar.gz -C $hadoop
+tar zxf $files/$hadoop_tar -C $hadoop
 echo "done."
-cd $hadoop
+cd $hadoop/$hadoop_version
 for patch in "$patch_1722" "$patch_5450"; do
-    num=$(echo $patch | sed 's/HADOOP-\(.{4}\).*/\1/')
-    printf "Applying patch HADOOP-$num... "
-    patch -p0 < "$files/patches/$patch"
+    num=$(echo $patch | sed 's/\(HADOOP-.{4}\).*/\1/')
+    printf "Applying patch $num... "
+    patch -p0 <"$files/patches/$patch" &>/dev/null
+    if [ $? -ne 0 ]; then
+        echo
+        echo "Error: Could not apply patch $num."
+        exit 1
+    fi
     echo "done."
 done
+printf "Compiling Apache Hadoop... "
+ant package &>/dev/null
+if [ $? -ne 0 ]; then
+    echo
+    echo "Error: Could not compile Apache Hadoop."
+    exit 1
+fi
+echo "done."
 
 # hbase.
 printf "Extracting Apache HBase... "
 mkdir -p $hbase
-tar zxf $files/hbase-0.19.1.tar.gz -C $hbase
+tar zxf $files/$hbase_tar -C $hbase
 echo "done."
+cd $hbase/$hbase_version
+printf "Compiling Apache HBase... "
+ant package &>/dev/null
+if [ $? -ne 0 ]; then
+    echo
+    echo "Error: Could not compile Apache HBase."
+    exit 1
+fi
+echo "done."
+
+
+# clean up.
+if [ "x" = "x$keep_files" ]; then
+    printf "Cleaning up downloaded files... "
+    rm -rf $files
+    echo "done."
+else
+    echo "Not cleaning up downloaded files in $files."
+fi
 
 
 # configuration?
 echo "Everything installed."
 echo "Edit the following files to configure Hadoop and HBase:"
-echo "* $hadoop/conf/hadoop-env.sh"
-echo "* $hadoop/conf/hadoop-site.xml"
-echo "* $hbase/conf/hbase-env.sh"
-echo "* $hbase/conf/hbase-site.xml"
+echo "* $hadoop/$hadoop_version/conf/hadoop-env.sh"
+echo "* $hadoop/$hadoop_version/conf/hadoop-site.xml"
+echo "* $hbase/$hbase_version/conf/hbase-env.sh"
+echo "* $hbase/$hbase_version/conf/hbase-site.xml"
