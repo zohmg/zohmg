@@ -12,7 +12,7 @@ system_target  = '/usr/lib/python'+python_version+'/site-packages' # might bork 
 def clean():
     """cleans things a bit."""
     print 'cleaning previous zohmg installation.'
-    os.system("rm %s/zohmg-*.egg" % system_target)
+    os.system("rm %s/zohmg-*.egg 2> /dev/null" % system_target)
     for dir in [target, doc_target, lib_target]:
         os.system("rm -rf %s" % dir)
 
@@ -20,11 +20,6 @@ def clean():
 def install():
     build_darling = False
 
-    # check for rootness.
-    if os.geteuid() != 0:
-        print "you need to be root. please sudo."
-        sys.exit(1)
-    print "installing!"
 
     # creating directories.
     for dir in [target, doc_target, lib_target]:
@@ -67,19 +62,19 @@ def setup():
     print
     print "installing zohmg: python setup.py install"
     # install,
-    r = os.system('python setup.py install > tmp/zohmg-install.log')
+    r = os.system('python setup.py install > zohmg-install.log')
     if r != 0:
         print "errors?!"
         print "try again, it could work the second (or third) time."
         sys.exit(r)
     # let the user know what happened,
-    os.system("egrep '(Installing|Copying) zohmg' tmp/zohmg-install.log")
+    os.system("egrep '(Installing|Copying) zohmg' zohmg-install.log")
     # clean up.
     os.system("rm -rf build dist zohmg.egg-info")
 
 def test():
     sys.stdout.write('testing zohmg script..')
-    r = os.system('zohmg 2>&1 /dev/null')
+    r = os.system('zohmg 2>&1 > /dev/null')
     if r != 0:
         # fail!
         print 'fail.'
@@ -104,12 +99,15 @@ def build_darling(target):
 
 def install_pythonmodules():
     packages = ['python-setuptools', 'python-paste', 'python-setuptools', 'python-simplejson', 'python-yaml']
-    print 'installing pythonmodules, assuming apt-get: '
+    print 'apt-get installing pythonmodules; assuming your system is debian-based. '
     print ', '.join(packages) + '.'
     r = os.system('sudo apt-get install ' + ' '.join(packages))
-    print "return code: " + str(r)
+    if r != 0:
+        print 'problems apt-getting packages!'
+        print 'please make sure you install the following packages or their equivalents:'
+        for p in packages: print "* " + p
+        print
 
 # copies bundle (file) to target, printing msg.
 def copy_bundle(msg,file,target):
-    print "copying",msg
     os.system("cp -v %s %s" % (file,target))
