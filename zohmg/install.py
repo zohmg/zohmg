@@ -6,12 +6,13 @@ python_version = sys.version[:3] # works for now.
 target     = '/usr/local/share/zohmg'
 doc_target = '/usr/local/share/zohmg/doc'
 lib_target = '/usr/local/lib/zohmg'
-system_target  = '/usr/lib/python'+python_version+'/site-packages'
+system_target  = '/usr/lib/python'+python_version+'/site-packages' # might bork on 2.6
 
 
 def clean():
     """cleans things a bit."""
     print 'cleaning previous zohmg installation.'
+    os.system("rm %s/zohmg-*.egg" % system_target)
     for dir in [target, doc_target, lib_target]:
         os.system("rm -rf %s" % dir)
 
@@ -41,8 +42,8 @@ def install():
     else:
         copy_bundle("pre-built darling jar","lib/darling-*.jar",lib_target)
 
-    # setuptools.
-    install_setuptools()
+    # apt-get python modules.
+    install_pythonmodules()
 
     # thrift & hbase, etc.
     #requires setuptools.
@@ -101,13 +102,12 @@ def build_darling(target):
         sys.exit(r)
     os.system("cp -v java/darling/build/darling-.jar " + target)
 
-def install_setuptools():
-    print 'will now install setuptools.'
-    # if debian/ubuntu, use apt.
-    if True:
-        os.system('sudo apt-get install python-setuptools')
-        # TODO: check return code.
-    # else.. download egg (or bundle it), install.
+def install_pythonmodules():
+    packages = ['python-setuptools', 'python-paste', 'python-setuptools', 'python-simplejson', 'python-yaml']
+    print 'installing pythonmodules, assuming apt-get: '
+    print ', '.join(packages) + '.'
+    r = os.system('sudo apt-get install ' + ' '.join(packages))
+    print "return code: " + str(r)
 
 # copies bundle (file) to target, printing msg.
 def copy_bundle(msg,file,target):
