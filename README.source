@@ -4,15 +4,12 @@ BUILDING ZOHMG
 Contents:
 - Dependencies
 - Build process
-  - Quick way
-  - Detailed way
 
 
 
 DEPENDENCIES
 ------------
 - Apache Ant
-- Apache HBase
 - Apache Thrift
 - Python
 - Python Setup Tools
@@ -22,23 +19,13 @@ DEPENDENCIES
 
 BUILD PROCESS
 -------------
+In order to build from source the dependencies above need to be met.
 
-Quick way
----------
-When Ant, HBase and Thrift are installed run
-
-    python source_compile.py
-
-This builds the sources. To prepare binary distribution files run
-
-    python setup.py bdist_egg
-    python setup-hbase.py bdist_egg
-    python setup-thrift.py bdist_egg
-
-Resulting files end up in the build directory.
+Eggs
+----
+Go to the eggs directory and run eggdance.sh.
 
 
-
-Detailed way
-------------
-What really happens in source_compile?!
+Jars
+----
+Go to java/darling and run ant.
