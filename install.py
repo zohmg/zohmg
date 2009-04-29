@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import zohmg.install
+import os
 
 if __name__ == "__main__":
 
