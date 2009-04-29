@@ -1,16 +1,53 @@
 #!/bin/sh
 
-# outline
-# - set default options
-# - parse options
-# - check for programs needed
-# - for each sw
-#   - download
-#   - maybe patch
-#   - maybe ant package
+
+# set default variables.
+prefix="/opt"
+hadoop_version="hadoop-0.19.1"
+hadoop_tar="$hadoop_version.tar.gz"
+patch_1722="HADOOP-1722-branch-0.19.patch"
+patch_5450="HADOOP-5450.patch"
+hbase_version="hbase-0.19.1"
+hbase_tar="$hbase_version.tar.gz"
+hadoop_release="http://mirrors.ukfast.co.uk/sites/ftp.apache.org/hadoop/core/hadoop-0.19.1/$hadoop_tar"
+hadoop_1722="https://issues.apache.org/jira/secure/attachment/12401426/$patch_1722"
+hadoop_5450="https://issues.apache.org/jira/secure/attachment/12401846/$patch_5450"
+hbase_release="http://mirrors.ukfast.co.uk/sites/ftp.apache.org/hadoop/hbase/hbase-0.19.1/$hbase_tar"
+install_log="$(pwd)/install.log"
+install_tmplog=$(mktemp /tmp/zohmg-log.XXXXXXXX)
 
 
 # helpers.
+
+# execute $1 and exit if it failed, displaying $2.
+# it is possible to set $3 in order to print to screen (without logging).
+function exec_and_log() {
+    # setup variables.
+    command=$1
+    [ "x" = "x$2" ] && msg="Error: Could not execute $command." || msg=$2
+
+    # execute and log to intermediate.
+    if [ "x" = "x$3" ]; then
+        $1 &>$install_tmplog
+    else
+        $1
+    fi
+
+    # check exit code.
+    if [ $? -ne 0 ]; then
+        echo
+        echo $2
+        exit 1
+    fi
+
+    # log if not requested not to.
+    if [ "x" = "x$3" ]; then
+        cat $install_log $install_tmplog >"$install_log.new"
+        mv "$install_log.new" $install_log
+    fi
+}
+
+
 function usage() {
     echo "Usage: $(basename $0) [options]"
     echo "Options:"
@@ -27,29 +64,10 @@ function usage() {
     echo "                         Cannot be used with --hadoop-only."
     echo "    --help               Prints this help and exits."
     echo "    --keep-files         Keeps downloaded files."
-    echo "    --no-configi         Do not configure Hadoop or HBase."
+    echo "    --no-config          Do not configure Hadoop or HBase."
     echo "    --prefix=PREFIX      Changes installation prefix to PREFIX."
     echo "                         Defaults to /opt."
 }
-
-
-# set default variables.
-prefix="/opt"
-hadoop_version="hadoop-0.19.1"
-hadoop_tar="$hadoop_version.tar.gz"
-patch_1722="HADOOP-1722-branch-0.19.patch"
-patch_5450="HADOOP-5450.patch"
-hbase_version="hbase-0.19.1"
-hbase_tar="$hbase_version.tar.gz"
-hadoop_release="http://mirrors.ukfast.co.uk/sites/ftp.apache.org/hadoop/core/hadoop-0.19.1/$hadoop_tar"
-hadoop_1722="https://issues.apache.org/jira/secure/attachment/12401426/$patch_1722"
-hadoop_5450="https://issues.apache.org/jira/secure/attachment/12401846/$patch_5450"
-hbase_release="http://mirrors.ukfast.co.uk/sites/ftp.apache.org/hadoop/hbase/hbase-0.19.1/$hbase_tar"
-install_log="install.log"
-
-
-# truncate install.log.
->$install_log
 
 
 # parse arguments.
@@ -110,7 +128,12 @@ while [ $1 ]; do
 done
 
 
-# set paths.
+# truncate logs.
+>$install_log
+>"$install_log.new"
+
+
+# set default paths.
 [ "x" = "x$hadoop" ] && hadoop="$prefix/hadoop"
 [ "x" = "x$hbase" ] && hbase="$prefix/hbase"
 
@@ -120,11 +143,7 @@ echo "Checking for necessary programs..."
 for command in "ant -version" "patch --version" "wget --version"; do
     program=$(echo $command | sed 's/ .*//')
     printf "Checking for $program... "
-    $command >>$install_log
-    if [ $? -ne 0 ]; then
-        echo "Error: Missing program: $program not found."
-        exit 1
-    fi
+    exec_and_log "$command" "Error: Missing program: $program not found." "true"
     echo "ok."
 done
 
@@ -136,25 +155,21 @@ if [ "x" = "x$files" ]; then
     files=$(mktemp -d /tmp/zohmg-deps.XXXXXX)
     mkdir -p $files/patches
     echo "done."
-    printf "Downloading files... "
+    echo "Downloading files... "
+    # printing progress to screen, without logging.
     # release files.
     cd $files
-    wget $hadoop_release >>$install_log
-    wget $hbase_release >>$install_log
+    exec_and_log "wget $hadoop_release" "Error: Could not download $hadoop_release" "true"
+    exec_and_log "wget $hbase_release" "Error: Could not download $hbase_release" "true"
     # download patches.
     cd patches
-    wget $hadoop_1722 >>$install_log
-    wget $hadoop_5450 >>$install_log
-    echo "done."
+    exec_and_log "wget $hadoop_1722" "Error: Could not download $hadoop_1722" "true"
+    exec_and_log "wget $hadoop_5450" "Error: Could not download $hadoop_5450" "true"
+    echo "Done downloading files."
 else
     printf "Using previously downloaded files in $files... "
     for file in "patches/$patch_1722" "patches/$patch_5450" "$hadoop_tar" "$hbase_tar"; do
-        ls $files/$file >>$install_log
-        if [ $? -ne 0 ]; then
-            echo
-            echo "Error: Could not find file $files/$file."
-            exit 1
-        fi
+        exec_and_log "ls $files/$file" "Error: Could not find file $files/$file."
     done
     echo "ok."
 fi
@@ -162,7 +177,7 @@ fi
 
 # stop if --download-only was supplied.
 if [ "$download_only" = "true" ]; then
-    echo "Files downloaded to $tmpdir ."
+    echo "Files downloaded to $files ."
     exit 0
 fi
 
@@ -172,66 +187,63 @@ echo "Installing..."
 
 # check permissions.
 for dir in "$hadoop" "$hbase"; do
-    mkdir -p "$dir"
-    if [ $? -ne 0 ]; then
-        echo "Error: Could not create $dir."
-        exit 1
-    fi
+    exec_and_log "mkdir -p $dir" "Error: Could not create $dir."
 done
 
 # hadoop
-printf "Extracting Apache Hadoop... "
-mkdir -p $hadoop
-tar zxf $files/$hadoop_tar -C $hadoop
-echo "done."
-cd $hadoop/$hadoop_version
-for patch in "$patch_1722" "$patch_5450"; do
-    num=$(echo $patch | sed 's/.patch$//')
-    printf "Applying patch $num... "
-    patch -p0 <"$files/patches/$patch" >>$install_log
-    if [ $? -ne 0 ]; then
-        echo
-        echo "Error: Could not apply patch $num."
-        exit 1
-    fi
+if [ ! "x" = "x$hbase_only" ]; then
+    echo "Skipping installation of Apache Hadoop..."
+else
+    printf "Extracting Apache Hadoop... "
+    exec_and_log "mkdir -p $hadoop"
+    exec_and_log "tar zxf $files/$hadoop_tar -C $hadoop"
     echo "done."
-done
-printf "Compiling Apache Hadoop... "
-ant package >>$install_log
-if [ $? -ne 0 ]; then
-    echo
-    echo "Error: Could not compile Apache Hadoop."
-    exit 1
+    for patch in "$patch_1722" "$patch_5450"; do
+        num=$(echo $patch | sed 's/.patch$//')
+        printf "Applying patch $num... "
+        exec_and_log "cd $hadoop/$hadoop_version ; patch -p0 <$files/patches/$patch" "Error: Could not apply patch $num."
+        echo "done."
+    done
+    printf "Compiling Apache Hadoop... "
+    exec_and_log "echo ... Compiling Apache Hadoop ..."
+    exec_and_log "ant package" "Error: Could not compile Apache Hadoop."
+    echo "done."
 fi
-echo "done."
 
 # hbase.
-printf "Extracting Apache HBase... "
-mkdir -p $hbase
-tar zxf $files/$hbase_tar -C $hbase
-echo "done."
-cd $hbase/$hbase_version
-printf "Compiling Apache HBase... "
-ant package >>$install_log
-if [ $? -ne 0 ]; then
-    echo
-    echo "Error: Could not compile Apache HBase."
-    exit 1
+if [ ! "x" = "x$hadoop_only" ]; then
+    echo "Skipping installation of Apache HBase..."
+else
+    printf "Extracting Apache HBase... "
+    exec_and_log "mkdir -p $hbase"
+    exec_and_log "tar zxf $files/$hbase_tar -C $hbase"
+    echo "done."
+    exec_and_log "cd $hbase/$hbase_version"
+    printf "Compiling Apache HBase... "
+    exec_and_log "echo ... Compiling Apache HBase ..."
+    exec_and_log "ant package" "Error: Could not compile Apache HBase."
+    echo "done."
 fi
-echo "done."
 
 
 # configuration?
 if [ "x" = "x$no_config" ]; then
-    printf "Configuring Hadoop and HBase... "
-    cd $hadoop/$hadoop_version/conf
-    cp -v hadoop-env.sh hadoop-env.sh.dist >>$install_log
-    cp -v hadoop-site.xml hadoop-site.xml.dist >>$install_log
-    cp -v $files/conf/hadoop-env.sh $hadoop/$hadoop_version/conf >>$install_log
-    cp -v $files/conf/hadoop-site.xml $hadoop/$hadoop_version/conf >>$install_log
-    cp -v hbase-env.sh hbase-env.sh.dist >>$tmp_log
-    cp -v $files/conf/hbase-env.sh $hbase/$hbase_version/conf >>$install_log
-    echo "done."
+    if [ "x" = "x$hbase_only" ]; then
+        printf "Configuring Apache Hadoop... "
+        cd $hadoop/$hadoop_version/conf
+        exec_and_log "cp -v hadoop-env.sh hadoop-env.sh.dist"
+        exec_and_log "cp -v hadoop-site.xml hadoop-site.xml.dist"
+        exec_and_log "cp -v $files/conf/hadoop-env.sh ."
+        exec_and_log "cp -v $files/conf/hadoop-site.xml ."
+        echo "done."
+    fi
+    if [ "x" = "x$hadoop_only" ]; then
+        printf "Configuring Apache HBase... "
+        cd $hbase/$hbase_version/conf
+        exec_and_log "cp -v hbase-env.sh hbase-env.sh.dist"
+        exec_and_log "cp -v $files/conf/hbase-env.sh ."
+        echo "done."
+    fi
 else
     echo "Edit the following files to configure Hadoop and HBase:"
     echo "* $hadoop/$hadoop_version/conf/hadoop-env.sh"
@@ -241,9 +253,11 @@ fi
 
 
 # clean up.
+rm "$install_log.new"
+rm $install_tmplog
 if [ "x" = "x$keep_files" ]; then
     printf "Cleaning up downloaded files... "
-    rm -rf $files
+    exec_and_log "rm -rf $files" "Error: Could not remove $files."
     echo "done."
 else
     echo "Not cleaning up downloaded files in $files."
