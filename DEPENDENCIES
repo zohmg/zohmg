@@ -66,6 +66,7 @@ zohmg depends on several pieces of software:
 
     For more information see http://undefined.org/python/#simplejson.
 
+
 - PyYAML
 
     YAML parser and emitter for Python.
@@ -73,4 +74,3 @@ zohmg depends on several pieces of software:
     There is a Debian package called python-yaml.
 
     For more information see http://pyyaml.org/.
-
