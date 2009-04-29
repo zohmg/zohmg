@@ -27,6 +27,7 @@ function usage() {
     echo "                         Cannot be used with --hadoop-only."
     echo "    --help               Prints this help and exits."
     echo "    --keep-files         Keeps downloaded files."
+    echo "    --no-configi         Do not configure Hadoop or HBase."
     echo "    --prefix=PREFIX      Changes installation prefix to PREFIX."
     echo "                         Defaults to /opt."
 }
@@ -44,6 +45,11 @@ hadoop_release="http://mirrors.ukfast.co.uk/sites/ftp.apache.org/hadoop/core/had
 hadoop_1722="https://issues.apache.org/jira/secure/attachment/12401426/$patch_1722"
 hadoop_5450="https://issues.apache.org/jira/secure/attachment/12401846/$patch_5450"
 hbase_release="http://mirrors.ukfast.co.uk/sites/ftp.apache.org/hadoop/hbase/hbase-0.19.1/$hbase_tar"
+install_log="install.log"
+
+
+# truncate install.log.
+>$install_log
 
 
 # parse arguments.
@@ -86,6 +92,9 @@ while [ $1 ]; do
         "--keep-files")
             keep_files="true"
             ;;
+        "--no-config")
+            no_config="true"
+            ;;
         "--prefix")
             prefix="$arg"
             ;;
@@ -111,7 +120,7 @@ echo "Checking for necessary programs..."
 for command in "ant -version" "patch --version" "wget --version"; do
     program=$(echo $command | sed 's/ .*//')
     printf "Checking for $program... "
-    $command &>/dev/null
+    $command >>$install_log
     if [ $? -ne 0 ]; then
         echo "Error: Missing program: $program not found."
         exit 1
@@ -130,17 +139,17 @@ if [ "x" = "x$files" ]; then
     printf "Downloading files... "
     # release files.
     cd $files
-    wget $hadoop_release &>/dev/null
-    wget $hbase_release &>/dev/null
+    wget $hadoop_release >>$install_log
+    wget $hbase_release >>$install_log
     # download patches.
     cd patches
-    wget $hadoop_1722 &>/dev/null
-    wget $hadoop_5450 &>/dev/null
+    wget $hadoop_1722 >>$install_log
+    wget $hadoop_5450 >>$install_log
     echo "done."
 else
     printf "Using previously downloaded files in $files... "
     for file in "patches/$patch_1722" "patches/$patch_5450" "$hadoop_tar" "$hbase_tar"; do
-        ls $files/$file &>/dev/null
+        ls $files/$file >>$install_log
         if [ $? -ne 0 ]; then
             echo
             echo "Error: Could not find file $files/$file."
@@ -177,9 +186,9 @@ tar zxf $files/$hadoop_tar -C $hadoop
 echo "done."
 cd $hadoop/$hadoop_version
 for patch in "$patch_1722" "$patch_5450"; do
-    num=$(echo $patch | sed 's/\(HADOOP-.{4}\).*/\1/')
+    num=$(echo $patch | sed 's/.patch$//')
     printf "Applying patch $num... "
-    patch -p0 <"$files/patches/$patch" &>/dev/null
+    patch -p0 <"$files/patches/$patch" >>$install_log
     if [ $? -ne 0 ]; then
         echo
         echo "Error: Could not apply patch $num."
@@ -188,7 +197,7 @@ for patch in "$patch_1722" "$patch_5450"; do
     echo "done."
 done
 printf "Compiling Apache Hadoop... "
-ant package &>/dev/null
+ant package >>$install_log
 if [ $? -ne 0 ]; then
     echo
     echo "Error: Could not compile Apache Hadoop."
@@ -203,13 +212,32 @@ tar zxf $files/$hbase_tar -C $hbase
 echo "done."
 cd $hbase/$hbase_version
 printf "Compiling Apache HBase... "
-ant package &>/dev/null
+ant package >>$install_log
 if [ $? -ne 0 ]; then
     echo
     echo "Error: Could not compile Apache HBase."
     exit 1
 fi
 echo "done."
+
+
+# configuration?
+if [ "x" = "x$no_config" ]; then
+    printf "Configuring Hadoop and HBase... "
+    cd $hadoop/$hadoop_version/conf
+    cp -v hadoop-env.sh hadoop-env.sh.dist >>$install_log
+    cp -v hadoop-site.xml hadoop-site.xml.dist >>$install_log
+    cp -v $files/conf/hadoop-env.sh $hadoop/$hadoop_version/conf >>$install_log
+    cp -v $files/conf/hadoop-site.xml $hadoop/$hadoop_version/conf >>$install_log
+    cp -v hbase-env.sh hbase-env.sh.dist >>$tmp_log
+    cp -v $files/conf/hbase-env.sh $hbase/$hbase_version/conf >>$install_log
+    echo "done."
+else
+    echo "Edit the following files to configure Hadoop and HBase:"
+    echo "* $hadoop/$hadoop_version/conf/hadoop-env.sh"
+    echo "* $hadoop/$hadoop_version/conf/hadoop-site.xml"
+    echo "* $hbase/$hbase_version/conf/hbase-env.sh"
+fi
 
 
 # clean up.
@@ -222,10 +250,4 @@ else
 fi
 
 
-# configuration?
-echo "Everything installed."
-echo "Edit the following files to configure Hadoop and HBase:"
-echo "* $hadoop/$hadoop_version/conf/hadoop-env.sh"
-echo "* $hadoop/$hadoop_version/conf/hadoop-site.xml"
-echo "* $hbase/$hbase_version/conf/hbase-env.sh"
-echo "* $hbase/$hbase_version/conf/hbase-site.xml"
+echo "Done."
