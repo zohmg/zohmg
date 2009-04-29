@@ -16,10 +16,18 @@ def clean():
     for dir in [target, doc_target, lib_target]:
         os.system("rm -rf %s" % dir)
 
-# hey, what's the difference between install and setup?
 def install():
-    build_darling = False
+    # apt-get python modules.
+    install_pythonmodules()
 
+    # thrift & hbase, etc.
+    #requires setuptools.
+    print "installing libraries with no installation mechanism of their own - the eggdance."
+    os.system("sh eggs/eggdance.sh")
+
+
+def copy_files():
+    build_darling = False
 
     # creating directories.
     for dir in [target, doc_target, lib_target]:
@@ -36,14 +44,6 @@ def install():
         build_darling(target)
     else:
         copy_bundle("pre-built darling jar","lib/darling-*.jar",lib_target)
-
-    # apt-get python modules.
-    install_pythonmodules()
-
-    # thrift & hbase, etc.
-    #requires setuptools.
-    print "installing libraries with no installation mechanism of their own - the eggdance."
-    os.system("sh eggs/eggdance.sh")
 
     # HBase.thrift
     copy_bundle("bundled hbase thrift interface","lib/Hbase.thrift",target)
