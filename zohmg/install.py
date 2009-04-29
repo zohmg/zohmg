@@ -98,7 +98,7 @@ def build_darling(target):
     os.system("cp -v java/darling/build/darling-.jar " + target)
 
 def install_pythonmodules():
-    packages = ['python-setuptools', 'python-paste', 'python-setuptools', 'python-simplejson', 'python-yaml']
+    packages = ['python-setuptools', 'python-paste', 'python-simplejson', 'python-yaml']
     print 'apt-get installing pythonmodules; assuming your system is debian-based. '
     print ', '.join(packages) + '.'
     r = os.system('sudo apt-get install ' + ' '.join(packages))
