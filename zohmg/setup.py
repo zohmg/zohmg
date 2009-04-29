@@ -18,5 +18,11 @@ class Setup(object):
         print "".join((map( lambda cf: "  * "+str(cf)+"\n" , cfs)))
         print
 
-        c = setup_transport("localhost")
+        try:
+            c = setup_transport("localhost")
+        except:
+            sys.stderr.write("could not setup thrift transport.\n")
+            sys.stderr.write("is the thrift server turned on?\n")
+            sys.exit(1)
+
         create_or_bust(c, dataset, cfs)
