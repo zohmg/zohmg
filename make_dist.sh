@@ -17,7 +17,7 @@ echo "done."
 printf "Copying dist files to temporary target..."
 cp AUTHORS INSTALL QUICKSTART README TODO $BUILD_TARGET
 cp install.py setup.py $BUILD_TARGET
-cp -r examples java lib src tests zohmg $BUILD_TARGET
+cp -r eggs examples java lib src tests zohmg $BUILD_TARGET
 echo "done."
 
 printf "Creating dist tar archive..."

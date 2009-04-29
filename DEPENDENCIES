@@ -1,0 +1,76 @@
+DEPENDENCIES
+------------
+zohmg depends on several pieces of software:
+
+- Apache Hadoop (0.19.1)
+
+    MapReduce framework implemented in Java.
+
+    Additionally Hadoop source has to be patched with the patches
+    HADOOP-1722 and HADOOP-5450.
+
+    For more information see http://hadoop.org/.
+
+
+- Apache HBase (0.19.1)
+
+    BigTable inspired database implemented in Java.
+
+    Usually runs best if this is the same version as Hadoop.
+
+    For more information see http://hbase.org/.
+
+
+- Apache Thrift
+
+    Framework for scalable cross-language service development.
+
+    zohmg is tested to work with svn revision [TODO: add revision here.] of
+    Thrift.
+
+    For more information see http://incubator.thrift.org/thrift/.
+
+
+- Dumbo (0.21.x)
+
+    Python module which wraps around Hadoop Streaming and makes it possible
+    to write MapReduce programs in Python.
+
+    For more information see http://wiki.github.com/klbostee/dumbo.
+
+
+- Python Paste
+
+    Tools for using a Web Server Gateway Interface stack.
+
+    There is a debian package called python-paste.
+
+    For more information see http://pythonpaste.org/.
+
+
+- Python Setup Tools
+
+    Framework for building, installing, upgrading and uninstalling Python
+    packages.
+
+    There is a Debian package called python-setuptools.
+
+    For more information see http://pypi.python.org/pypi/setuptools.
+
+
+- Python simplejson
+
+    Simple, fast, extensible JSON encoder/decoder for Python.
+
+    There is a Debian package called python-simplejson.
+
+    For more information see http://undefined.org/python/#simplejson.
+
+- PyYAML
+
+    YAML parser and emitter for Python.
+
+    There is a Debian package called python-yaml.
+
+    For more information see http://pyyaml.org/.
+

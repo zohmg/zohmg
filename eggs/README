@@ -1,0 +1,9 @@
+egg-creation facility.
+----------------------
+
+this is where we install code with no install mechanism of its own.
+
+each module lives in its own subdirectory,
+with an associated setup-${modulename}.py file.
+
+please see eggdance.sh.

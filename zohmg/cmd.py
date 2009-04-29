@@ -1,6 +1,7 @@
+# this is the command line interface.
+
 from zohmg.utils import fail
 import sys, os
-
 
 def usage(reason = None):
     zohmg = os.path.basename(sys.argv[0])
@@ -28,7 +29,7 @@ def zohmg():
         cmd = sys.argv[1]
     except:
         usage()
-        sys.exit(1)
+        sys.exit(0)
 
     if   cmd == 'create':  create()
     elif cmd == 'setup':   setup()

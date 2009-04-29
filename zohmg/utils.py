@@ -13,12 +13,15 @@ def setup_transport(host):
     from thrift.transport import TTransport
     from thrift.protocol import TBinaryProtocol
     from hbase import Hbase
-    transport = TSocket.TSocket(host, 9090)
-    transport = TTransport.TBufferedTransport(transport)
-    protocol = TBinaryProtocol.TBinaryProtocol(transport)
-    client = Hbase.Client(protocol)
-    transport.open()
-    return client
+    try:
+        transport = TSocket.TSocket(host, 9090)
+        transport = TTransport.TBufferedTransport(transport)
+        protocol = TBinaryProtocol.TBinaryProtocol(transport)
+        client = Hbase.Client(protocol)
+        transport.open()
+        return client
+    except:
+        raise
 
 
 def create_or_bust(c, t, cfs=['fam']):

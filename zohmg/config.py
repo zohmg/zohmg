@@ -87,12 +87,11 @@ class Config(object):
         # the name of the dataset, the dimensions or units.
         for xs in [[dataset], ds, us]:
             for x in xs:
-                m = re.match('^[a-zA-Z]+$', x)
+                m = re.match('^[a-zA-Z0-9]+$', x)
                 if m == None:
                     sys.stderr.write("hey!, '%s' is an invalid name.\n" % x)
                     sane = False
 
-        # all is fine!
         return sane
 
 
