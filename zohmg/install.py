@@ -11,12 +11,16 @@ system_target  = '/usr/lib/python'+python_version+'/site-packages' # might bork 
 
 def clean():
     """cleans things a bit."""
+    print
     print 'cleaning previous zohmg installation.'
     os.system("rm %s/zohmg-*.egg 2> /dev/null" % system_target)
     for dir in [target, doc_target, lib_target]:
         os.system("rm -rf %s" % dir)
 
 def install():
+    print
+    print "installing python modules &c."
+
     # apt-get python modules.
     install_pythonmodules()
 
@@ -27,6 +31,9 @@ def install():
 
 
 def copy_files():
+    print
+    print "populating zohmg directories"
+
     build_darling = False
 
     # creating directories.
@@ -60,7 +67,8 @@ def copy_files():
 
 def setup():
     print
-    print "installing zohmg: python setup.py install"
+    print "installing zohmg"
+
     # install,
     r = os.system('python setup.py install > zohmg-install.log')
     if r != 0:
@@ -87,7 +95,9 @@ def test():
 
 # not used atm; user would have to specify classpath == jobbigt.
 def build_darling(target):
+    print
     print 'building java hook-ups'
+
     r = os.system('cd java/darling; ant')
     if r != 0:
         # fail!
