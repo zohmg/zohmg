@@ -74,9 +74,9 @@ class Create(object):
 
         # Create skeleton config/dataset.yaml
         datasetconfig = "dataset: %s\n" % self.basename \
-                      + "dimensions:\n  -d0\n  -d1\n" \
-                      + "projections:\n  p0:\n    -d0\n    -d1\n" \
-                      + "units:\n  u0\n"
+                      + "dimensions:\n  - d0\n  - d1\n" \
+                      + "projections:\n  p0:\n    - d0\n    - d1\n" \
+                      + "units:\n  - u0\n"
         self.__write_to_file("config/dataset.yaml", datasetconfig)
         # TODO: consider using Config.config_file instead of hardcoded path.
 
