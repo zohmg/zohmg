@@ -1,0 +1,59 @@
+diff --git a/scripts/install_hadoop_hbase.sh b/scripts/install_hadoop_hbase.sh
+index d026749..7190395 100755
+--- a/scripts/install_hadoop_hbase.sh
++++ b/scripts/install_hadoop_hbase.sh
+@@ -1,4 +1,9 @@
+-#!/bin/sh
++#!/bin/bash
++
++if [[ $EUID -ne 0 ]]; then
++   echo "you need to be root. please sudo." 1>&2
++   exit 1
++fi
+ 
+ 
+ # set default variables.
+@@ -24,27 +29,30 @@ install_tmplog=$(mktemp /tmp/zohmg-log.XXXXXXXX)
+ function exec_and_log() {
+     # setup variables.
+     command=$1
+-    [ "x" = "x$2" ] && msg="Error: Could not execute $command." || msg=$2
++    msg=$2
++    toscreen=$3
++
++    # check if $msg is set.
++    [ "x" = "x$msg" ] && msg="Error: Could not execute $command." || msg=$msg
+ 
+     # execute and log to intermediate.
+-    if [ "x" = "x$3" ]; then
+-        $1 &>$install_tmplog
++    $command &> $install_tmplog
++    ret=$? # save return code.
++
++    # log unless requested not to.
++    if [ "x" = "x${toscreen}" ]; then
++        cat $install_log $install_tmplog >"$install_log.new"
++        mv "$install_log.new" $install_log
+     else
+-        $1
++	echo "i'll be quiet."
+     fi
+ 
+-    # check exit code.
+-    if [ $? -ne 0 ]; then
++    # check exit code of command.
++    if [ $ret -ne 0 ]; then
+         echo
+-        echo $2
++        echo $msg
+         exit 1
+     fi
+-
+-    # log if not requested not to.
+-    if [ "x" = "x$3" ]; then
+-        cat $install_log $install_tmplog >"$install_log.new"
+-        mv "$install_log.new" $install_log
+-    fi
+ }
+ 
+ 
