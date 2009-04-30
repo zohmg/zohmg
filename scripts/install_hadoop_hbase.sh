@@ -1,6 +1,12 @@
 #!/bin/sh
 
 
+if [ $EUID -ne 0 ]; then
+    echo "Error: Superuser privileges required."
+    exit 1
+fi
+
+
 # set default variables.
 prefix="/opt"
 hadoop_version="hadoop-0.19.1"
@@ -25,26 +31,29 @@ function exec_and_log() {
     # setup variables.
     command=$1
     [ "x" = "x$2" ] && msg="Error: Could not execute $command." || msg=$2
+    screenoutput=$3
 
     # execute and log to intermediate.
-    if [ "x" = "x$3" ]; then
+    if [ "x" = "x$screenoutput" ]; then
         $1 &>$install_tmplog
     else
         $1
     fi
-
-    # check exit code.
-    if [ $? -ne 0 ]; then
-        echo
-        echo $2
-        exit 1
-    fi
+    ret=$?
 
     # log if not requested not to.
     if [ "x" = "x$3" ]; then
         cat $install_log $install_tmplog >"$install_log.new"
         mv "$install_log.new" $install_log
     fi
+
+    # check exit code.
+    if [ $ret -ne 0 ]; then
+        echo
+        echo $msg
+        exit 1
+    fi
+
 }
 
 
@@ -143,7 +152,7 @@ echo "Checking for necessary programs..."
 for command in "ant -version" "patch --version" "wget --version"; do
     program=$(echo $command | sed 's/ .*//')
     printf "Checking for $program... "
-    exec_and_log "$command" "Error: Missing program: $program not found." "true"
+    exec_and_log "$command" "Error: Missing program: $program not found."
     echo "ok."
 done
 
