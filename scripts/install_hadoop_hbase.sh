@@ -202,7 +202,9 @@ else
     for patch in "$patch_1722" "$patch_5450"; do
         num=$(echo $patch | sed 's/.patch$//')
         printf "Applying patch $num... "
-        exec_and_log "cd $hadoop ; patch -p0 <$files/patches/$patch" "Error: Could not apply patch $num."
+        exec_and_log "echo ... Patching Apache Hadoop ..."
+        cd $hadoop
+        exec_and_log "patch -p0 <$files/patches/$patch" "Error: Could not apply patch $num."
         echo "done."
     done
     printf "Compiling Apache Hadoop... "
