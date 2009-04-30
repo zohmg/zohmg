@@ -63,10 +63,6 @@ function usage() {
     echo "    --download-only      Only download software, do not build."
     echo "    --files=FILES        Directory with already downloaded files."
     echo "                         Files are downloaded to /tmp/zohmg-deps.XXXXXX."
-    echo "    --hadoop-dir=HADOOP  Changes Apache Hadoop installation dir to HADOOP."
-    echo "                         This option overrides the --prefix option."
-    echo "    --hbase-dir=HBASE    Changes Apache HBase installation dir to HBASE."
-    echo "                         This option overrides the --prefix option."
     echo "    --hadoop-only        Installs only Apache Hadoop."
     echo "                         Cannot be used with --hbase-only."
     echo "    --hbase-only         Installs only Apache HBase."
@@ -89,6 +85,7 @@ while [ $1 ]; do
             ;;
         "--files")
             files="$arg"
+            keep_files="true" # do not delete files we did not download.
             ;;
         "--hadoop-only")
             if [ $hbase_only ]; then
@@ -105,12 +102,6 @@ while [ $1 ]; do
                 exit 1
             fi
             hbase_only="true"
-            ;;
-        "--hadoop-dir")
-            hadoop="$arg"
-            ;;
-        "--hbase-dir")
-            hbase="$arg"
             ;;
         "--help")
             usage
@@ -143,8 +134,10 @@ done
 
 
 # set default paths.
-[ "x" = "x$hadoop" ] && hadoop="$prefix/hadoop"
-[ "x" = "x$hbase" ] && hbase="$prefix/hbase"
+hadoop="$prefix/$hadoop_version"
+hbase="$prefix/$hbase_version"
+hadoop_conf=$hadoop/conf
+hbase_conf=$hbase/conf
 
 
 # check for necessary programs.
@@ -204,17 +197,17 @@ if [ ! "x" = "x$hbase_only" ]; then
     echo "Skipping installation of Apache Hadoop..."
 else
     printf "Extracting Apache Hadoop... "
-    exec_and_log "mkdir -p $hadoop"
-    exec_and_log "tar zxf $files/$hadoop_tar -C $hadoop"
+    exec_and_log "tar zxf $files/$hadoop_tar -C $prefix"
     echo "done."
     for patch in "$patch_1722" "$patch_5450"; do
         num=$(echo $patch | sed 's/.patch$//')
         printf "Applying patch $num... "
-        exec_and_log "cd $hadoop/$hadoop_version ; patch -p0 <$files/patches/$patch" "Error: Could not apply patch $num."
+        exec_and_log "cd $hadoop ; patch -p0 <$files/patches/$patch" "Error: Could not apply patch $num."
         echo "done."
     done
     printf "Compiling Apache Hadoop... "
     exec_and_log "echo ... Compiling Apache Hadoop ..."
+    cd $hadoop
     exec_and_log "ant package" "Error: Could not compile Apache Hadoop."
     echo "done."
 fi
@@ -224,12 +217,11 @@ if [ ! "x" = "x$hadoop_only" ]; then
     echo "Skipping installation of Apache HBase..."
 else
     printf "Extracting Apache HBase... "
-    exec_and_log "mkdir -p $hbase"
-    exec_and_log "tar zxf $files/$hbase_tar -C $hbase"
+    exec_and_log "tar zxf $files/$hbase_tar -C $prefix"
     echo "done."
-    exec_and_log "cd $hbase/$hbase_version"
     printf "Compiling Apache HBase... "
     exec_and_log "echo ... Compiling Apache HBase ..."
+    cd $hbase
     exec_and_log "ant package" "Error: Could not compile Apache HBase."
     echo "done."
 fi
@@ -239,37 +231,177 @@ fi
 if [ "x" = "x$no_config" ]; then
     if [ "x" = "x$hbase_only" ]; then
         printf "Configuring Apache Hadoop... "
-        cd $hadoop/$hadoop_version/conf
-        exec_and_log "cp -v hadoop-env.sh hadoop-env.sh.dist"
-        exec_and_log "cp -v hadoop-site.xml hadoop-site.xml.dist"
-        exec_and_log "cp -v $files/conf/hadoop-env.sh ."
-        exec_and_log "cp -v $files/conf/hadoop-site.xml ."
+        # backup template configurations.
+        exec_and_log "cp -v $hadoop_conf/hadoop-env.sh $hadoop_conf/hadoop-env.sh.dist"
+        exec_and_log "cp -v $hadoop_conf/hadoop-site.xml $hadoop_conf/hadoop-site.xml.dist"
+
+        # emit configuration.
+        cat << EOF >$hadoop_conf/hadoop-env.sh
+# Set Hadoop-specific environment variables here.
+
+# The only required environment variable is JAVA_HOME.  All others are
+# optional.  When running a distributed configuration it is best to
+# set JAVA_HOME in this file, so that it is correctly defined on
+# remote nodes.
+
+# The java implementation to use.  Required.
+# export JAVA_HOME=/usr/lib/j2sdk1.5-sun
+# Automatically infer \$JAVA_HOME on Debian based systems.
+export JAVA_HOME=\`ls -l /etc/alternatives/java | sed 's#.* -> \(.*\)/jre/bin/java#\1#'\`
+
+# Extra Java CLASSPATH elements.  Optional.
+# export HADOOP_CLASSPATH=
+
+# The maximum amount of heap to use, in MB. Default is 1000.
+# export HADOOP_HEAPSIZE=2000
+
+# Extra Java runtime options.  Empty by default.
+# export HADOOP_OPTS=-server
+
+# Command specific options appended to HADOOP_OPTS when specified
+export HADOOP_NAMENODE_OPTS="-Dcom.sun.management.jmxremote $HADOOP_NAMENODE_OPTS"
+export HADOOP_SECONDARYNAMENODE_OPTS="-Dcom.sun.management.jmxremote $HADOOP_SECONDARYNAMENODE_OPTS"
+export HADOOP_DATANODE_OPTS="-Dcom.sun.management.jmxremote $HADOOP_DATANODE_OPTS"
+export HADOOP_BALANCER_OPTS="-Dcom.sun.management.jmxremote $HADOOP_BALANCER_OPTS"
+export HADOOP_JOBTRACKER_OPTS="-Dcom.sun.management.jmxremote $HADOOP_JOBTRACKER_OPTS"
+# export HADOOP_TASKTRACKER_OPTS=
+# The following applies to multiple commands (fs, dfs, fsck, distcp etc)
+# export HADOOP_CLIENT_OPTS
+
+# Extra ssh options.  Empty by default.
+# export HADOOP_SSH_OPTS="-o ConnectTimeout=1 -o SendEnv=HADOOP_CONF_DIR"
+
+# Where log files are stored.  $HADOOP_HOME/logs by default.
+# export HADOOP_LOG_DIR=${HADOOP_HOME}/logs
+
+# File naming remote slave hosts.  $HADOOP_HOME/conf/slaves by default.
+# export HADOOP_SLAVES=${HADOOP_HOME}/conf/slaves
+
+# host:path where hadoop code should be rsync'd from.  Unset by default.
+# export HADOOP_MASTER=master:/home/$USER/src/hadoop
+
+# Seconds to sleep between slave commands.  Unset by default.  This
+# can be useful in large clusters, where, e.g., slave rsyncs can
+# otherwise arrive faster than the master can service them.
+# export HADOOP_SLAVE_SLEEP=0.1
+
+# The directory where pid files are stored. /tmp by default.
+# export HADOOP_PID_DIR=/var/hadoop/pids
+
+# A string representing this instance of hadoop. $USER by default.
+# export HADOOP_IDENT_STRING=$USER
+
+# The scheduling priority for daemon processes.  See 'man nice'.
+# export HADOOP_NICENESS=10
+EOF
+        cat <<EOF >$hadoop_conf/hadoop-site.xml
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+  <property>
+    <name>fs.default.name</name>
+    <value>hdfs://localhost:9000</value>
+  </property>
+  <property>
+    <name>mapred.job.tracker</name>
+    <value>localhost:9001</value>
+  </property>
+  <property>
+    <name>dfs.replication</name>
+    <value>1</value>
+  </property>
+</configuration>
+EOF
         echo "done."
     fi
     if [ "x" = "x$hadoop_only" ]; then
         printf "Configuring Apache HBase... "
-        cd $hbase/$hbase_version/conf
-        exec_and_log "cp -v hbase-env.sh hbase-env.sh.dist"
-        exec_and_log "cp -v $files/conf/hbase-env.sh ."
+        # backup template configuration.
+        exec_and_log "cp -v $hbase_conf/hbase-env.sh $hbase_conf/hbase-env.sh.dist"
+
+        # emit configuration.
+        cat <<EOF >$hbase_conf/hbase-env.sh
+#
+#/**
+# * Copyright 2007 The Apache Software Foundation
+# *
+# * Licensed to the Apache Software Foundation (ASF) under one
+# * or more contributor license agreements.  See the NOTICE file
+# * distributed with this work for additional information
+# * regarding copyright ownership.  The ASF licenses this file
+# * to you under the Apache License, Version 2.0 (the
+# * "License"); you may not use this file except in compliance
+# * with the License.  You may obtain a copy of the License at
+# *
+# *     http://www.apache.org/licenses/LICENSE-2.0
+# *
+# * Unless required by applicable law or agreed to in writing, software
+# * distributed under the License is distributed on an "AS IS" BASIS,
+# * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# * See the License for the specific language governing permissions and
+# * limitations under the License.
+# */
+
+# Set environment variables here.
+
+# The java implementation to use.  Java 1.6 required.
+# export JAVA_HOME=/usr/java/jdk1.6.0/
+# Automatically infer \$JAVA_HOME on Debian based systems.
+export JAVA_HOME=\`ls -l /etc/alternatives/java | sed 's#.* -> \(.*\)/jre/bin/java#\1#'\`
+
+# Extra Java CLASSPATH elements.  Optional.
+# export HBASE_CLASSPATH=
+
+# The maximum amount of heap to use, in MB. Default is 1000.
+# export HBASE_HEAPSIZE=1000
+
+# Extra Java runtime options.  Empty by default.
+# export HBASE_OPTS=-server
+
+# File naming hosts on which HRegionServers will run.  $HBASE_HOME/conf/regionservers by default.
+# export HBASE_REGIONSERVERS=${HBASE_HOME}/conf/regionservers
+
+# Extra ssh options.  Empty by default.
+# export HBASE_SSH_OPTS="-o ConnectTimeout=1 -o SendEnv=HBASE_CONF_DIR"
+
+# Where log files are stored.  $HBASE_HOME/logs by default.
+# export HBASE_LOG_DIR=${HBASE_HOME}/logs
+
+# A string representing this instance of hbase. $USER by default.
+# export HBASE_IDENT_STRING=$USER
+
+# The scheduling priority for daemon processes.  See 'man nice'.
+# export HBASE_NICENESS=10
+
+# The directory where pid files are stored. /tmp by default.
+# export HBASE_PID_DIR=/var/hadoop/pids
+
+# Seconds to sleep between slave commands.  Unset by default.  This
+# can be useful in large clusters, where, e.g., slave rsyncs can
+# otherwise arrive faster than the master can service them.
+# export HBASE_SLAVE_SLEEP=0.1
+EOF
         echo "done."
     fi
 else
     echo "Edit the following files to configure Hadoop and HBase:"
-    echo "* $hadoop/$hadoop_version/conf/hadoop-env.sh"
-    echo "* $hadoop/$hadoop_version/conf/hadoop-site.xml"
-    echo "* $hbase/$hbase_version/conf/hbase-env.sh"
+    echo "* $hadoop_conf/hadoop-env.sh"
+    echo "* $hadoop_conf/hadoop-site.xml"
+    echo "* $hbase_conf/hbase-env.sh"
 fi
 
 
 # clean up.
-rm "$install_log.new"
 rm $install_tmplog
 if [ "x" = "x$keep_files" ]; then
     printf "Cleaning up downloaded files... "
     exec_and_log "rm -rf $files" "Error: Could not remove $files."
     echo "done."
 else
-    echo "Not cleaning up downloaded files in $files."
+    echo "Not cleaning up files in $files."
 fi
 
 
