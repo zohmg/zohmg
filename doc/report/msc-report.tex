@@ -1,7 +1,8 @@
 \documentclass[a4paper,10pt]{book}
 
 \author{Per Andersson, Fredrik M{\"o}llerstrand}
-\title{OHM -- OHM HBase Masseuse [DRAFT]}
+\title{Zonotoop--a large scale aggregating data warehouse for
+time-series-based data. [DRAFT]}
 
 
 
@@ -231,10 +232,11 @@ them.
 
 
 
-\chapter{OHM}
+\chapter{Usage}
 
 We have built a system--henceforth called OHM--which has the goal of being
-a large scale data warehouse for time-series based log-like data sources.
+a large scale aggregating data warehouse for time-series-based log-like
+data sources.
 
 
 
@@ -244,21 +246,25 @@ A manage script is used to create tables from a pre-defined schema.
 
 
 
-\subsection{Query language}
-
-
-
 \section{Import}
 
-The user writes MapReduce programs which imports log-like data to the data
-store.
-
-After the data is imported a metadata scanner is run which creates metadata
-about the imported data.
+The user writes the map part of the MapReduce programs which imports
+log-like data to the data store. The reduce step is taken care of by OHM,
+which uses sum reducer that simply sums up values with the same keys.
 
 
+\subsection{User mappers}
 
-\section{Store data}
+Import jobs use mappers defined by the user, either in Python or Java.
+Mappers written by the user import each line from the input file and set
+the arguments to the map function, key and value, as line number and line
+contents, respectively. The user can then perform computations on these
+entities and finally yield the results as a dictionary. The resulting
+dictionary will be interpreted by OHM and stored accordingly.
+
+
+
+\section{Storing data}
 
 Data is stored in a BigTable like database. A natural consequence of this
 that the data is stored sorted by rowkey allowing fast access to an
@@ -284,7 +290,15 @@ OHM is built upon existing tools and software. It uses Apache Hadoop and
 HBase, free implementations of Googles' MapReduce and BigTable
 respectively, both implemented in Java.
 
-When data is exchanged between OHM and the user either
+Importing data to OHM is as simple as the user defines a mapper--the first
+half of a MapReduce program--which is run over a file that resides on
+HDFS\footnote{Hadoop Distributed Filesystem}.
+
+Data is stored on Apache HBase
+
+Exporting data
+
+and the user 
 JSON\footnote{JavaScript Object Notation} is transported over a RESTful
 interface or data is transported with Thrift.
 
@@ -296,6 +310,10 @@ OHM is implemented in Python.
 
 \subsection{YAML}
 
+The user's datasets are defined using YAML--a human friendly data
+serialization standard.
+
+
 \section{Apache Hadoop}
 
 \subsection{Hadoop Distributed File System}
@@ -304,11 +322,11 @@ OHM is implemented in Python.
 
 \section{Apache HBase}
 
+\subsection{Thrift}
+
 \section{Data interchange}
 
 \subsection{Input and output formats}
-
-\subsection{Thrift}
 
 \subsection{REST}
 
