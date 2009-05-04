@@ -1,3 +1,8 @@
 *.pyc
 *~
 dist
+*.bbl
+*.blg
+*.dvi
+*.pdf
+*.toc
