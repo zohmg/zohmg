@@ -1,0 +1,344 @@
+\documentclass[a4paper,10pt]{book}
+
+\author{Per Andersson, Fredrik M{\"o}llerstrand}
+\title{OHM -- OHM HBase Masseuse [DRAFT]}
+
+
+
+\begin{document}
+
+
+
+\maketitle
+
+
+
+\noindent \Large{\textbf{Abstract}}
+
+\vspace{12pt}
+
+\noindent This is where we put down two to four sentences about:
+Introduction, problem, existing tools, our solution and implementation,
+conclusions.
+
+
+\tableofcontents
+
+\vfill
+
+\pagebreak
+
+
+
+\chapter{Introduction}
+
+As large scale web services grow they generate vast volumes of log data,
+for instance Apache web logs. The ability to accurately analyse gathered
+data is important to the evaluation, planning, and success of the web
+service. Storing and analysing massive volumes of log data requires
+special measures to be taken. From an end-user perspective the requirement
+is an easy, complete and fast data analysing procedure. The technical
+aspects of this requirement boils down to the following key points:
+Visualising, storing and importing the data. The result is an
+multidimensional information system which is subject to
+OLAP\footnote{On-Line Analytical Processing}. \cite{olap_solutions}
+
+All three requirements are depend on one another, what data and how it is
+stored affects what can be visualised. Also, what data is imported--and
+how it is analysed--affects how it can be stored and hence visualised.
+
+It is assumed that the audience of this paper has at least a basic
+understanding of how one models data in relational databases. As will
+quickly become apparent, a BigTable-like \cite{bigtable} data store is
+drastically different from the relational model, meaning that those who
+know their table schemas will have some un-learning to do before being able
+to fully grasp the leaner BigTable-model.
+
+% TODO: necessity of this paragraph?
+The reader is also assumed to possess basic understanding about distributed
+systems, with focus on high level abstractions rather than detailed
+knowledge about practical implementation details.
+
+
+
+\section{BigTable}
+
+The data model is a simple one: Rows of data are stored in named tables.
+Each row consists of a sortable row key and an arbitrary number of columns.
+The columns are of the form "column-family:qualifier", where the column
+family is one of a number of fixed column families defined by the table,
+and the qualifier is an arbitrary string specified by the application. In
+effect, column families are pre-announced while qualifiers are not. The
+contents of each column family are stored together, so the user will want
+to store items that have similar characteristics in the same column family.
+Each data point is called a cell. A cell is an uninterpreted array of
+bytes-- there are no data types, and it is up to the application to
+interpret the data correctly. The table can store any number of timestamped
+versions of each cell, allowing versioning of data.
+
+The model above can indeed be thought of as a sparse distributed
+multidimensional sorted map. In concept, this multidimensional map is
+identical to a nested hash map from your favourite programming language. The
+dimensions of this multidimensional map is mapped out on the row key, the
+column family and the column qualifier, and possibly also of the version
+timestamp.
+
+In actual practice, the main difference between the two models is that
+querying is highly restricted in a BigTable-like data store--there are no
+joins, for example--whereas the relational database was born to be queried.
+On the other hand, the restrictions placed upon the BigTable models are
+what allows it to scale to such a large dataset. Indeed, BigTable was born
+to scale.
+
+\textbf{TODO: -- elaborate on reasons to why starsql does not scale--}
+
+Many applications have the behaviour where they write data once and read it
+a lot more, log analysers for instance. This writing-once-reading-many
+behaviour is precisely what BigTable is designed for. BigTable is designed
+for sequential, as opposed to random, data access. A typical use case is
+the scan, where a large number of rows are read in sequence and a certain
+column or column-family are picked up and returned. Certainly, you will
+want to store those data points that are likely to be needed simultaneously
+close to each other. \cite{bigtable}
+
+
+
+\section{MapReduce}
+
+Analysing the massive amounts of log data raises high demand for computing
+power. The MapReduce \cite{mapreduce} pattern suits the analysing issue
+well. The great benefit of MapReduce is that it runs on a computer cluster
+of commodity hardware where computation takes place independently in
+parallel. All results computed by each node are then reduced into one
+single result.
+
+% ONE DOES NOT SIMPLY PROCESS THE DATA ON ONE COMPUTER INTO MORDOR.
+Basically MapReduce is a two phase computation. First the input data is
+partitioned and each of these partitions is sent to a \textit{mapper} which
+performs computations on each row of the data. The mapper then outputs each
+resulting computation on the format \texttt{key,value}. These key-value
+pairs are received by a \textit{reducer} which performs the second stage of
+the computation.
+
+
+
+\section{Summary}
+
+Regarding the infrastructure, both BigTable and MapReduce has high
+availability, scalability and reliability. Since BigTable runs on top of
+GFS\footnote{Google File System}, the data stored in BigTable is
+replicated, usually three times, onto other nodes in the cluster.
+\cite{gfs} Likewise, if a node in a MapReduce job goes down or fails to
+complete the job it is reassigned to another node. \cite{mapreduce}
+
+
+
+\chapter{Problem description}
+
+\section{Scope}
+
+Time-series based analysis is the most important one when analysing web
+logs, it comes natural since all log entries are timestamped.
+\cite{discoveringweb} It is also the most common form we have seen for logs
+in general.
+
+Assuming that time-series analysis is the most important, we have imposed
+the restriction on the system that is built so that it only handles
+time-series. Because of this restriction the data store obviously becomes
+less general purpose. Although since most log data is time-series based
+this restriction does not cripple the system much--if at all.
+
+
+
+\section{Data size}
+
+The sheer size of the data makes it unfeasible to use a single computer.
+Eventually a single machine would be fed so much data that it cannot cope
+with it. For instance a single web log file for one day can be up to
+several gigabytes. It is problematic for a single machine to handle this
+because of the limitations of memory, loading the entire file in memory.
+Distributed computing solves this by spreading the computations out to
+several machines in parallel. The obvious gain is that the waiting time
+before a computation is done is divided by the amount of nodes used,
+compared to running the computation on one machine. There is also a gain
+related to the actual machines, it is possible to use commodity hardware.
+Because MapReduce and BigTable has high availability and reliability a node
+in the cluster can safely be replaced on the fly if it fails.
+
+Scalability is also very important. Using single machines for computing is
+problematic when the dataset grows, more powerful machines has to be
+obtained. More power contained in a single machine results in higher price,
+eventually it is too expensive to perform computations on very large
+datasets. Both MapReduce and BigTable scale close to linearly, adding one
+machine to the cluster adds equal amount of processing power. Since
+MapReduce and BigTable can use commodity hardware it is reasonable to buy
+extra machines to gain extra computing power or storage space.
+
+
+
+\chapter{Data model}
+
+\section{Sorted data}
+
+\subsection{Rows}
+
+Each row in a BigTable is associated with a unique key. All the data is
+stored sorted by rowkey. Because of this it is important to have a thorough
+analysis of how the data is going to be accessed in order to store it
+efficiently.
+
+
+
+\subsection{Regions}
+
+BigTable use the concept of tablets, HBase in turn uses regions. In order
+to be consistent with the rest of this paper we henceforth use the term
+region.
+
+A region is a partition of the data stored on a node in the computer
+cluster. A region server (referred to as tablet server in \cite{mapreduce})
+holds information on which regions are located on which nodes. More
+precisely the region server knows what range of rowkeys are in each region
+on each node. This behaviour makes it fast to access data while keeping
+reliability and scalability features.
+
+
+
+\section{Dimensions}
+
+\subsection{Column-families}
+
+Each column-family is stored as a single map-file in hbase.
+
+
+
+\section{Hierarchies}
+
+Depending on how the rowkeys are formatted different hierarchies are
+created. The order in which the data is stored is very important, it
+defines how effective scanning for data will be. For instance, let's say we
+have thousand rows and want ten out of those. In this case only one per
+cent of the data is interesting to us, if a scan would be required to visit
+all the thousand rows a lot of rows are skipped. Skipping rows is expensive
+in that sense that we have to read them but throw away the result. The goal
+is to push this cost to a bare minimum, using as many as possible of the
+rows we scan.
+
+To minimize the cost of scanning for data we want it to be ordered so that
+a scan would use every row it visits. In the case with thousand rows of
+which we want ten, it would mean that we just scan ten rows and use all of
+them.
+
+
+
+\chapter{OHM}
+
+We have built a system--henceforth called OHM--which has the goal of being
+a large scale data warehouse for time-series based log-like data sources.
+
+
+
+\section{Deployment}
+
+A manage script is used to create tables from a pre-defined schema.
+
+
+
+\subsection{Query language}
+
+
+
+\section{Import}
+
+The user writes MapReduce programs which imports log-like data to the data
+store.
+
+After the data is imported a metadata scanner is run which creates metadata
+about the imported data.
+
+
+
+\section{Store data}
+
+Data is stored in a BigTable like database. A natural consequence of this
+that the data is stored sorted by rowkey allowing fast access to an
+arbitrary (sequential) range.
+
+
+
+\section{Export}
+
+It is possible to query OHM about metadata it has on each of the imported
+data sets.
+
+Data is served to the user either over HTTP in JSON format or over Thrift.
+\cite{thrift}
+
+
+
+
+
+\chapter{Implementation}
+
+OHM is built upon existing tools and software. It uses Apache Hadoop and
+HBase, free implementations of Googles' MapReduce and BigTable
+respectively, both implemented in Java.
+
+When data is exchanged between OHM and the user either
+JSON\footnote{JavaScript Object Notation} is transported over a RESTful
+interface or data is transported with Thrift.
+
+OHM is implemented in Python.
+
+
+
+\section{Administration}
+
+\subsection{YAML}
+
+\section{Apache Hadoop}
+
+\subsection{Hadoop Distributed File System}
+
+\subsection{Dumbo}
+
+\section{Apache HBase}
+
+\section{Data interchange}
+
+\subsection{Input and output formats}
+
+\subsection{Thrift}
+
+\subsection{REST}
+
+\subsection{JSON}
+
+
+
+\chapter{Examples}
+
+\section{Web log analysis}
+
+
+
+\chapter{Conclusion}
+
+
+
+\chapter{Related work}
+
+HDW is system which goal is to create a high performance large scale data
+warehouse based on MapReduce and Bigtable. \cite{hdw}
+
+
+
+\pagebreak
+
+
+
+\bibliographystyle{plain} \bibliography{references}
+
+
+
+\end{document}
