@@ -132,21 +132,39 @@ presents the conclusion, respectively.
 
 
 
-\chapter{Theory [TODO: needs better name]}
 
-\section{Time-series}
+\chapter{Theory}
 
-\section{Multidimensional arrays}
+\section{Data cubes}
 
-\subsection{Data cubes}
+A data cube is a conceptual n-dimensional array of values. The values are numerical facts belonging to some dimension. The data cube is also known as a hypercube. In this context, each dimension of the cube corresponds to an attribute of the data in question and each point along the dimensions axis is a value of the corresponding attribute. The mental model of a data cube aids in reasoning about dimensions. Data cubes are traditionally modeled as star schemas in relational database systems.
 
-\subsection{Cube lattice}
+\subsection{Dimensions}
 
-\section{Dimensions}
+The dimensions of the data cube are.. 
 
-\section{Projections}
+\subsection{Projections}
 
-\section{Granularity}
+One of the most common operations on a data cube is the projection. A projection is a dimensionality reduction, where one or more dimensions are discarded from the cube with the measurements along each axis summed up, leaving a data cube of a lesser dimension.
+
+A typical projection is that from an n-dimensional cube down to two dimensions, which is the case when plotting an image on screen or paper.
+
+
+\subsection{Slice and dice}
+
+The slice operation fixes the values of one or several dimensions in the cube. The data omitted from this operation would be any data associated with the values of the dimension that were not fixed. The dice operation is a slice on more than two dimensions. [source: http://www.cs.ualberta.ca/~zaiane/courses/cmput690/glossary.html]
+
+\section{Time series}
+
+Time is the most common of the dimensions in the data cube constructed for Zohmg. The time stamp is a common property for all data handled by Zohmg; every measurement is expected to have time as one of its dimensions. TODO: really, this belongs in the implementation section. I find nothing interesting to say about time series in this section.
+
+\section{Aggregates}
+
+An aggregate is a composite of several values. Typical examples of aggregate functions are average, count and sum.
+
+In a standard OLAP setup, a number of aggregates are pre-computed and stored in the cube. These base aggregates represent only a fraction of the very many possible aggregations. The remaining aggregates are computed from the base aggregates as they are demanded.
+
+
 
 
 
@@ -279,9 +297,9 @@ them.
 
 \section{Apache Hadoop}
 
-Hadoop is an free software implementation of Google's MapReduce-framework described in \cite{mapreduce}. Hadoop is written in Java and is part of the Apache Software Foundation.  It is a fairly mature piece of software and is used in production at numerous companies.
+Hadoop is an open source software implementation of Google's MapReduce-framework described in \cite{mapreduce}. Hadoop is written in Java and is part of the Apache Software Foundation.  It is a fairly mature piece of software and is used in production at numerous companies.
 
-MapReduce is a framework for running jobs in parallel across multiple machines.  As the name implies, MapReduce is made up of two part or phases: map and reduce. The map phase consumes one piece of input at a time (a piece of input can be a line from a log file, for example), and emits an intermediate key and value. These keys and values are then processed by the reduce phase, which emits the final key-value pairs.
+MapReduce is a framework for running jobs in parallel across multiple machines.  As the name implies, MapReduce is made up of two parts or phases: map and reduce. The map phase consumes one piece of input at a time (a piece of input can be a line from a log file, for example), and emits an intermediate key and value. These keys and values are then processed by the reduce phase, which emits the final key-value pairs.
 
 MapReduce works by splitting the input, which commonly is in the size range of many gigabytes, into n parts and lets each node of the computing cluster work on one or more parts. The mapper on each node emits key-value pairs which are fed into the reduce phase. The final output is collated, usually on a network file system.
 
@@ -294,7 +312,7 @@ All Zohmg import programs are executed on Hadoop.
 
 \section{Apache HBase}
 
-HBase is an free software implementation of Google's BigTable data store described in \cite{bigtable}. It is a sub-project of Hadoop, written in Java and a part of the Apache Software Foundation. HBase is still in its infancy and few organizations use it for mission-critical applications.
+HBase is an open source implementation of Google's BigTable data store described in \cite{bigtable}. It is a sub-project of Hadoop, written in Java and a part of the Apache Software Foundation. HBase is still in its infancy and few organizations use it for mission-critical applications.
 
 BigTable is a data store designed for traversal of very large data sets.  Time-stamped cells inside column-familes in rows. The row has a key and any number of cells attached to it. The rows in a table are sorted by the row key.  The typical use-case of BigTable is to scan a range of rows. It is therefor important to set up one's keys so that related data is close to each other. For example, if it makes sense to traverse the data in chronological order, the key might contain a representation of the data's timestamp. The classic example is to have the reversed domain name (i.e.  com.google.www) as the row key, which means that all sub-domains of any domain are next to each other.
 
