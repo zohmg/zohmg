@@ -62,6 +62,98 @@ knowledge about practical implementation details.
 
 
 
+\section{Problem description}
+
+\subsection{Scope}
+
+Time-series based analysis is the most important one when analysing web
+logs, it comes natural since all log entries are timestamped.
+\cite{discoveringweb} It is also the most common form we have seen for logs
+in general.
+
+Assuming that time-series analysis is the most important, we have imposed
+the restriction on the system that is built so that it only handles
+time-series. Because of this restriction the data store obviously becomes
+less general purpose. Although since most log data is time-series based
+this restriction does not cripple the system much--if at all.
+
+
+
+\subsection{Data size}
+
+The sheer size of the data makes it unfeasible to use a single computer.
+Eventually a single machine would be fed so much data that it cannot cope
+with it. For instance a single web log file for one day can be up to
+several gigabytes. It is problematic for a single machine to handle this
+because of the limitations of memory, loading the entire file in memory.
+Distributed computing solves this by spreading the computations out to
+several machines in parallel. The obvious gain is that the waiting time
+before a computation is done is divided by the amount of nodes used,
+compared to running the computation on one machine. There is also a gain
+related to the actual machines, it is possible to use commodity hardware.
+Because MapReduce and BigTable has high availability and reliability a node
+in the cluster can safely be replaced on the fly if it fails.
+
+Scalability is also very important. Using single machines for computing is
+problematic when the dataset grows, more powerful machines has to be
+obtained. More power contained in a single machine results in higher price,
+eventually it is too expensive to perform computations on very large
+datasets. Both MapReduce and BigTable scale close to linearly, adding one
+machine to the cluster adds equal amount of processing power. Since
+MapReduce and BigTable can use commodity hardware it is reasonable to buy
+extra machines to gain extra computing power or storage space.
+
+
+\section{Overview}
+
+
+
+\chapter{Theory [TODO: needs better name]}
+
+\section{Time-series}
+
+\section{Multidimensional arrays}
+
+\subsection{Data cubes}
+
+\subsection{Cube lattice}
+
+\section{Dimensions}
+
+\section{Projections}
+
+\section{Granularity}
+
+
+
+\chapter{Tools}
+
+Regarding the infrastructure, both BigTable and MapReduce has high
+availability, scalability and reliability. Since BigTable runs on top of
+GFS\footnote{Google File System}, the data stored in BigTable is
+replicated, usually three times, onto other nodes in the cluster.
+\cite{gfs} Likewise, if a node in a MapReduce job goes down or fails to
+complete the job it is reassigned to another node. \cite{mapreduce}
+
+
+\section{MapReduce}
+
+Analysing the massive amounts of log data raises high demand for computing
+power. The MapReduce \cite{mapreduce} pattern suits the analysing issue
+well. The great benefit of MapReduce is that it runs on a computer cluster
+of commodity hardware where computation takes place independently in
+parallel. All results computed by each node are then reduced into one
+single result.
+
+% ONE DOES NOT SIMPLY PROCESS THE DATA ON ONE COMPUTER INTO MORDOR.
+Basically MapReduce is a two phase computation. First the input data is
+partitioned and each of these partitions is sent to a \textit{mapper} which
+performs computations on each row of the data. The mapper then outputs each
+resulting computation on the format \texttt{key,value}. These key-value
+pairs are received by a \textit{reducer} which performs the second stage of
+the computation.
+
+
 \section{BigTable}
 
 The data model is a simple one: Rows of data are stored in named tables.
@@ -103,85 +195,12 @@ want to store those data points that are likely to be needed simultaneously
 close to each other. \cite{bigtable}
 
 
+\subsection{Data model}
 
-\section{MapReduce}
-
-Analysing the massive amounts of log data raises high demand for computing
-power. The MapReduce \cite{mapreduce} pattern suits the analysing issue
-well. The great benefit of MapReduce is that it runs on a computer cluster
-of commodity hardware where computation takes place independently in
-parallel. All results computed by each node are then reduced into one
-single result.
-
-% ONE DOES NOT SIMPLY PROCESS THE DATA ON ONE COMPUTER INTO MORDOR.
-Basically MapReduce is a two phase computation. First the input data is
-partitioned and each of these partitions is sent to a \textit{mapper} which
-performs computations on each row of the data. The mapper then outputs each
-resulting computation on the format \texttt{key,value}. These key-value
-pairs are received by a \textit{reducer} which performs the second stage of
-the computation.
+Sorted distributed multidimensional sparse hashtable.
 
 
-
-\section{Summary}
-
-Regarding the infrastructure, both BigTable and MapReduce has high
-availability, scalability and reliability. Since BigTable runs on top of
-GFS\footnote{Google File System}, the data stored in BigTable is
-replicated, usually three times, onto other nodes in the cluster.
-\cite{gfs} Likewise, if a node in a MapReduce job goes down or fails to
-complete the job it is reassigned to another node. \cite{mapreduce}
-
-
-
-\chapter{Problem description}
-
-\section{Scope}
-
-Time-series based analysis is the most important one when analysing web
-logs, it comes natural since all log entries are timestamped.
-\cite{discoveringweb} It is also the most common form we have seen for logs
-in general.
-
-Assuming that time-series analysis is the most important, we have imposed
-the restriction on the system that is built so that it only handles
-time-series. Because of this restriction the data store obviously becomes
-less general purpose. Although since most log data is time-series based
-this restriction does not cripple the system much--if at all.
-
-
-
-\section{Data size}
-
-The sheer size of the data makes it unfeasible to use a single computer.
-Eventually a single machine would be fed so much data that it cannot cope
-with it. For instance a single web log file for one day can be up to
-several gigabytes. It is problematic for a single machine to handle this
-because of the limitations of memory, loading the entire file in memory.
-Distributed computing solves this by spreading the computations out to
-several machines in parallel. The obvious gain is that the waiting time
-before a computation is done is divided by the amount of nodes used,
-compared to running the computation on one machine. There is also a gain
-related to the actual machines, it is possible to use commodity hardware.
-Because MapReduce and BigTable has high availability and reliability a node
-in the cluster can safely be replaced on the fly if it fails.
-
-Scalability is also very important. Using single machines for computing is
-problematic when the dataset grows, more powerful machines has to be
-obtained. More power contained in a single machine results in higher price,
-eventually it is too expensive to perform computations on very large
-datasets. Both MapReduce and BigTable scale close to linearly, adding one
-machine to the cluster adds equal amount of processing power. Since
-MapReduce and BigTable can use commodity hardware it is reasonable to buy
-extra machines to gain extra computing power or storage space.
-
-
-
-\chapter{Data model}
-
-\section{Sorted data}
-
-\subsection{Rows}
+\subsubsection{Rows}
 
 Each row in a BigTable is associated with a unique key. All the data is
 stored sorted by rowkey. Because of this it is important to have a thorough
@@ -190,7 +209,7 @@ efficiently.
 
 
 
-\subsection{Regions}
+\subsubsection{Regions}
 
 BigTable use the concept of tablets, HBase in turn uses regions. In order
 to be consistent with the rest of this paper we henceforth use the term
@@ -205,18 +224,18 @@ reliability and scalability features.
 
 
 
-\section{Dimensions}
+\subsection{Dimensions}
 
-\subsection{Column-families}
+\subsubsection{Column-families}
 
 Each column-family is stored as a single map-file in hbase.
 
 
-\subsection{Column-qualifiers}
+\subsubsection{Column-qualifiers}
 
 
 
-\section{Hierarchies}
+\subsection{Hierarchies}
 
 Depending on how the rowkeys are formatted different hierarchies are
 created. The order in which the data is stored is very important, it
@@ -234,27 +253,6 @@ which we want ten, it would mean that we just scan ten rows and use all of
 them.
 
 
-
-\chapter{Theory [TODO: needs better name]}
-
-\section{Time-series}
-
-\section{Multidimensional arrays}
-
-\subsection{Data cubes}
-
-\subsection{Cube lattice}
-
-\section{Dimensions}
-
-\section{Projections}
-
-\section{Granularity}
-
-
-
-\chapter{Tools}
-
 \section{Apache Hadoop}
 
 \subsection{Hadoop Distributed File System}
@@ -265,9 +263,7 @@ them.
 
 \subsection{Thrift}
 
-\subsection{REST}
-
-\subsection{JSON}
+\section{Java}
 
 \section{Python}
 
@@ -280,6 +276,10 @@ them.
 \subsection{Setuptools}
 
 \subsection{simplejson}
+
+\section{REST}
+
+\section{JSON}
 
 
 
@@ -330,12 +330,15 @@ Support exists for writing the mapper in Java or Python.
 
 \section{Data interchange}
 
-\subsection{Input formats}
+\subsection{Internal}
 
-\subsection{Output formats}
+\subsubsection{Input formats}
 
-\subsubsection{Darling}
+\subsubsection{Output formats}
 
+\subsection{External}
+
+\subsubsection{JSON}
 
 
 \chapter{Usage}
@@ -418,27 +421,23 @@ Built with Python Paste--a middleware framework--the data server dispatches
 to the requested application depending on the URI it was fed.
 
 
-
-\section{URLParser}
+\subsubsection{URLParser}
 
 Dispatching.
 
 
-
-\section{Clients}
+\subsubsection{Clients}
 
 Dispatches to static files in client directory in the project directory.
 Custom clients can be built with HTML and JavaScript, see the examples.
 
 
-
-\section{Data}
+\subsubsection{Data}
 
 Serves data from HBase, dumps it as JSONP.
 
 
-
-\section{Transformers}
+\subsubsection{Transformers}
 
 Fetches data from HBase and transforms it with the requested transform
 program in the transformers directory in the project directory, output is
@@ -452,13 +451,25 @@ dumped as JSONP.
 
 
 
-\chapter{Future work}
+\chapter{Discussion}
 
-Multiple datasets
+\section{Related work}
 
-Metadata
+HDW is system which goal is to create a high performance large scale data
+warehouse based on MapReduce and Bigtable. \cite{hdw}
+
+
+\section{Future work}
+
+\subsection{Multiple datasets}
+
+\subsection{Metadata}
+
+\subsection{Updating dataset files}
 
 Update tables on configuration--dataset files--changes.
+
+\subsection{Importing without MapReduce}
 
 Importing content without firing of a MapReduce job, e.g. via a Thrift
 service.
@@ -466,13 +477,6 @@ service.
 
 
 \chapter{Conclusion}
-
-
-
-\chapter{Related work}
-
-HDW is system which goal is to create a high performance large scale data
-warehouse based on MapReduce and Bigtable. \cite{hdw}
 
 
 
