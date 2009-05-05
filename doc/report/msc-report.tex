@@ -364,7 +364,16 @@ notably: object-oriented, imperative and functional---scripting language.
 
 \subsection{Paste}
 
-Middleware. WSGI. HTTP server.
+Python Paste is a framework for building WSGI\footnote{Web Server Gateway
+Interface, a HTTP extension where a CGI-like environment is passed around.}
+applications and middleware.
+
+WSGI applications receive a WSGI request and returns a response with the
+built-in web server.
+
+Middleware is software that acts as an intermediary. WSGI middleware
+receives a WSGI request and then performs logic upon this request, before
+passing the request to a WSGI application.
 
 
 \subsection{PyYAML}
@@ -374,13 +383,18 @@ PyYAML is a complete YAML 1.1 compliant parser and emitter for Python.
 
 \subsection{Setuptools}
 
+Python Setuptools is a framework---built on top of the Python module
+distutils---for basic package management of Python software. Amongst other
+things it creates and installs Python Eggs\footnote{A Zip file which
+bundles Python software.}.
+
+
 \subsection{simplejson}
 
-
-\section{REST}
-
-REST\footnote{Representational State Transfer}
-
+A simple, fast, complete and extensible JSON encoder and decoder for
+Python. The Python module simplejson is implemented entirely in Python and
+has no external dependencies. However a C extension which provides a
+serious speed boost is included.
 
 
 
@@ -556,6 +570,7 @@ dumped as JSONP.
 
 HDW is system which goal is to create a high performance large scale data
 warehouse based on MapReduce and Bigtable. \cite{hdw}
+
 
 
 \section{Future work}
