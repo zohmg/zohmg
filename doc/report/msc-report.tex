@@ -244,6 +244,18 @@ data sources.
 
 A manage script is used to create tables from a pre-defined schema.
 
+\begin{verbatim}
+   zohmg create project
+\end{verbatim}
+
+\noindent Edit the configuration files.
+
+\begin{verbatim}
+   zohmg setup
+\end{verbatim}
+
+\noindent The above command executes the configuration made and creates the
+infrastructure (HBase tables) for the project.
 
 
 \section{Import}
@@ -262,6 +274,9 @@ contents, respectively. The user can then perform computations on these
 entities and finally yield the results as a dictionary. The resulting
 dictionary will be interpreted by OHM and stored accordingly.
 
+\begin{verbatim}
+   zohmg import mappers/somemapper.py path/on/hdfs
+\end{verbatim}
 
 
 \section{Storing data}
@@ -280,7 +295,28 @@ data sets.
 Data is served to the user either over HTTP in JSON format or over Thrift.
 \cite{thrift}
 
+\begin{verbatim}
+   zohmg serve
+\end{verbatim}
 
+\noindent The above serves on default port 8086, with the --port argument it is
+possible to change server port.
+
+To extract data, visit the server URL (e.g. http://localhost:8086/) and
+give a request and query.
+
+
+\subsection{Data server}
+
+TODO
+
+URLParser
+
+Client
+
+Data
+
+Transform
 
 
 
@@ -306,12 +342,17 @@ OHM is implemented in Python.
 
 
 
-\section{Administration}
+\section{Configuration}
 
 \subsection{YAML}
 
 The user's datasets are defined using YAML--a human friendly data
-serialization standard.
+serialization standard. The datasets reside in the config directory.
+
+\subsection{Environment}
+
+Certain paths need to be known by OHM in order to function, these are set
+in the config/environment.py file.
 
 
 \section{Apache Hadoop}
