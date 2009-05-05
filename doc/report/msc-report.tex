@@ -137,11 +137,23 @@ presents the conclusion, respectively.
 
 \section{Data cubes}
 
-A data cube is a conceptual n-dimensional array of values. The values are numerical facts belonging to some dimension. The data cube is also known as a hypercube. In this context, each dimension of the cube corresponds to an attribute of the data in question and each point along the dimensions axis is a value of the corresponding attribute. The mental model of a data cube aids in reasoning about dimensions. Data cubes are traditionally modeled as star schemas in relational database systems.
+A data cube is a conceptual n-dimensional array of values. The values are
+numerical facts belonging to some dimension. The data cube is also known as a
+hypercube, it relates to multidimensional analogues of squares and cubes.
+In this context, each dimension of the cube corresponds to an attribute of
+the data in question and each point along the dimension's axis is a value of
+the corresponding attribute. The mental model of a data cube aids in
+reasoning about dimensions. Data cubes are traditionally modeled as star
+schemas in relational database systems. \cite{olap_solutions}
+
 
 \subsection{Dimensions}
 
-The dimensions of the data cube are.. 
+The school book example of a data cube is three dimensional where each of
+the three dimensions correspond to one of the attributes time, products,
+and stores. Adding another attribute adds another dimension to the data
+cube, because of the one to one relationship of attributes and dimensions.
+
 
 \subsection{Projections}
 
@@ -154,9 +166,13 @@ A typical projection is that from an n-dimensional cube down to two dimensions, 
 
 The slice operation fixes the values of one or several dimensions in the cube. The data omitted from this operation would be any data associated with the values of the dimension that were not fixed. The dice operation is a slice on more than two dimensions. [source: http://www.cs.ualberta.ca/~zaiane/courses/cmput690/glossary.html]
 
+
+
 \section{Time series}
 
 Time is the most common of the dimensions in the data cube constructed for Zohmg. The time stamp is a common property for all data handled by Zohmg; every measurement is expected to have time as one of its dimensions. TODO: really, this belongs in the implementation section. I find nothing interesting to say about time series in this section.
+
+
 
 \section{Aggregates}
 
