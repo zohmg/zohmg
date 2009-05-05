@@ -212,6 +212,9 @@ reliability and scalability features.
 Each column-family is stored as a single map-file in hbase.
 
 
+\subsection{Column-qualifiers}
+
+
 
 \section{Hierarchies}
 
@@ -229,6 +232,107 @@ To minimize the cost of scanning for data we want it to be ordered so that
 a scan would use every row it visits. In the case with thousand rows of
 which we want ten, it would mean that we just scan ten rows and use all of
 them.
+
+
+
+\chapter{Theory [TODO: needs better name]}
+
+\section{Time-series}
+
+\section{Multidimensional arrays}
+
+\subsection{Data cubes}
+
+\subsection{Cube lattice}
+
+\section{Dimensions}
+
+\section{Projections}
+
+\section{Granularity}
+
+
+
+\chapter{Tools}
+
+\section{Apache Hadoop}
+
+\subsection{Hadoop Distributed File System}
+
+\section{Apache HBase}
+
+\subsection{Thrift}
+
+\subsection{REST}
+
+\subsection{JSON}
+
+\section{Python}
+
+\subsection{Dumbo}
+
+\subsection{Paste}
+
+\subsection{PyYAML}
+
+\subsection{Setuptools}
+
+\subsection{simplejson}
+
+
+
+\chapter{Implementation}
+
+OHM is built upon existing tools and software. It uses Apache Hadoop and
+HBase, free implementations of Google's MapReduce and BigTable
+respectively, both implemented in Java.
+
+Importing data to OHM is as simple as the user defines a mapper--the first
+half of a MapReduce program--which is run over a file that resides on
+HDFS\footnote{Hadoop Distributed Filesystem}.
+
+Data is stored on Apache HBase
+
+Exporting data
+
+JSON\footnote{JavaScript Object Notation} is transported over a RESTful
+interface or data is transported with Thrift.
+
+OHM is implemented in Python.
+
+
+
+\section{Configuration}
+
+\subsection{YAML}
+
+The user's datasets are defined using YAML--a human friendly data
+serialization standard. The dataset files reside in the config directory.
+
+
+\subsection{Environment}
+
+Certain paths need to be known by OHM in order to function, these are set
+in the config/environment.py file.
+
+
+
+\section{Importing}
+
+The user defines a mapper which OHM wraps, interpreting the output from the
+mapper program and storing it in HBase.
+
+Support exists for writing the mapper in Java or Python.
+
+
+
+\section{Data interchange}
+
+\subsection{Input formats}
+
+\subsection{Output formats}
+
+\subsubsection{Darling}
 
 
 
@@ -299,8 +403,8 @@ Data is served to the user either over HTTP in JSON format or over Thrift.
    zohmg serve
 \end{verbatim}
 
-\noindent The above serves on default port 8086, with the --port argument it is
-possible to change server port.
+\noindent The above serves on default port 8086, with the --port argument
+it is possible to change server port.
 
 To extract data, visit the server URL (e.g. http://localhost:8086/) and
 give a request and query.
@@ -308,70 +412,35 @@ give a request and query.
 
 \subsection{Data server}
 
-TODO
-
-URLParser
-
-Client
-
-Data
-
-Transform
+Built with Python Paste--a middleware framework--the data server dispatches
+to the requested application depending on the URI it was fed.
 
 
 
-\chapter{Implementation}
+\section{URLParser}
 
-OHM is built upon existing tools and software. It uses Apache Hadoop and
-HBase, free implementations of Googles' MapReduce and BigTable
-respectively, both implemented in Java.
-
-Importing data to OHM is as simple as the user defines a mapper--the first
-half of a MapReduce program--which is run over a file that resides on
-HDFS\footnote{Hadoop Distributed Filesystem}.
-
-Data is stored on Apache HBase
-
-Exporting data
-
-and the user 
-JSON\footnote{JavaScript Object Notation} is transported over a RESTful
-interface or data is transported with Thrift.
-
-OHM is implemented in Python.
+Dispatching.
 
 
 
-\section{Configuration}
+\section{Clients}
 
-\subsection{YAML}
-
-The user's datasets are defined using YAML--a human friendly data
-serialization standard. The datasets reside in the config directory.
-
-\subsection{Environment}
-
-Certain paths need to be known by OHM in order to function, these are set
-in the config/environment.py file.
+Dispatches to static files in client directory in the project directory.
+Custom clients can be built with HTML and JavaScript, see the examples.
 
 
-\section{Apache Hadoop}
 
-\subsection{Hadoop Distributed File System}
+\section{Data}
 
-\subsection{Dumbo}
+Serves data from HBase, dumps it as JSONP.
 
-\section{Apache HBase}
 
-\subsection{Thrift}
 
-\section{Data interchange}
+\section{Transformers}
 
-\subsection{Input and output formats}
-
-\subsection{REST}
-
-\subsection{JSON}
+Fetches data from HBase and transforms it with the requested transform
+program in the transformers directory in the project directory, output is
+dumped as JSONP.
 
 
 
