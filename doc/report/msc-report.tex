@@ -33,6 +33,17 @@ conclusions.
 
 \chapter{Introduction}
 
+This paper talks about a data store for aggregated multi-dimensional time-series-based data. The data is aggregated over many units of measurements and across multiple dimensions. One of these dimensions is always time.
+
+Zohmg solves the problem of summing and storing measurements taken from log files or similar. It stores solely summarized data, not atomic data. Zohmg is optimized for speed of data retrieval.
+
+The paper is presented in three major sections: problem statement, the theoretical solution and the implementation details.
+
+Says Wikipedia: "Data warehouse is a repository of an organization's electronically stored data. Data warehouses are designed to facilitate reporting and analysis." The main actions of a data warehouse is extract, transform and load data, although not necessarily in that order.
+
+The classic thinking in data warehousing is the divide between facts and dimensons. The facts are measures categorized by dimensions. In OLAP, a sort of data warehouse, the OLAP cube is typically modelled in fact tables and dimension tables in a relational database. The novelty of our approach is to model OLAP cube-like aggregation data store on top of a bigtable-like data store.
+
+
 As large scale web services grow they generate vast volumes of log data,
 for instance Apache web logs. The ability to accurately analyse gathered
 data is important to the evaluation, planning, and success of the web
@@ -255,19 +266,42 @@ them.
 
 \section{Apache Hadoop}
 
+Hadoop is an open-source implementation of Google's MapReduce-framework described in [mapreduce]. Hadoop is written in Java and is part of the Apache Software Foundation.  It is a fairly mature piece of software and is used in production at numerous companies.
+
+MapReduce is a framework for running jobs in parallel across multiple machines. As the name implies, MapReduce is made up of two part or phases: map and reduce. The map phase consumes one piece of input at a time (a piece of input can be a line from a log file, for example), and emits an intermediate key and value. These keys and values are then processed by the reduce phase, which emits the final key-value pairs.
+
+MapReduce works by splitting the input, which commonly is in the size range of many gigabytes, into n parts and lets each node of the computing cluster work on one or more parts. The mapper on each node emits key-value pairs which are fed into the reduce phase. The final output is collated, usually on a network file system.
+
+All Zohmg programs are executed on Hadoop.
+
 \subsection{Hadoop Distributed File System}
 
 \subsection{Hadoop streaming}
 
 \section{Apache HBase}
 
+HBase is an open-source implementation of Google's BigTable data store described in [bigtable]. It is a sub-project of Hadoop, written in Java and a part of the Apache Software Foundation. HBase is still in its infancy and few organizations use it for mission-critical applications.
+
+BigTable is a data store designed for traversal of very large data sets. Time-stamped cells inside column-familes in rows. The row has a key and any number of cells attached to it. The rows in a table are sorted by the row key. The typical use-case of BigTable is to scan a range of rows. It is therefor important to set up one's keys so that related data is close to each other. For example, if it makes sense to traverse the data in chronological order, the key might contain a representation of the data's timestamp. The classic example is to have the reversed domain name (i.e. com.google.www) as the row key, which means that all sub-domains of any domain are next to each other.
+
+Sparseness is a big thing. Null values are free of charge. *Describe how we leverage sparsity*.
+
+The typical use case for Zohmg is to read one or more qualifiers, which correspond to one or more points in n-space, over a range of time. Therefor, the keys are made up of the time and unit of the measurement, and the qualifier queried for represents the point in n-space. More on this in the data model section.
+
+
+All Zohmg data is stored in HBase.
+
+\section{Dumbo}
+
+Dumbo is a framework for writing Hadoop programs in languages other than Java, in a so-called Streaming Mode. Dumbo is written in Python. It is used extensively at last.fm for writing short prototypes.
+
+All Zohmg programs written in Python use Dumbo to execute on Hadoop.
+
 \subsection{Thrift}
 
 \section{Java}
 
 \section{Python}
-
-\subsection{Dumbo}
 
 \subsection{Paste}
 
@@ -460,6 +494,14 @@ warehouse based on MapReduce and Bigtable. \cite{hdw}
 
 
 \section{Future work}
+
+Says Wikipedia: "Organizations generally start off with relatively simple use of data warehousing. Over time, more sophisticated use of data warehousing evolves." Zohmg is that relatively simple data warehouse; the seed from which a more sophisticated data warehouse may evolve.
+
+There is as of yet no support for specifying granularities. The only supported resolution of time is the day.
+
+The single aggregation performed is summing of the measurements. Future work may include average, max and min, etc.
+
+There is no metadata store. It would be very helpful for the application writer to know what the known values are for each dimension.
 
 \subsection{Multiple datasets}
 
