@@ -6,9 +6,9 @@ DONE> ImportError: No module named hbase.ttypes
 priority uno:
 + rename. (zonotoop)
 + make sure it's easy to get zohmg up and running.
-  - shell script to install dependencies
-+ server
-  - transformers, plugin to data server
+DONE>  - shell script to install dependencies
+DONE> + server
+DONE>  - transformers, plugin to data server
 + config
   - put address and ports for servers and software in config (hbase REST et al)
 + some update step for post-setup alterations to dataset.yaml
