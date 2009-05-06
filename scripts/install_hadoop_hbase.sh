@@ -35,7 +35,8 @@ function exec_and_log() {
 
     # execute and log to intermediate.
     if [ "x" = "x$screenoutput" ]; then
-        $1 &>$install_tmplog
+        $1
+#        $1 &>$install_tmplog
     else
         $1
     fi
@@ -199,14 +200,14 @@ else
     printf "Extracting Apache Hadoop... "
     exec_and_log "tar zxf $files/$hadoop_tar -C $prefix"
     echo "done."
+    exec_and_log "echo ... Patching Apache Hadoop ..."
     for patch in "$patch_1722" "$patch_5450"; do
         num=$(echo $patch | sed 's/.patch$//')
         printf "Applying patch $num... "
-        exec_and_log "echo ... Patching Apache Hadoop ..."
-        cd $hadoop
-        exec_and_log "patch -p0 <$files/patches/$patch" "Error: Could not apply patch $num."
+        exec_and_log "cd $hadoop ; patch -p0 <$files/patches/$patch" "Error: Could not apply patch $num."
         echo "done."
     done
+    exec_and_log "echo ok"
     printf "Compiling Apache Hadoop... "
     exec_and_log "echo ... Compiling Apache Hadoop ..."
     cd $hadoop
