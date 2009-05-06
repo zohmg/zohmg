@@ -35,8 +35,7 @@ function exec_and_log() {
 
     # execute and log to intermediate.
     if [ "x" = "x$screenoutput" ]; then
-        $1
-#        $1 &>$install_tmplog
+        $1 &>$install_tmplog
     else
         $1
     fi
@@ -160,14 +159,25 @@ if [ "x" = "x$files" ]; then
     echo "done."
     echo "Downloading files... "
     # printing progress to screen, without logging.
-    # release files.
     cd $files
-    exec_and_log "wget $hadoop_release" "Error: Could not download $hadoop_release" "true"
-    exec_and_log "wget $hbase_release" "Error: Could not download $hbase_release" "true"
-    # download patches.
-    cd patches
-    exec_and_log "wget $hadoop_1722" "Error: Could not download $hadoop_1722" "true"
-    exec_and_log "wget $hadoop_5450" "Error: Could not download $hadoop_5450" "true"
+    # empty hadoop
+    if [ ! "x" = "x$hbase_only" ]; then
+        echo "Skipping download of Apache Hadoop..."
+    else
+        # hadoop release file.
+        exec_and_log "wget $hadoop_release" "Error: Could not download $hadoop_release" "true"
+        # download patches.
+        cd patches
+        exec_and_log "wget $hadoop_1722" "Error: Could not download $hadoop_1722" "true"
+        exec_and_log "wget $hadoop_5450" "Error: Could not download $hadoop_5450" "true"
+    fi
+    if [ ! "x" = "x$hadoop_only" ]; then
+        echo "Skipping download of Apache HBase..."
+    else
+        cd $files
+        # hbase release file.
+        exec_and_log "wget $hbase_release" "Error: Could not download $hbase_release" "true"
+    fi
     echo "Done downloading files."
 else
     printf "Using previously downloaded files in $files... "
@@ -187,11 +197,6 @@ fi
 
 # install.
 echo "Installing..."
-
-# check permissions.
-for dir in "$hadoop" "$hbase"; do
-    exec_and_log "mkdir -p $dir" "Error: Could not create $dir."
-done
 
 # hadoop
 if [ ! "x" = "x$hbase_only" ]; then
@@ -239,7 +244,7 @@ if [ "x" = "x$no_config" ]; then
         exec_and_log "cp -v $hadoop_conf/hadoop-site.xml $hadoop_conf/hadoop-site.xml.dist"
 
         # emit configuration.
-        cat << EOF >$hadoop_conf/hadoop-env.sh
+        cat << EOHADOOPENV >$hadoop_conf/hadoop-env.sh
 # Set Hadoop-specific environment variables here.
 
 # The only required environment variable is JAVA_HOME.  All others are
@@ -262,11 +267,11 @@ export JAVA_HOME=\`ls -l /etc/alternatives/java | sed 's#.* -> \(.*\)/jre/bin/ja
 # export HADOOP_OPTS=-server
 
 # Command specific options appended to HADOOP_OPTS when specified
-export HADOOP_NAMENODE_OPTS="-Dcom.sun.management.jmxremote $HADOOP_NAMENODE_OPTS"
-export HADOOP_SECONDARYNAMENODE_OPTS="-Dcom.sun.management.jmxremote $HADOOP_SECONDARYNAMENODE_OPTS"
-export HADOOP_DATANODE_OPTS="-Dcom.sun.management.jmxremote $HADOOP_DATANODE_OPTS"
-export HADOOP_BALANCER_OPTS="-Dcom.sun.management.jmxremote $HADOOP_BALANCER_OPTS"
-export HADOOP_JOBTRACKER_OPTS="-Dcom.sun.management.jmxremote $HADOOP_JOBTRACKER_OPTS"
+export HADOOP_NAMENODE_OPTS="-Dcom.sun.management.jmxremote \$HADOOP_NAMENODE_OPTS"
+export HADOOP_SECONDARYNAMENODE_OPTS="-Dcom.sun.management.jmxremote \$HADOOP_SECONDARYNAMENODE_OPTS"
+export HADOOP_DATANODE_OPTS="-Dcom.sun.management.jmxremote \$HADOOP_DATANODE_OPTS"
+export HADOOP_BALANCER_OPTS="-Dcom.sun.management.jmxremote \$HADOOP_BALANCER_OPTS"
+export HADOOP_JOBTRACKER_OPTS="-Dcom.sun.management.jmxremote \$HADOOP_JOBTRACKER_OPTS"
 # export HADOOP_TASKTRACKER_OPTS=
 # The following applies to multiple commands (fs, dfs, fsck, distcp etc)
 # export HADOOP_CLIENT_OPTS
@@ -274,14 +279,14 @@ export HADOOP_JOBTRACKER_OPTS="-Dcom.sun.management.jmxremote $HADOOP_JOBTRACKER
 # Extra ssh options.  Empty by default.
 # export HADOOP_SSH_OPTS="-o ConnectTimeout=1 -o SendEnv=HADOOP_CONF_DIR"
 
-# Where log files are stored.  $HADOOP_HOME/logs by default.
-# export HADOOP_LOG_DIR=${HADOOP_HOME}/logs
+# Where log files are stored.  \$HADOOP_HOME/logs by default.
+# export HADOOP_LOG_DIR=\${HADOOP_HOME}/logs
 
-# File naming remote slave hosts.  $HADOOP_HOME/conf/slaves by default.
-# export HADOOP_SLAVES=${HADOOP_HOME}/conf/slaves
+# File naming remote slave hosts.  \$HADOOP_HOME/conf/slaves by default.
+# export HADOOP_SLAVES=\${HADOOP_HOME}/conf/slaves
 
 # host:path where hadoop code should be rsync'd from.  Unset by default.
-# export HADOOP_MASTER=master:/home/$USER/src/hadoop
+# export HADOOP_MASTER=master:/home/\$USER/src/hadoop
 
 # Seconds to sleep between slave commands.  Unset by default.  This
 # can be useful in large clusters, where, e.g., slave rsyncs can
@@ -291,13 +296,13 @@ export HADOOP_JOBTRACKER_OPTS="-Dcom.sun.management.jmxremote $HADOOP_JOBTRACKER
 # The directory where pid files are stored. /tmp by default.
 # export HADOOP_PID_DIR=/var/hadoop/pids
 
-# A string representing this instance of hadoop. $USER by default.
-# export HADOOP_IDENT_STRING=$USER
+# A string representing this instance of hadoop. \$USER by default.
+# export HADOOP_IDENT_STRING=\$USER
 
 # The scheduling priority for daemon processes.  See 'man nice'.
 # export HADOOP_NICENESS=10
-EOF
-        cat <<EOF >$hadoop_conf/hadoop-site.xml
+EOHADOOPENV
+        cat <<EOHADOOPSITE >$hadoop_conf/hadoop-site.xml
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 
@@ -317,7 +322,7 @@ EOF
     <value>1</value>
   </property>
 </configuration>
-EOF
+EOHADOOPSITE
         echo "done."
     fi
     if [ "x" = "x$hadoop_only" ]; then
@@ -326,7 +331,7 @@ EOF
         exec_and_log "cp -v $hbase_conf/hbase-env.sh $hbase_conf/hbase-env.sh.dist"
 
         # emit configuration.
-        cat <<EOF >$hbase_conf/hbase-env.sh
+        cat <<EOHBASEENV >$hbase_conf/hbase-env.sh
 #
 #/**
 # * Copyright 2007 The Apache Software Foundation
@@ -364,17 +369,17 @@ export JAVA_HOME=\`ls -l /etc/alternatives/java | sed 's#.* -> \(.*\)/jre/bin/ja
 # Extra Java runtime options.  Empty by default.
 # export HBASE_OPTS=-server
 
-# File naming hosts on which HRegionServers will run.  $HBASE_HOME/conf/regionservers by default.
-# export HBASE_REGIONSERVERS=${HBASE_HOME}/conf/regionservers
+# File naming hosts on which HRegionServers will run.  \$HBASE_HOME/conf/regionservers by default.
+# export HBASE_REGIONSERVERS=\${HBASE_HOME}/conf/regionservers
 
 # Extra ssh options.  Empty by default.
 # export HBASE_SSH_OPTS="-o ConnectTimeout=1 -o SendEnv=HBASE_CONF_DIR"
 
-# Where log files are stored.  $HBASE_HOME/logs by default.
-# export HBASE_LOG_DIR=${HBASE_HOME}/logs
+# Where log files are stored.  \$HBASE_HOME/logs by default.
+# export HBASE_LOG_DIR=\${HBASE_HOME}/logs
 
-# A string representing this instance of hbase. $USER by default.
-# export HBASE_IDENT_STRING=$USER
+# A string representing this instance of hbase. \$USER by default.
+# export HBASE_IDENT_STRING=\$USER
 
 # The scheduling priority for daemon processes.  See 'man nice'.
 # export HBASE_NICENESS=10
@@ -386,7 +391,7 @@ export JAVA_HOME=\`ls -l /etc/alternatives/java | sed 's#.* -> \(.*\)/jre/bin/ja
 # can be useful in large clusters, where, e.g., slave rsyncs can
 # otherwise arrive faster than the master can service them.
 # export HBASE_SLAVE_SLEEP=0.1
-EOF
+EOHBASEENV
         echo "done."
     fi
 else
