@@ -106,10 +106,10 @@ Because MapReduce and BigTable has high availability and reliability a node
 in the cluster can safely be replaced on the fly if it fails.
 
 Scalability is also very important. Using single machines for computing is
-problematic when the dataset grows, more powerful machines has to be
+problematic when the data set grows, more powerful machines has to be
 obtained. More power contained in a single machine results in higher price,
 eventually it is too expensive to perform computations on very large
-datasets. Both MapReduce and BigTable scale close to linearly, adding one
+data sets. Both MapReduce and BigTable scale close to linearly, adding one
 machine to the cluster adds equal amount of processing power. Since
 MapReduce and BigTable can use commodity hardware it is reasonable to buy
 extra machines to gain extra computing power or storage space.
@@ -159,7 +159,9 @@ cube, because of the one to one relationship of attributes and dimensions.
 
 One of the most common operations on a data cube is the projection. A projection is a dimensionality reduction, where one or more dimensions are discarded from the cube with the measurements along each axis summed up, leaving a data cube of a lesser dimension.
 
-A typical projection is that from an n-dimensional cube down to two dimensions, which is the case when plotting an image on screen or paper.
+A typical projection is that from an n-dimensional cube down to two
+dimensions, which is the case when plotting an object---with three or more
+dimensions---on screen or paper.
 
 
 \subsection{Slice and dice}
@@ -238,7 +240,7 @@ In actual practice, the main difference between the two models is that
 querying is highly restricted in a BigTable-like data store---there are no
 joins, for example---whereas the relational database was born to be queried.
 On the other hand, the restrictions placed upon the BigTable models are
-what allows it to scale to such a large dataset. Indeed, BigTable was born
+what allows it to scale to such a large data set. Indeed, BigTable was born
 to scale.
 
 \textbf{TODO: -- elaborate on reasons to why starsql does not scale--}
@@ -466,6 +468,9 @@ Python is a popular general-purpose high-level multi-paradigm---most
 notably: object-oriented, imperative and functional---scripting language.
 \cite{python}
 
+Zohmg is written mostly in Python. Zohmg uses the following Python modules
+internally; it depends on them to be available on the system.
+
 
 \subsection{Paste}
 
@@ -526,9 +531,9 @@ Zohmg is implemented in Python.
 
 \section{Configuration}
 
-\subsection{YAML}
+\subsection{Data sets}
 
-The user's datasets are defined using YAML. The dataset files reside in
+The user's data sets are defined using YAML. The data set files reside in
 the config directory.
 
 
@@ -556,9 +561,47 @@ Support exists for writing the mapper in Java or Python.
 
 \subsubsection{Output formats}
 
+The Darling output format for HBase. Between Zohmg and Hadoop JSON is used
+for serializing data.
+
+
 \subsection{External}
 
-\subsubsection{JSON}
+The data export server is uilt with Python Paste---a middleware
+framework---the data server dispatches to the requested application
+depending on the URI it was fed.
+
+
+\subsubsection{URLParser}
+
+Middleware which dispatches to applications based on the URI. The URLParser
+removes the first part of the URI and tries to find a matching application
+to relay the request to. For instance, consider the URI
+\texttt{/client/file.html}. The first part---\texttt{client}---will be
+removed and the request \texttt{/file.html} will be sent to the application
+named \texttt{client.py}.
+
+
+\subsubsection{Clients}
+
+Dispatches request to serve static files from the project's
+\texttt{clients} directory. Custom clients---which interact with Zohmg---can
+be built with HTML and JavaScript, see the examples.
+
+
+\subsubsection{Data}
+
+Fetches data from HBase via its Thrift interface. The data is served to the
+user as JSONP\footnote{JSON with padding: JSON extension which adds name of
+callback function as an argument to the function itself.}.
+
+
+\subsubsection{Transformers}
+
+Fetches data from HBase and transforms it with the requested transform
+program from the project's transformers directory, output is
+dumped as JSONP.
+
 
 
 \chapter{Usage}
@@ -630,43 +673,62 @@ Data is served to the user either over HTTP in JSON format or over Thrift.
 \noindent The above serves on default port 8086, with the \texttt{--port}
 argument it is possible to change server port.
 
-To extract data, visit the server URL (e.g. http://localhost:8086/) and
-give a query request.
+The data server have three methods of serving data: raw, transformed, and
+static. The raw and transformed data are aggregates served from HBase,
+transformed in the latter case, while the static method just serve static
+files from the project's \textit{clients} directory. Aggregates served from
+HBase are returned to the user as JSONP.
 
 
-\subsection{Data server}
+\subsection{Data}
 
-Built with Python Paste---a middleware framework---the data server
-dispatches to the requested application depending on the URI it was fed.
+Based on the query---which the user submits---the corresponding data is
+served from HBase as JSONP. The query is a simple definition of wanted row
+range, dimensions, and values for these dimensions. The query is submitted
+to the data server via HTTP, an example query could look like (the URL is
+wrapped to fit the page) \\
 
+\texttt{http://localhost:8086/data/?t0=20090101 \\
+\&t1=20090420\&unit=pageviews\&d0=country\&d0v=SE} \\
 
-\subsubsection{URLParser}
-
-Middleware which dispatches to applications based on the URI.
-
-
-\subsubsection{Clients}
-
-Dispatches request to serve static files from the project's client directory.
-Custom clients can be built with HTML and JavaScript, see the examples.
+The above query would return the pageviews for SE between 1 January 2009
+and 4 April 2009.
 
 
-\subsubsection{Data}
-
-Serves data from HBase as JSONP\footnote{JSON with padding: JSON extension which adds name of callback function as an argument to the function itself.}.
-
-
-\subsubsection{Transformers}
+\subsection{Transformers}
 
 Fetches data from HBase and transforms it with the requested transform
-program from the project's transformers directory, output is
+program from the project's \texttt{transformers} directory, output is
 dumped as JSONP.
+
+
+\subsection{Clients}
+
+It is possible to build static web pages out of HTML and JavaScript, which
+can interact with the data server. These static pages can for instance
+present some sort of query building mechanism (for insntance with drop down
+boxes) and then send this query to the data server and graph the resulting
+data.
+
+The data server serves static files from the project's \texttt{clients}
+directory at the server URL appended with \texttt{client/filename}.
 
 
 
 \chapter{Examples}
 
 \section{Web log analysis}
+
+Configure the dataset.yaml.
+
+Write a custom mapper, which imports data from web logs.
+
+Start data server and extract data from it.
+
+Possibly write a transformer which performs some transformation on the
+aggregated data.
+
+Possibly write a client which will render a graph.
 
 
 
@@ -689,13 +751,13 @@ The single aggregation performed is summing of the measurements. Future work may
 
 There is no metadata store. It would be very helpful for the application writer to know what the known values are for each dimension.
 
-\subsection{Multiple datasets}
+\subsection{Multiple data sets}
 
 \subsection{Metadata}
 
-\subsection{Updating dataset files}
+\subsection{Updating data set files}
 
-Update tables on changes in configuration---dataset files.
+Update tables on changes in configuration---data set files.
 
 \subsection{Importing without MapReduce}
 
@@ -706,6 +768,8 @@ service.
 
 \chapter{Conclusion}
 
+Last.fm is looking at using Zohmg for multiple application areas, such as
+radio stats and web page stats.
 
 
 \pagebreak
