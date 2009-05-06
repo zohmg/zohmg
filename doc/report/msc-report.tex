@@ -1,7 +1,7 @@
 \documentclass[a4paper,10pt]{book}
 
 \author{Per Andersson, Fredrik M{\"o}llerstrand}
-\title{Zohmg---a large scale data warehouse for aggregated time-series-based
+\title{Zohmg---a large scale data store for aggregated time-series-based
 data. [DRAFT]}
 
 
@@ -317,7 +317,7 @@ them.
 Hadoop is a free software implementation of Google's MapReduce-framework
 described in \cite{mapreduce}. Hadoop is written in Java and is part of
 the Apache Software Foundation.  It is a fairly mature piece of software
-and is used in production at numerous companies.
+and is used in production at numerous companies. \cite{hadoop}
 
 MapReduce is a framework for running jobs in parallel across multiple
 machines. As the name implies, MapReduce is made up of two parts or
@@ -371,6 +371,7 @@ HBase is a free software implementation of Google's BigTable data store
 described in \cite{bigtable}. It is a sub-project of Hadoop, written in
 Java and a part of the Apache Software Foundation. HBase is still in its
 infancy and few organizations use it for mission-critical applications.
+\cite{hbase}
 
 BigTable is a data store designed for traversal of very large data sets.
 Time-stamped cells inside column-familes in rows. The row has a key and
@@ -413,7 +414,9 @@ than Java--for instance Python.
 
 \section{Dumbo}
 
-Dumbo is a framework for writing Hadoop programs in languages other than Java, in a so-called Streaming Mode. Dumbo is written in Python. It is used extensively at Last.fm for writing short prototypes.
+Dumbo is a framework for writing Hadoop programs in languages other than
+Java, in a so-called Streaming Mode. Dumbo is written in Python. It is used
+extensively at Last.fm for writing short prototypes. \cite{dumbo}
 
 All Zohmg programs written in Python use Dumbo to execute on Hadoop.
 
@@ -453,7 +456,7 @@ Both Hadoop and HBase are written in Java---a popular high-level
 object-oriented programming language.
 
 Most Hadoop users write their MapReduce programs in Java, since this is the
-native language of Hadoop.
+native language of Hadoop. \cite{java}
 
 
 
@@ -461,25 +464,27 @@ native language of Hadoop.
 
 Python is a popular general-purpose high-level multi-paradigm---most
 notably: object-oriented, imperative and functional---scripting language.
+\cite{python}
 
 
 \subsection{Paste}
 
 Python Paste is a framework for building WSGI\footnote{Web Server Gateway
 Interface, a HTTP extension where a CGI-like environment is passed around.}
-applications and middleware.
+applications and middleware. \cite{definitive_guide_to_pylons}
 
 WSGI applications receive a WSGI request and returns a response with the
 built-in web server.
 
 Middleware is software that acts as an intermediary. WSGI middleware
 receives a WSGI request and then performs logic upon this request, before
-passing the request to a WSGI application.
+passing the request to a WSGI application. \cite{paste}
 
 
 \subsection{PyYAML}
 
 PyYAML is a complete YAML 1.1 compliant parser and emitter for Python.
+\cite{pyyaml}
 
 
 \subsection{Setuptools}
@@ -487,7 +492,7 @@ PyYAML is a complete YAML 1.1 compliant parser and emitter for Python.
 Python Setuptools is a framework---built on top of the Python module
 distutils---for basic package management of Python software. Amongst other
 things it creates and installs Python Eggs\footnote{A Zip file which
-bundles Python software files.}.
+bundles Python software files.}. \cite{setuptools}
 
 
 \subsection{simplejson}
@@ -495,7 +500,7 @@ bundles Python software files.}.
 A simple, fast, complete and extensible JSON encoder and decoder for
 Python. The Python module simplejson is implemented entirely in Python and
 has no external dependencies. However a C extension which provides a
-serious speed boost is included.
+serious speed boost is included. \cite{simplejson}
 
 
 
