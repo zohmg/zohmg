@@ -4,41 +4,30 @@
 \title{Zohmg---a large scale data store for aggregated time-series-based
 data. [DRAFT]}
 
-
-
 \begin{document}
-
-
-
 \maketitle
 
-
-
 \noindent \Large{\textbf{Abstract}}
-
 \vspace{12pt}
 
-\noindent This is where we put down two to four sentences about:
-Introduction, problem, existing tools, our solution and implementation,
-conclusions.
+\noindent 
+This thesis describes a data store for multi-dimensional time-series-based data. The data is aggregated over many units of measurements and across multiple dimensions. One of these dimensions is always time.
+
+Zohmg solves the problem of summing, storing and serving measurements. These measurements may be taken from log files or similar sources. Zohmg stores only the summarized data, not the atomic measurements. Zohmg is optimized for speed of data retrieval.
+
+The thesis is presented in three major sections: problem statement, theoretical solution and implementation details.
 
 
 \tableofcontents
-
 \vfill
-
 \pagebreak
-
-
 
 \chapter{Introduction}
 
-This thesis talks about a data store for aggregated multi-dimensional time-series-based data. The data is aggregated over many units of measurements and across multiple dimensions. One of these dimensions is always time.
 
-Zohmg solves the problem of summing and storing measurements taken from log files or similar. It stores solely summarized data, not atomic data. Zohmg is optimized for speed of data retrieval.
 
-The thesis is presented in three major sections: problem statement, the theoretical solution and the implementation details.
 
+% TODO: den har texten passar battre i ett eget stycke/sektion, background reading style.
 Says Wikipedia: "Data warehouse is a repository of an organization's electronically stored data. Data warehouses are designed to facilitate reporting and analysis." The main actions of a data warehouse is extract, transform and load data, although not necessarily in that order.
 
 The classic thinking in data warehousing is the divide between facts and dimensons. The facts are measures categorized by dimensions. In OLAP, a sort of data warehouse, the OLAP cube is typically modelled in fact tables and dimension tables in a relational database. The novelty of our approach is to model OLAP cube-like aggregation data store on top of a bigtable-like data store.
@@ -58,18 +47,6 @@ OLAP\footnote{On-Line Analytical Processing}. \cite{olap_solutions}
 All three requirements are depend on one another, what data and how it is
 stored affects what can be visualised. Also, what data is imported---and
 how it is analysed---affects how it can be stored and hence visualised.
-
-It is assumed that the audience of this paper has at least a basic
-understanding of how one models data in relational databases. As will
-quickly become apparent, a BigTable-like \cite{bigtable} data store is
-drastically different from the relational model, meaning that those who
-know their table schemas will have some un-learning to do before being able
-to fully grasp the leaner BigTable-model.
-
-% TODO: necessity of this paragraph?
-The reader is also assumed to possess basic understanding about distributed
-systems, with focus on high level abstractions rather than detailed
-knowledge about practical implementation details.
 
 
 
@@ -117,11 +94,11 @@ extra machines to gain extra computing power or storage space.
 
 \section{Overview}
 
-This thesis, fully, describes the Zohmg system and how to use it.
+This thesis describes the Zohmg system and how to use it.
 
-Chapter 2 the theoretical base of the problem statement is established.
+In chapter 2, the theoretical base of the problem statement is established.
 
-In chapter 3 the tools used for the implementation are declared, moving
+In chapter 3, the tools used for the implementation are declared, moving
 over to chapter 4 where the details of the implementation are presented.
 
 How to use the Zohmg system is presented in chapter 5, while chapter 6
@@ -139,7 +116,7 @@ presents the conclusion, respectively.
 
 A data cube is a conceptual n-dimensional array of values. The values are
 numerical facts belonging to some dimension. The data cube is also known as a
-hypercube, it relates to multidimensional analogues of squares and cubes.
+hypercube. The data cube relates to multidimensional analogues of squares and cubes.
 In this context, each dimension of the cube corresponds to an attribute of
 the data in question and each point along the dimension's axis is a value of
 the corresponding attribute. The mental model of a data cube aids in
@@ -607,7 +584,7 @@ dumped as JSONP.
 \chapter{Usage}
 
 We have built a system---henceforth called Zohmg---which has the goal of being
-a large scale aggregating data warehouse for time-series-based log-like
+a large scale aggregating data store for time-series-based log-like
 data sources.
 
 
