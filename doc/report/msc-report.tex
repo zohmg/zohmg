@@ -173,6 +173,9 @@ replicated, usually three times, onto other nodes in the cluster.
 complete the job it is reassigned to another node. \cite{mapreduce}
 
 
+% TODO> I argue that we should have 'hadoop' and 'hbase' as the main sections,
+% and let mapreduce be a subsection of hadooop, bigtable a dito of hbase.
+
 \section{MapReduce}
 
 Analysing the massive amounts of log data raises high demand for computing
@@ -182,7 +185,6 @@ of commodity hardware where computation takes place independently in
 parallel. All results computed by each node are then reduced into one
 single result.
 
-% ONE DOES NOT SIMPLY PROCESS THE DATA ON ONE COMPUTER INTO MORDOR.
 Basically MapReduce is a two phase computation. First the input data is
 partitioned and each of these partitions is sent to a \textit{mapper} which
 performs computations on each row of the data. The mapper then outputs each
@@ -260,7 +262,7 @@ on each node. This behaviour makes it fast to access data while keeping
 reliability and scalability features.
 
 
-
+% TODO> why is this Tool & BigTable-subsection called Dimensions? Disambiguation needed. -fredrik
 \subsection{Dimensions}
 
 \subsubsection{Column-families}
@@ -400,7 +402,6 @@ extensively at Last.fm for writing short prototypes. \cite{dumbo}
 All Zohmg programs written in Python use Dumbo to execute on Hadoop.
 
 
-
 \section{Serializing}
 
 Serializing data is the task of converting an object into a sequence of
@@ -483,6 +484,7 @@ A simple, fast, complete and extensible JSON encoder and decoder for
 Python. The Python module simplejson is implemented entirely in Python and
 has no external dependencies. However a C extension which provides a
 serious speed boost is included. \cite{simplejson}
+
 
 
 
@@ -727,6 +729,8 @@ There is as of yet no support for specifying granularities. The only supported r
 The single aggregation performed is summing of the measurements. Future work may include average, max and min, etc.
 
 There is no metadata store. It would be very helpful for the application writer to know what the known values are for each dimension.
+
+It'd be interesting to think a bit about how the data store could be fully elastic, i.e. not require any data set definition from the user and instead create column-families on the fly based on the dimensions output from the user's map.
 
 \subsection{Multiple data sets}
 
