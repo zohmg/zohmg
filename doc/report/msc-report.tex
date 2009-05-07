@@ -505,29 +505,54 @@ serious speed boost is included in simplejson. \cite{simplejson}
 
 \chapter{Implementation}
 
+% COMMENT: do we really need to repeat this?
 As stated in chapter 3, Zohmg is built upon existing tools and software.
-It uses Apache Hadoop and Apache HBase, free software implementations of
-Google's MapReduce and BigTable respectively, both implemented in Java.
+It uses Dumbo to run jobs on Apache Hadoop, and uses Apache HBase to persist the data.
 
-Importing data to Zohmg is as simple as the user defines a mapper---the
-first half of a MapReduce program---which is run over a file that resides
-on HDFS\footnote{Hadoop Distributed Filesystem}.
 
-The resulting aggregated data, from the mapper, is stored in Apache HBase.
+% TODO: not sure this is precisely a story about the implementation. putting it here for now.
 
-Exporting data from Zohmg is done via a web interface which dumps JSON.
-It is possible to transform the stored data before exporting it with user
-defined transformers.
+-- A truly magnetic data store - the idea of enabling the user --
 
-Zohmg is implemented in Python.
+From a user's perspective, storing aggregates in Zohmg is as simple as writing a map (in the MapReduce sense) and letting Zohmg run that map over the data set. The user's map is called 'usermap' from here on. In order to let Zohmg know what output to expect from the mapper, the user also defines the dimensions and units of his data. After all, the user most likely knows his own data better than anyone else.
 
-Using Zohmg the user first creates a project directory. This is further
-explained in chapter 5.
+A standard MapReduce map emits key-value pairs. Not so in the case of the Zohmg mapper: the usermap emits triples (that is, a tuple of three values) consisting of a timestamp, a list of dimensions and their respective values, and a list of measurements. In effect, the dimensions and the timestamp specify a point in n-space and the measurements represent the observations made at that point.
+
+Going back to the running example of apache query logs, a usermap might look something like this:
+
+\begin{verbatim}
+# assumes Apache common log format.
+def map(key, value):
+  apachelog = parse_apache_log(value)
+  dimensions = {'useragent' : apachelog.useragent,
+                'path'      : apachelog.path,
+                'status'    : apachelog.statuscode}
+  values = {'pageviews' : 1,
+            'bytes'     : apachelog.size}
+ 
+ yield parsed.timestamp, dimensions, measurements
+\end{verbatim}
+
+The actual parsing of the log is abstracted; it is the emitting of dimensionality data I want to showcase in this example. We assume that parse_apache_log() accepts a single line from the log file and returns an object with the appropriate fields, such as useragent ant statuscode.
+
+For every line of the log file, we emit a point in n-space (the dimensions and the timestamp) together with a count of pageviews and bytes; one pageview per request and  the number of bytes served in the request. It is likely that you will want to add business logic here, perhaps only counting requests from useragents that aren not spiders and that resulted in a status code of 200.
+
+The last line 'yields' the tuple. This is a python construct called a generator that lets the map emit any number of tuples (or none!) for a single invocation.
+
+The user will import a day worth of logs like so:
+
+\begin{verbatim}
+  zohmg import mappers/apache.py /data/weblogs/2009/05/10
+\end{verbatim}
+
+This will instruct zohmg to apply the map function found in apache.py to all logs that it can find in the /data/weblogs/2009/05/10 directory on HDFS. The emitted output is duly collected and projections are carefully stored in the data store.
 
 
 \section{Configuration}
 
 \subsection{Data sets}
+
+% TODO: define what a data set is, and what makes it different from a project.
 
 The user's data sets are defined using YAML. The data set files reside in
 the project's \texttt{config} directory.
@@ -557,6 +582,7 @@ Support exists for writing the mapper in Java or Python.
 
 \subsubsection{Output formats}
 
+% TODO: not truly correct
 The Darling output format for HBase. Between Zohmg and Hadoop JSON is used
 for serializing data.
 
@@ -587,6 +613,7 @@ be built with HTML and JavaScript, see the examples.
 
 \subsubsection{Data}
 
+% ?
 Fetches data from HBase via its Thrift interface. The data is served to the
 user as JSONP\footnote{JSON with padding: JSON extension which adds name of
 callback function as an argument to the function itself.}.
@@ -600,13 +627,11 @@ dumped as JSONP.
 
 
 
+
+
 \chapter{Usage}
 
-We have built a system---henceforth called Zohmg---which has the goal of being
-a large scale aggregating data store for time-series-based log-like
-data sources.
-
-
+This is the user manual.
 
 \section{Deployment}
 
@@ -650,6 +675,7 @@ dictionary will be interpreted by Zohmg and stored accordingly.
 
 \section{Storing data}
 
+% COMMENT: I don't think we should mention the underlying store in the usage section.
 Data is stored in Apache HBase. A natural consequence of this that the
 data is stored sorted by rowkey allowing fast access to an arbitrary
 (sequential) range.
