@@ -533,7 +533,10 @@ def map(key, value):
  yield parsed.timestamp, dimensions, measurements
 \end{verbatim}
 
-The actual parsing of the log is abstracted; it is the emitting of dimensionality data I want to showcase in this example. We assume that parse_apache_log() accepts a single line from the log file and returns an object with the appropriate fields, such as useragent ant statuscode.
+The actual parsing of the log is abstracted; it is the emitting of
+dimensionality data I want to showcase in this example. We assume that
+parse\_apache\_log() accepts a single line from the log file and returns an
+object with the appropriate fields, such as useragent ant statuscode.
 
 For every line of the log file, we emit a point in n-space (the dimensions and the timestamp) together with a count of pageviews and bytes; one pageview per request and  the number of bytes served in the request. It is likely that you will want to add business logic here, perhaps only counting requests from useragents that aren not spiders and that resulted in a status code of 200.
 
