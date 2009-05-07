@@ -559,7 +559,7 @@ data.
 
 From a user's perspective, storing aggregates in Zohmg is as simple as writing
 a map (in the MapReduce sense) and letting Zohmg run that map over the data
-set. The user's map is called 'usermap' from here on. In order to let Zohmg
+set. The user's map is called \textit{usermap} from here on. In order to let Zohmg
 know what output to expect from the mapper, the user also defines the
 dimensions and units of his data. After all, the user most likely knows his
 own data better than anyone else.
@@ -571,26 +571,28 @@ and a list of measurements. In effect, the dimensions and the timestamp
 specify a point in n-space and the measurements represent the observations
 made at that point.
 
-Going back to the running example of apache query logs, a usermap might look
+Going back to the running example of apache access logs, a usermap might look
 something like this:
 
 \begin{verbatim}
-# assumes Apache common log format.
 def map(key, value):
-  apachelog = parse_apache_log(value)
-  dimensions = {'useragent' : apachelog.useragent,
-                'path'      : apachelog.path,
-                'status'    : apachelog.statuscode}
+  log = parse_apache_log(value)
+  dimensions = {'useragent' : log.useragent,
+                'path'      : log.path,
+                'status'    : log.statuscode}
   values = {'pageviews' : 1,
-            'bytes'     : apachelog.size}
- 
+            'bytes'     : log.size}
+
  yield parsed.timestamp, dimensions, measurements
 \end{verbatim}
 
+\vspace{12pt}
+
 The actual parsing of the log is abstracted; it is the emitting of
 dimensionality data I want to showcase in this example. We assume that
-parse\_apache\_log() accepts a single line from the log file and returns an
-object with the appropriate fields, such as useragent ant statuscode.
+\texttt{parse\_apache\_log()} accepts a single line from the log file and
+returns an object with the appropriate fields, such as useragent ant
+statuscode.
 
 For every line of the log file, we emit a point in n-space (the dimensions and
 the timestamp) together with a count of pageviews and bytes; one pageview per
@@ -598,7 +600,7 @@ request and the number of bytes served in the request. It is likely that you
 will want to add business logic here, perhaps only counting requests from
 useragents that aren not spiders and that resulted in a status code of 200.
 
-The last line 'yields' the tuple. This is a python construct called a
+The last line \textit{yields} the tuple. This is a python construct called a
 generator that lets the map emit any number of tuples (or none!) for a single
 invocation.
 
@@ -608,10 +610,10 @@ The user will import a day worth of logs like so:
   zohmg import mappers/apache.py /data/weblogs/2009/05/10
 \end{verbatim}
 
-This will instruct zohmg to apply the map function found in apache.py to all
-logs that it can find in the /data/weblogs/2009/05/10 directory on HDFS. The
-emitted output is duly collected and projections are carefully stored in the
-data store.
+This will instruct zohmg to apply the map function found in \texttt{apache.py}
+to all logs that it can find in the \texttt{/data/weblogs/2009/05/10} directory
+on HDFS. The emitted output is duly collected and projections are carefully
+stored in the data store.
 
 
 
@@ -622,14 +624,16 @@ When reasoning about dimensions, the issue of cardinality will come up sooner
 or later.
 
 The cardinality of a dimension is the number of distinct values of the
-dimension. For example, the dimension of 'logged in' has a cardinality of two
-since 'logged in' is a boolean variable; the user is either logged in or not.
-The 'country' dimension has a much higher cardinality: there are some 300
-countries in the world. Certainly, there could be dimension whose cardinality
-is infinite: the 'path' dimension in the web log example, for example, could
-in theory have a limitless number of values.
-The number of possible combinations of dimensions of your data -- the number
-of points in n-space -- is directly related to the cardinality of each
+dimension. For example, the dimension of \textit{logged in} has a cardinality
+of two since \textit{logged in} is a boolean variable; the user is either
+logged in or not. The \textit{country} dimension has a much higher
+cardinality: there are some 300 countries in the world. Certainly, there could
+be dimension whose cardinality is infinite: the \textit{path} dimension in the
+web log example, for example, could in theory have a limitless number of
+values.
+
+The number of possible combinations of dimensions of your data---the number
+of points in n-space---is directly related to the cardinality of each
 dimension. It is likely that your data is of such a nature that it is
 physically impossible to store information about all dimension combinations.
 This is why we ask you, the user, to define what projections you are
@@ -640,7 +644,7 @@ is both a time and space save, and in many cases the only feasible solution.
 
 [What are the limits of our system? How high cardinality do we support? (This
 is closely tied to hbase and the qualifier-limit.) If Martin is going to have
-'normalized_path' as one of his dimensions, we might run into trouble.]
+\textit{normalized\_path} as one of his dimensions, we might run into trouble.]
 
 -- The implementation of all that --
 
@@ -651,8 +655,8 @@ pipe to the underlying data store.
 Dumbo expects a key-value pair from the mapper. Hadoop will collect all keys
 and give the reducer a key and an iterator of values. If we are to store
 projections, we need to encode both the desired dimensions and the unit in
-question in the key and emit the value of the unit in the 'value' field. This
-way we can use a simple SumReducer to sum the values for each unit at any
+question in the key and emit the value of the unit in the \textit{value} field.
+This way we can use a simple SumReducer to sum the values for each unit at any
 point in n-space and be done.
 
 Remember, the usermapper gives us a point in n-space and a list of

@@ -1,5 +1,5 @@
 from zohmg.config import Config, Environ
-from zohmg.util import fail
+from zohmg.utils import fail
 import os, re
 
 class Process(object):
