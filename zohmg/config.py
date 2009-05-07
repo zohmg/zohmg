@@ -64,24 +64,27 @@ class Config(object):
             ps = self.projections()
         except:
             # might as well return straight away; nothing else will work.
-            sys.stderr.write("hey!, you must define 'dataset', 'dimensions', 'units' and 'projections'.\n")
+            print >>sys.stderr, "[%s] Error: Data set: Missing definition of dataset, dimensions, units, projections." \
+                                % time.asctime()
             return False
 
         # dimensions, projections and units must be non-empty.
         if ds == None or us == None or ps == None or \
-           len(ds) == 0 or len(us) == 0 or len(ps) == 0:
-            sys.stderr.write("hey!, dimensions, projections and units must be non-empty\n")
-            return False
+            len(ds) == 0 or len(us) == 0 or len(ps) == 0:
+                print >>sys.stderr, "[%s] Error: Data set: dimensions, projections and units must be non-empty." \
+                                    % time.asctime()
+                return False
 
         # also, the configuration may not reference unknown dimensions.
         for p in ps:
             if ps[p] == None or len(ps[p]) == 0:
-                sys.stderr.write("hey!, you may not specify empty projections.\n")
+                print >>sys.stderr, "[%s] Error: Data set: Empty projections are not allowed." % time.asctime()
                 return False
             for d in ps[p]:
                 if d not in ds:
-                    sys.stderr.write("hey!, '%s' is a reference to an unknown dimension.\n" % d)
-                    sane = False
+                    print >>sys.stderr, "[%s] Error: Data set: %s is a reference to an unkown dimension." \
+                                    % (time.asctime(),d)
+                    sane = False # TODO: return False ?
 
         # also, there must be no funny characters in
         # the name of the dataset, the dimensions or units.
@@ -89,8 +92,8 @@ class Config(object):
             for x in xs:
                 m = re.match('^[a-zA-Z0-9]+$', x)
                 if m == None:
-                    sys.stderr.write("hey!, '%s' is an invalid name.\n" % x)
-                    sane = False
+                    print >>sys.stderr, "[%s] Error: Data set: '%s' is an invalid name." % (time.asctime(),x)
+                    sane = False # TODO: return False ?
 
         return sane
 
@@ -107,9 +110,9 @@ class Environ(object):
         sys.path.append("") # add cwd so we can import from it.
         try:
             env = __import__(config_path+"environment")
-        except ImportError, ioe:
-            msg = "[%s] Error: Could not import %senvironment.py. %s." % (time.asctime(),config_path,ioe.strerror)
-            fail(msg,ioe.errno)
+        except ImportError:
+            msg = "[%s] Error: Could not import %senvironment.py. %s." % (time.asctime(),config_path)
+            fail(msg)
 
         for key in dir(env):
             self.environ[key] = env.__dict__[key]

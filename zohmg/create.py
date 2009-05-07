@@ -13,9 +13,9 @@ HADOOP_HOME = ''
 # Jars for Hadoop Core, Hadoop Streaming and HBase
 CLASSPATH = (
   # be sure to set these correctly!
-  '/home/hadoop/hadoop-0.19/build/hadoop-0.19.0-dev-core.jar',
-  '/home/hadoop/hadoop-0.19/build/contrib/streaming/hadoop-0.19.0-dev-streaming.jar',
-  '/home/hadoop/hbase-0.19/build/hbase-0.19.0-dev.jar'
+  '/opt/hadoop-0.19.1/build/hadoop-0.19.0-dev-core.jar',
+  '/opt/hadoop-0.19.1/build/contrib/streaming/hadoop-0.19.0-dev-streaming.jar',
+  '/opt/hbase-0.19.1/build/hbase-0.19.0-dev.jar'
 )
 """
 
