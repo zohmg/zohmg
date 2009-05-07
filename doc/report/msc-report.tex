@@ -573,6 +573,76 @@ data store.
 
 
 
+
+- Something about cardinality -
+
+When reasoning about dimensions, the issue of cardinality will come up sooner
+or later.
+
+The cardinality of a dimension is the number of distinct values of the
+dimension. For example, the dimension of 'logged in' has a cardinality of two
+since 'logged in' is a boolean variable; the user is either logged in or not.
+The 'country' dimension has a much higher cardinality: there are some 300
+countries in the world. Certainly, there could be dimension whose cardinality
+is infinite: the 'path' dimension in the web log example, for example, could
+in theory have a limitless number of values.
+The number of possible combinations of dimensions of your data -- the number
+of points in n-space -- is directly related to the cardinality of each
+dimension. It is likely that your data is of such a nature that it is
+physically impossible to store information about all dimension combinations.
+This is why we ask you, the user, to define what projections you are
+interested in: storing aggregates for the slices of the cube that interest you
+is both a time and space save, and in many cases the only feasible solution.
+
+-- Limits on cardinality --
+
+[What are the limits of our system? How high cardinality do we support? (This
+is closely tied to hbase and the qualifier-limit.) If Martin is going to have
+'normalized_path' as one of his dimensions, we might run into trouble.]
+
+-- The implementation of all that --
+
+Since we wish to store projections rather than all combinations of all
+dimensions, we need to mangle the data slightly before sending it down the
+pipe to the underlying data store.
+
+Dumbo expects a key-value pair from the mapper. Hadoop will collect all keys
+and give the reducer a key and an iterator of values. If we are to store
+projections, we need to encode both the desired dimensions and the unit in
+question in the key and emit the value of the unit in the 'value' field. This
+way we can use a simple SumReducer to sum the values for each unit at any
+point in n-space and be done.
+
+Remember, the usermapper gives us a point in n-space and a list of
+measurements. We need to break out the measurements and sum over each such
+measurement. Zohmg solves this by wrapping the usermapper in a cleverly named
+devicie, namely a mapperwrapper.
+
+% TODO: this para sounds as if it was written by a drunken monkey. The
+mapperwrapper takes each tuple emitted by the usermapper and performs a
+dimensionality reduction, ending up with the projections requested by the
+user. For every projection and unit, the dimensions remaining after the
+reduction are appended to the string representation of the unit and emitted as
+the key. The value is simply the value of the unit. The Hadoop framework will
+do the heavy work of collecting all keys and summing the values.
+
+An alternative approach would have been to perform the dimensionality
+reduction at a later stage, namely in the reducer of a multi-pass MapReduce
+job.
+
+The reducer, then, is very simple: it's a simple sum of the values. The output
+of the reducer will not be stored on disk as is usually the case, but will
+instead be interpreted by a custom OutputReader that persists the data to
+HBase.
+
+The reducer needs to communicate to the OutputReader under what rowkey,
+column-family and qualifier to store the computed sum. It does this by
+emitting the row key as the key and a json-serialized map of the form
+{"column-family:qualifier" : value}.
+
+The OutputReader interprets the json and persists the data. Et voila!
+
+
 \section{Configuration}
 
 \subsection{Data sets}
