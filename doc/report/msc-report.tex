@@ -117,9 +117,9 @@ extra machines to gain extra computing power or storage space.
 
 \section{Overview}
 
-This thesis, fully, describes the Zohmg system and how to use it.
+This thesis fully describes the Zohmg system and how to use it.
 
-Chapter 2 the theoretical base of the problem statement is established.
+Chapter 2 establish the theoretical base of the problem statement.
 
 In chapter 3 the tools used for the implementation are declared, moving
 over to chapter 4 where the details of the implementation are presented.
@@ -127,7 +127,7 @@ over to chapter 4 where the details of the implementation are presented.
 How to use the Zohmg system is presented in chapter 5, while chapter 6
 shows an example work flow.
 
-Chapters 7 and 8 discusses the results, related, and future work, and
+Chapters 7 and 8 discuss the results, related, and future work, and
 presents the conclusion, respectively.
 
 
@@ -151,8 +151,9 @@ schemas in relational database systems. \cite{olap_solutions}
 
 The school book example of a data cube is three dimensional where each of
 the three dimensions correspond to one of the attributes time, products,
-and stores. Adding another attribute adds another dimension to the data
-cube, because of the one to one relationship of attributes and dimensions.
+and stores. Adding another attribute, for instance sales, adds another
+dimension to the data cube, because of the one to one relationship of
+attributes and dimensions.
 
 
 \subsection{Projections}
@@ -178,11 +179,26 @@ Time is the most common of the dimensions in the data cube constructed for Zohmg
 
 \section{Aggregates}
 
-An aggregate is a composite of several values. Typical examples of aggregate functions are average, count and sum.
+An aggregate is a composite of several values. Typical examples of
+aggregate functions are average, count, and sum.
 
-In a standard OLAP setup, a number of aggregates are pre-computed and stored in the cube. These base aggregates represent only a fraction of the very many possible aggregations. The remaining aggregates are computed from the base aggregates as they are demanded.
+In a standard OLAP setup, a number of aggregates are pre-computed and
+stored in the cube. These base aggregates represent only a fraction of the
+many possible aggregations. The remaining aggregates are computed from the
+base aggregates as they are demanded.
 
+The main reason for pre-computing aggregates is to reduce access times, the
+time it takes to compute an aggregate may be unacceptable to a waiting
+user. Pre-computing frequently requested aggregates is therefore regularly
+done in the background, giving the user fast access to these.
+\cite{olap_solutions}
 
+The classic trade-off between time and space applys to wether or not
+pre-compute an aggregate. Pre-computing to many aggregates might render an
+unfeasible of data amount to store, while pre-computing to few aggregates
+renders longer access times for aggregates which are not pre-computed. This
+problem is further discussed in the thesis, but left to the user of the
+Zohmg system to solve.
 
 
 
@@ -299,19 +315,18 @@ Each column-family is further divided into one or more column-qualifiers.
 \subsection{Hierarchies}
 
 Depending on how the rowkeys are formatted different hierarchies are
-created. The order in which the data is stored is very important, it
-defines how effective scanning for data will be. For instance, let's say
-we have thousand rows and want ten out of those. In this case only one per
-cent of the data is interesting to us, if a scan would be required to
-visit all the thousand rows a lot of rows are skipped. Skipping rows is
-expensive in that sense that we have to read them but throw away the
-result. The goal is to push this cost to a bare minimum, using as many as
-possible of the rows we scan.
+created. The order in which the data is stored is important, it defines how
+effective scanning data will be. In the case of having thousand rows and
+requesting ten out of these, then only one por cent of the data is
+interesting. If a scan would be required to visit all the thousand rows a
+lot of rows are skipped. Skipping rows is expensive in that sense that they
+are but the result is thrown away. The goal is to push this cost to a bare
+minimum, using as many of the rows as possible.
 
-To minimize the cost of scanning for data we want it to be ordered so that
-a scan would use every row it visits. In the case with thousand rows of
-which we want ten, it would mean that we just scan ten rows and use all of
-them.
+The minimum cost of scanning data is achieved by ordering the data so that
+a scan uses every visited row. In the case with thousand rows of which ten
+are wanted, would mean that ten rows scan are scanned of which all are
+used.
 
 
 \section{Apache Hadoop}
@@ -454,8 +469,8 @@ which humans are likely to view or edit, such as configuration files.
 
 \section{Java}
 
-Both Hadoop and HBase are written in Java---a popular high-level
-object-oriented programming language.
+Both Hadoop and HBase are written in Java---a high-level object-oriented
+programming language.
 
 Most Hadoop users write their MapReduce programs in Java, since this is the
 native language of Hadoop. \cite{java}
@@ -464,8 +479,8 @@ native language of Hadoop. \cite{java}
 
 \section{Python}
 
-Python is a popular general-purpose high-level multi-paradigm---most
-notably: object-oriented, imperative and functional---scripting language.
+Python is a general-purpose high-level multi-paradigm---amongst others:
+object-oriented, imperative and functional---scripting language.
 \cite{python}
 
 Zohmg is written mostly in Python. Zohmg uses the following Python modules
@@ -505,7 +520,7 @@ bundles Python software files.}. \cite{setuptools}
 A simple, fast, complete and extensible JSON encoder and decoder for
 Python. The Python module simplejson is implemented entirely in Python and
 has no external dependencies. However a C extension which provides a
-serious speed boost is included. \cite{simplejson}
+serious speed boost is included in simplejson. \cite{simplejson}
 
 
 
@@ -527,6 +542,8 @@ defined transformers.
 
 Zohmg is implemented in Python.
 
+Using Zohmg the user first creates a project directory. This is further
+explained in chapter 5.
 
 
 \section{Configuration}
@@ -534,7 +551,7 @@ Zohmg is implemented in Python.
 \subsection{Data sets}
 
 The user's data sets are defined using YAML. The data set files reside in
-the config directory.
+the project's \texttt{config} directory.
 
 
 \subsection{Environment}
@@ -546,8 +563,8 @@ in the config/environment.py file.
 
 \section{Importing}
 
-The user defines a mapper which Zohmg wraps, interpreting the output from the
-mapper program and storing it in HBase.
+The user writes a mapper which Zohmg wraps, interpreting the output from
+the mapper program and storing it in HBase.
 
 Support exists for writing the mapper in Java or Python.
 
@@ -567,7 +584,7 @@ for serializing data.
 
 \subsection{External}
 
-The data export server is uilt with Python Paste---a middleware
+The data export server is built with Python Paste---a middleware
 framework---the data server dispatches to the requested application
 depending on the URI it was fed.
 
@@ -620,7 +637,8 @@ A manage script is used to create tables from a pre-defined schema.
    zohmg create project
 \end{verbatim}
 
-\noindent Edit the configuration files.
+\noindent Edit the configuration files, which are text files in YAML and
+Python format.
 
 \begin{verbatim}
    zohmg setup
@@ -639,7 +657,7 @@ which uses sum reducer that simply sums up values with the same keys.
 
 \subsection{User mappers}
 
-Import jobs use mappers defined by the user, either in Python or Java.
+Import jobs use mappers written by the user, either in Python or Java.
 Mappers written by the user import each line from the input file and set
 the arguments to the map function, key and value, as line number and line
 contents, respectively. The user can then perform computations on these
@@ -673,10 +691,10 @@ Data is served to the user either over HTTP in JSON format or over Thrift.
 \noindent The above serves on default port 8086, with the \texttt{--port}
 argument it is possible to change server port.
 
-The data server have three methods of serving data: raw, transformed, and
+The data server have three methods of serving data: raw, transformed, or
 static. The raw and transformed data are aggregates served from HBase,
 transformed in the latter case, while the static method just serve static
-files from the project's \textit{clients} directory. Aggregates served from
+files from the project's \texttt{clients} directory. Aggregates served from
 HBase are returned to the user as JSONP.
 
 
@@ -706,8 +724,8 @@ dumped as JSONP.
 
 It is possible to build static web pages out of HTML and JavaScript, which
 can interact with the data server. These static pages can for instance
-present some sort of query building mechanism (for insntance with drop down
-boxes) and then send this query to the data server and graph the resulting
+present some sort of query building mechanism---for instance with drop down
+boxes---and then send this query to the data server and graph the resulting
 data.
 
 The data server serves static files from the project's \texttt{clients}
