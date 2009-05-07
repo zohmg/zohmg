@@ -1,13 +1,31 @@
 \documentclass[a4paper,10pt]{book}
 
+
 \author{Per Andersson, Fredrik M{\"o}llerstrand}
+
 \title{Zohmg---a large scale data store for aggregated time-series-based
 data. [DRAFT]}
 
+
+\newcommand{\chapterquote}[2] {
+\begin{quote}
+\textit{"{#1}"}
+
+--- {#2}
+\end{quote}
+
+\vspace{24pt}
+}
+
+
+
+
 \begin{document}
+
 \maketitle
 
 \noindent \Large{\textbf{Abstract}}
+
 \vspace{12pt}
 
 \noindent 
@@ -19,16 +37,21 @@ The thesis is presented in three major sections: problem statement, theoretical 
 
 
 \tableofcontents
+
 \vfill
+
 \pagebreak
 
 \chapter{Introduction}
 
-
-
-
 % TODO: den har texten passar battre i ett eget stycke/sektion, background reading style.
-Says Wikipedia: "Data warehouse is a repository of an organization's electronically stored data. Data warehouses are designed to facilitate reporting and analysis." The main actions of a data warehouse is extract, transform and load data, although not necessarily in that order.
+
+\chapterquote{Data warehouse is a repository of an organization's
+electronically stored data. Data warehouses are designed to facilitate
+reporting and analysis.}{Wikipedia}
+
+The main actions of a data warehouse is extract, transform and load data,
+although not necessarily in that order.
 
 The classic thinking in data warehousing is the divide between facts and dimensons. The facts are measures categorized by dimensions. In OLAP, a sort of data warehouse, the OLAP cube is typically modelled in fact tables and dimension tables in a relational database. The novelty of our approach is to model OLAP cube-like aggregation data store on top of a bigtable-like data store.
 
@@ -112,16 +135,20 @@ presents the conclusion, respectively.
 
 \chapter{Theory}
 
+\chapterquote{Einstein explained his theory to me every day, and on my
+arrival I was fully convinced that he understood it.}{Chaim Weizmann}
+
+
 \section{Data cubes}
 
-A data cube is a conceptual n-dimensional array of values. The values are
-numerical facts belonging to some dimension. The data cube is also known as a
-hypercube. The data cube relates to multidimensional analogues of squares and cubes.
-In this context, each dimension of the cube corresponds to an attribute of
-the data in question and each point along the dimension's axis is a value of
-the corresponding attribute. The mental model of a data cube aids in
-reasoning about dimensions. Data cubes are traditionally modeled as star
-schemas in relational database systems. \cite{olap_solutions}
+A data cube is a conceptual n-dimensional array of values, in which the values
+are numerical facts belonging to some dimension. The data cube is also known as
+a hypercube, relating to multidimensional analogues of squares and cubes. In
+this context, each dimension of the cube corresponds to an attribute of the
+data in question and each point along the dimension's axis is a value of the
+corresponding attribute. The mental model of a data cube aids in reasoning
+about dimensions. Data cubes are traditionally modeled as star schemas in
+relational database systems. \cite{olap_solutions}
 
 
 \subsection{Dimensions}
@@ -180,6 +207,13 @@ Zohmg system to solve.
 
 
 \chapter{Tools}
+
+\chapterquote{Arrange whatever pieces come your way.}{Virgina Wolf}
+
+%\chapterquote{In short, intelligence, considered in what seems to be its
+%original feature, is the faculty of manufacturing artificial objects,
+%especially tools to make tools, and of indefinitely urging the
+%manufacture.}{Henri Bergson}
 
 Regarding the infrastructure, both BigTable and MapReduce has high
 availability, scalability and reliability. Since BigTable runs on top of
@@ -505,6 +539,14 @@ serious speed boost is included in simplejson. \cite{simplejson}
 
 \chapter{Implementation}
 
+%\chapterquote{A good idea is about ten percent and implementation and hard
+%work, and luck is 90 percent.}{Guy Kawasaki}
+
+\chapterquote{It is not always what we know or analyzed before we make a
+decision that makes it a great decision. It is what we do after we make the
+decision to implement and execute it that makes it a good
+decision.}{William Pollard}
+
 % COMMENT: do we really need to repeat this?
 As stated in chapter 3, Zohmg is built upon existing tools and software.
 It uses Dumbo to run jobs on Apache Hadoop, and uses Apache HBase to persist the data.
@@ -634,6 +676,9 @@ dumped as JSONP.
 
 \chapter{Usage}
 
+\chapterquote{There comes a time when all people break down and do the
+unthinkable: They read the manual.}{Unknown}
+
 This is the user manual.
 
 \section{Deployment}
@@ -743,6 +788,15 @@ directory at the server URL appended with \texttt{client/filename}.
 
 \chapter{Examples}
 
+\chapterquote{Example is not the main thing in influencing others, it's
+the only thing}{Albert Schweitzer}
+
+%\chapterquote{There is nothing so annoying as a good example!!}{Mark Twain}
+
+%\chapterquote{Example isn't another way to teach, it is the only way to
+%teach}{Albert Einstein}
+
+
 \section{Web log analysis}
 
 Configure the dataset.yaml.
@@ -759,6 +813,8 @@ Possibly write a client which will render a graph.
 
 
 \chapter{Discussion}
+
+\chapterquote{In discussion comes the light!}{Unknown}
 
 \section{Related work}
 
@@ -795,6 +851,8 @@ service.
 
 
 \chapter{Conclusion}
+
+\chapterquote{When we can't dream any longer we die.}{Emma Goldman}
 
 Last.fm is looking at using Zohmg for multiple application areas, such as
 radio stats and web page stats.
