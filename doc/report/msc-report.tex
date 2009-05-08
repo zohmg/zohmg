@@ -29,11 +29,17 @@ data. [DRAFT]}
 \vspace{12pt}
 
 \noindent 
-This thesis describes a data store for multi-dimensional time-series-based data. The data is aggregated over many units of measurements and across multiple dimensions. One of these dimensions is always time.
+This thesis describes a data store for multi-dimensional time-series-based
+data. The data is aggregated over many units of measurements and across
+multiple dimensions. One of these dimensions is always time.
 
-Zohmg solves the problem of summing, storing and serving measurements. These measurements may be taken from log files or similar sources. Zohmg stores only the summarized data, not the atomic measurements. Zohmg is optimized for speed of data retrieval.
+Zohmg solves the problem of summing, storing and serving measurements. These
+measurements may be taken from log files or similar sources. Zohmg stores only
+the summarized data, not the atomic measurements. Zohmg is optimized for speed
+of data retrieval.
 
-The thesis is presented in three major sections: problem statement, theoretical solution and implementation details.
+The thesis is presented in three major sections: problem statement,
+theoretical solution and implementation details.
 
 
 \tableofcontents
@@ -53,7 +59,12 @@ reporting and analysis.}{Wikipedia}
 The main actions of a data warehouse is extract, transform and load data,
 although not necessarily in that order.
 
-The classic thinking in data warehousing is the divide between facts and dimensons. The facts are measures categorized by dimensions. In OLAP, a sort of data warehouse, the OLAP cube is typically modelled in fact tables and dimension tables in a relational database. The novelty of our approach is to model OLAP cube-like aggregation data store on top of a bigtable-like data store.
+The classic thinking in data warehousing is the divide between facts and
+dimensons. The facts are measures categorized by dimensions. In OLAP, a sort
+of data warehouse, the OLAP cube is typically modelled in fact tables and
+dimension tables in a relational database. The novelty of our approach is to
+model OLAP cube-like aggregation data store on top of a bigtable-like data
+store.
 
 
 As large scale web services grow they generate vast volumes of log data,
@@ -162,7 +173,10 @@ attributes and dimensions.
 
 \subsection{Projections}
 
-One of the most common operations on a data cube is the projection. A projection is a dimensionality reduction, where one or more dimensions are discarded from the cube with the measurements along each axis summed up, leaving a data cube of a lesser dimension.
+One of the most common operations on a data cube is the projection. A
+projection is a dimensionality reduction, where one or more dimensions are
+discarded from the cube with the measurements along each axis summed up,
+leaving a data cube of a lesser dimension.
 
 A typical projection is that from an n-dimensional cube down to two
 dimensions, which is the case when plotting an object---with three or more
@@ -312,7 +326,8 @@ on each node. This behaviour makes it fast to access data while keeping
 reliability and scalability features.
 
 
-% TODO> why is this Tool & BigTable-subsection called Dimensions? Disambiguation needed. -fredrik
+% TODO> why is this Tool & BigTable-subsection called Dimensions?
+% Disambiguation needed. -fredrik
 \subsection{Dimensions}
 
 \subsubsection{Column-families}
@@ -553,7 +568,8 @@ uses Dumbo to run jobs on Apache Hadoop, and uses Apache HBase to persist the
 data.
 
 
-% TODO: not sure this is precisely a story about the implementation. putting it here for now.
+% TODO: not sure this is precisely a story about the implementation.
+% putting it here for now.
 
 -- A truly magnetic data store - the idea of enabling the user --
 
@@ -925,16 +941,24 @@ warehouse based on MapReduce and Bigtable. \cite{hdw}
 
 \section{Future work}
 
-Says Wikipedia: "Organizations generally start off with relatively simple use of data warehousing. Over time, more sophisticated use of data warehousing evolves." Zohmg is that relatively simple data warehouse; the seed from which a more sophisticated data warehouse may evolve.
+Says Wikipedia: "Organizations generally start off with relatively simple use
+of data warehousing. Over time, more sophisticated use of data warehousing
+evolves." Zohmg is that relatively simple data warehouse; the seed from which
+a more sophisticated data warehouse may evolve.
 
-There is as of yet no support for specifying granularities. The only supported resolution of time is the day.
+There is as of yet no support for specifying granularities. The only supported
+resolution of time is the day.
 
-The single aggregation performed is summing of the measurements. Future work may include average, max and min, etc.
+The single aggregation performed is summing of the measurements. Future work
+may include average, max and min, etc.
 
-There is no metadata store. It would be very helpful for the application writer to know what the known values are for each dimension.
+There is no metadata store. It would be very helpful for the application
+writer to know what the known values are for each dimension.
 
-It'd be interesting to think a bit about how the data store could be fully elastic, i.e. not require any data set definition from the user and instead create column-families on the fly based on the dimensions output from the user's map.
-
+It'd be interesting to think a bit about how the data store could be fully
+elastic, i.e. not require any data set definition from the user and instead
+create column-families on the fly based on the dimensions output from the
+user's map.
 \subsection{Multiple data sets}
 
 \subsection{Metadata}
