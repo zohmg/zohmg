@@ -6,12 +6,13 @@ import os, re, sys, time
 # ALSO: is it safe to assume that HADOOP_HOME is *not* defined when
 # running locally?
 # TODO: why are we doing this in a global variable?
+
 # figure out if we are run inside dumbo.
 # files shipped to dumbo are all put in cwd.
 if "HADOOP_HOME" in os.environ:
-    config_path = ""
+    config_path = os.path.abspath("")
 else:
-    config_path = "config/"
+    config_path = os.path.abspath("config/")
 
 
 # TODO: multiple dataset files
@@ -20,7 +21,7 @@ class Config(object):
         if config_file:
             self.config_file = config_file
         else:
-            self.config_file = config_path + "dataset.yaml"
+            self.config_file = config_path + "/dataset.yaml"
 
         self.config = {}
         self.__read_config()
@@ -107,12 +108,12 @@ class Environ(object):
         return self.environ[key]
 
     def read_environ(self):
-        sys.path.append("") # add cwd so we can import from it.
+        sys.path.append(config_path) # add config path so we can import from it.
         try:
-            env = __import__(config_path+"environment")
+            import environment
         except ImportError:
             msg = "[%s] Error: Could not import %senvironment.py. %s." % (time.asctime(),config_path)
             fail(msg)
 
-        for key in dir(env):
-            self.environ[key] = env.__dict__[key]
+        for key in dir(environment):
+            self.environ[key] = environment.__dict__[key]
