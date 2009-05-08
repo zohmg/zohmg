@@ -53,7 +53,6 @@ function exec_and_log() {
         echo $msg
         exit 1
     fi
-
 }
 
 
@@ -209,7 +208,22 @@ else
     for patch in "$patch_1722" "$patch_5450"; do
         num=$(echo $patch | sed 's/.patch$//')
         printf "Applying patch $num... "
-        exec_and_log "cd $hadoop ; patch -p0 <$files/patches/$patch" "Error: Could not apply patch $num."
+        cd $hadoop
+        # inlined exec_and_log because of sh -c "command".
+        # execute and log to intermediate.
+        sh -c "patch -p0 <$files/patches/$patch" &>"$install_tmplog"
+        ret=$?
+
+        # log.
+        cat "$install_log" "$install_tmplog" >"$install_log.new"
+        mv "$install_log.new" "$install_log"
+
+        # check exit code.
+        if [ $ret -ne 0 ]; then
+            echo
+            echo "Error: Could not apply patch $num."
+            exit 1
+        fi
         echo "done."
     done
     exec_and_log "echo ok"
