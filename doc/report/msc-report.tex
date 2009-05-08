@@ -34,13 +34,15 @@ This thesis describes a data store for multi-dimensional time-series-based
 data. The data is aggregated over many units of measurements and across
 multiple dimensions. One of these dimensions is always time.
 
-In this thesis we present a data store called Zohmg. Zohmg is built on top of
-HBase and uses Hadoop to run import jobs in parallel. It solves the problem of
-summing, storing and serving measurements. These measurements may be taken
-from log files or similar sources. Zohmg stores only the summarized data, not
-the atomic measurements. The data store is optimized for speed of data
-retrieval: one of the design goals was to serve data at mouse-click rate and
-promote real-time data exploration.
+We present a data store called Zohmg. It is built on top of HBase and uses
+Hadoop to run import jobs in parallel. Zohmg stores and serves aggregates of
+measurements. The measurements are extracted taken from log files or similar
+sources with user-supplied code.
+
+The data store is optimized for speed of data retrieval: one of the design
+goals was to serve data at mouse-click rate and promote real-time data
+exploration. As such, Zohmg stores only the summarized data, not the atomic
+measurements.
 
 Similar data stores exist: they generally use a relational database system as
 their underlying data store. The novelty of our approach is to model OLAP
@@ -65,15 +67,45 @@ characteristics such as the number of visitors per day, and the average time a
 theme park guest spends queueing for a particular ride.
 
 Inevitably, these services and operations will generate a log for later
-analysis. As the services grow in size, so will the data sets they generate grow.
+analysis. As the services grow in size, so will the data sets they generate.
 
 An important property of these data sets is that they generally have a regular
-structure and are represented in independent records. The records can be
-broken up without losing any of their meaning and are as such very well suited
-for parallel analysis. The data sets are not fit to store using traditional
-database techniques, if only for the fact that they are too large to fit in a
-relational database.
+structure and are represented as a number of independent records. The records
+can be broken up without losing any of their meaning and are as such very well
+suited for parallel analysis. The data sets are not fit to store using
+traditional database techniques, if only for the fact that they are too large
+to fit in a relational database.
 
+Each log record typically contains quite a bit of information. For example, a
+log of visits to a web site might contain a timestamp, information about what
+country the visiting user is from, and a string of text that identifies the
+web browser that was used. From these base facts one can collect information
+about what countries generate the most traffic to the site, and which web
+browser is most popular in a certain country, for example.
+
+These bits of information can be thought of as points along an axis; Sweden,
+Norway and Denmark are all points along the country axis, for instance. This
+is an important concept and it will be used throughout the text.
+
+Typically, the size of a data set is in the range of several gigabytes of data
+per day. A single computer is not likely to be able to process that amount of
+data before a new batch arrives, and for very large data sets the single
+computer would simply not be able to fit the intermediate data set in its
+memory at all. Some data sets are many times larger than that and do not even
+fit inside a single computers storage devices.
+
+It is suitable to store the data across many storage nodes in what is called a
+distributed filesystem and to to exploit the parallel nature of the records by
+breaking up the data sets in pieces and have each piece be processed
+separately on a node in a large compute cluster.
+
+% TODO: fixa cites. Luckily, this is a problem that has already been solved.
+Google has published papers on the MapReduce framework \cite{mapreduce}, which
+allows for parallel processing of large data sets, and The Google Filesystem
+\cite{gfs}, a scalable, distributed filesystem. The Apache Hadoop project has
+published open source implementations of a mapreduce framework and a
+distributed filesystem, both of which build on the ideas in the papers
+published by Google.
 
 \section{Problem description}
 
@@ -89,33 +121,6 @@ the restriction on the system that is built so that it only handles
 time-series. Because of this restriction the data store obviously becomes
 less general purpose. Although since most log data is time-series based
 this restriction does not cripple the system much---if at all.
-
-
-
-\subsection{Data size}
-
-The sheer size of the data makes it unfeasible to use a single computer.
-Eventually a single machine would be fed so much data that it cannot cope
-with it. For instance a single web log file for one day can be up to
-several gigabytes. It is problematic for a single machine to handle this
-because of the limitations of memory, loading the entire file in memory.
-Distributed computing solves this by spreading the computations out to
-several machines in parallel. The obvious gain is that the waiting time
-before a computation is done is divided by the amount of nodes used,
-compared to running the computation on one machine. There is also a gain
-related to the actual machines, it is possible to use commodity hardware.
-Because MapReduce and BigTable has high availability and reliability a node
-in the cluster can safely be replaced on the fly if it fails.
-
-Scalability is also very important. Using single machines for computing is
-problematic when the data set grows, more powerful machines has to be
-obtained. More power contained in a single machine results in higher price,
-eventually it is too expensive to perform computations on very large
-data sets. Both MapReduce and BigTable scale close to linearly, adding one
-machine to the cluster adds equal amount of processing power. Since
-MapReduce and BigTable can use commodity hardware it is reasonable to buy
-extra machines to gain extra computing power or storage space.
-
 
 \section{Overview}
 
