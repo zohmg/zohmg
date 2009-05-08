@@ -9,6 +9,8 @@ priority uno:
 + rename.
 + make sure it's easy to get zohmg up and running.
 + in usermapper, add timestamp to map of dimensions.
++ npe on empty mapper output.
++ support for mapper class.
 DONE>  - shell script to install dependencies
 DONE> + server
 DONE>  - transformers, plugin to data server
