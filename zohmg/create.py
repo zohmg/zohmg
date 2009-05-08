@@ -8,14 +8,14 @@ DIRS = ["clients","config","lib","mappers","transformers"]
 ENV_SCRIPT = """# Please define the following environment variables.
 
 # Path to Hadoop directory.
-HADOOP_HOME = ''
+#HADOOP_HOME = '/opt/hadoop-0.19.1'
 
 # Jars for Hadoop Core, Hadoop Streaming and HBase
 CLASSPATH = (
   # be sure to set these correctly!
-  '/opt/hadoop-0.19.1/build/hadoop-0.19.0-dev-core.jar',
-  '/opt/hadoop-0.19.1/build/contrib/streaming/hadoop-0.19.0-dev-streaming.jar',
-  '/opt/hbase-0.19.1/build/hbase-0.19.0-dev.jar'
+  #'/opt/hadoop-0.19.1/build/hadoop-0.19.0-dev-core.jar',
+  #'/opt/hadoop-0.19.1/build/contrib/streaming/hadoop-0.19.0-dev-streaming.jar',
+  #'/opt/hbase-0.19.1/build/hbase-0.19.0-dev.jar'
 )
 """
 
