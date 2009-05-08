@@ -1,6 +1,6 @@
 from zohmg.config import Config, Environ
 from zohmg.utils import fail
-import os, platform, re
+import os, re, sys
 
 class Process(object):
     def go(self, mapper, input, for_dumbo):
@@ -9,7 +9,6 @@ class Process(object):
         resolver = 'fm.last.darling.HBaseIdentifierResolver'
         outputformat = 'org.apache.hadoop.hbase.mapred.TableOutputFormat'
 
-        python_version = platform.python_version()[:3]
         opts = [('jobconf',"hbase.mapred.outputtable=" + table),
                 ('jobconf','stream.io.identifier.resolver.class=' + resolver),
                 ('streamoutput','hbase'), # resolved by identifier.resolver
@@ -17,7 +16,7 @@ class Process(object):
                 ('input', input),
                 ('output','/tmp/does-not-matter'),
                 # Push zohmg egg and darling jar.
-                ('libegg','/usr/lib/python'+python_version+'/site-packages/zohmg-0.0.1-py'+python_version+'.egg'),
+                ('libegg',[z for z in sys.path if "zohmg" in z][0]),
                 ('libjar','/usr/local/lib/zohmg/darling-0.0.3.jar'),
                 ('file','lib/usermapper.py') # TODO: handle this more betterer.
                ]
