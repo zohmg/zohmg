@@ -2,8 +2,8 @@ priority zero:
 DONE> make sure all dependent eggs (paste, json, yaml, dumbo) are installed.
 DONE> ImportError: No module named setuptools
 DONE> ImportError: No module named hbase.ttypes
-+ ImportError when importing environment in zohmg.config.Environ, actually
-  a bug allowed the current behaviour. (It was removed in Python 2.6)
+DONE> + ImportError when importing environment in zohmg.config.Environ, actually
+        a bug allowed the current behaviour. (It was removed in Python 2.6)
 
 priority uno:
 + rename.
