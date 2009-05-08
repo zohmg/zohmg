@@ -107,6 +107,9 @@ published open source implementations of a mapreduce framework and a
 distributed filesystem, both of which build on the ideas in the papers
 published by Google.
 
+
+
+
 \section{Problem description}
 
 \subsection{Scope}
@@ -197,13 +200,21 @@ dimensions---on screen or paper.
 
 \subsection{Slice and dice}
 
-The slice operation fixes the values of one or several dimensions in the cube. The data omitted from this operation would be any data associated with the values of the dimension that were not fixed. The dice operation is a slice on more than two dimensions. [source: http://www.cs.ualberta.ca/~zaiane/courses/cmput690/glossary.html]
+The slice operation fixes the values of one or several dimensions in the cube.
+The data omitted from this operation would be any data associated with the
+values of the dimension that were not fixed. The dice operation is a slice on
+more than two dimensions. [source:
+http://www.cs.ualberta.ca/~zaiane/courses/cmput690/glossary.html]
 
 
 
 \section{Time series}
 
-Time is the most common of the dimensions in the data cube constructed for Zohmg. The time stamp is a common property for all data handled by Zohmg; every measurement is expected to have time as one of its dimensions. TODO: really, this belongs in the implementation section. I find nothing interesting to say about time series in this section.
+Time is the most common of the dimensions in the data cube constructed for
+Zohmg. The time stamp is a common property for all data handled by Zohmg;
+every measurement is expected to have time as one of its dimensions. TODO:
+really, this belongs in the implementation section. I find nothing interesting
+to say about time series in this section.
 
 
 
