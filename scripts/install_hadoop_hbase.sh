@@ -19,7 +19,7 @@ hadoop_release="http://mirrors.ukfast.co.uk/sites/ftp.apache.org/hadoop/core/had
 hadoop_1722="https://issues.apache.org/jira/secure/attachment/12401426/$patch_1722"
 hadoop_5450="https://issues.apache.org/jira/secure/attachment/12401846/$patch_5450"
 hbase_release="http://mirrors.ukfast.co.uk/sites/ftp.apache.org/hadoop/hbase/hbase-0.19.1/$hbase_tar"
-install_log="$(pwd)/hadoop_hbase_install.log"
+install_log="$(pwd)/install_hadoop_hbase.log"
 install_tmplog=$(mktemp /tmp/zohmg-log.XXXXXXXX)
 
 
@@ -35,7 +35,7 @@ function exec_and_log() {
 
     # execute and log to intermediate.
     if [ "x" = "x$screenoutput" ]; then
-        $1 &>$install_tmplog
+        $1 &>"$install_tmplog"
     else
         $1
     fi
@@ -43,8 +43,8 @@ function exec_and_log() {
 
     # log if not requested not to.
     if [ "x" = "x$3" ]; then
-        cat $install_log $install_tmplog >"$install_log.new"
-        mv "$install_log.new" $install_log
+        cat "$install_log" "$install_tmplog" >"$install_log.new"
+        mv "$install_log.new" "$install_log"
     fi
 
     # check exit code.
@@ -129,7 +129,7 @@ done
 
 
 # truncate logs.
->$install_log
+>"$install_log"
 >"$install_log.new"
 
 
