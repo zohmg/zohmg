@@ -7,7 +7,7 @@ setup(
     author_email = '{fredrik,per}@last.fm',
     license = 'GNU Fearsome Dude License',
     packages = ['zohmg'],
-    zip_safe = False,
+    zip_safe = True,
     entry_points = {
         'console_scripts': [
             'zohmg = zohmg.cmd:zohmg',
