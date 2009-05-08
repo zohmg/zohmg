@@ -26,26 +26,18 @@ install_tmplog=$(mktemp /tmp/zohmg-log.XXXXXXXX)
 # helpers.
 
 # execute $1 and exit if it failed, displaying $2.
-# it is possible to set $3 in order to print to screen (without logging).
 function exec_and_log() {
     # setup variables.
     command=$1
     [ "x" = "x$2" ] && msg="Error: Could not execute $command." || msg=$2
-    screenoutput=$3
 
     # execute and log to intermediate.
-    if [ "x" = "x$screenoutput" ]; then
-        $1 &>"$install_tmplog"
-    else
-        $1
-    fi
+    $1 | tee "$install_tmplog" | cat
     ret=$?
 
-    # log if not requested not to.
-    if [ "x" = "x$3" ]; then
-        cat "$install_log" "$install_tmplog" >"$install_log.new"
-        mv "$install_log.new" "$install_log"
-    fi
+    # log.
+    cat "$install_log" "$install_tmplog" >"$install_log.new"
+    mv "$install_log.new" "$install_log"
 
     # check exit code.
     if [ $ret -ne 0 ]; then
@@ -143,7 +135,7 @@ hbase_conf=$hbase/conf
 echo "Checking for necessary programs..."
 for command in "ant -version" "patch --version" "wget --version"; do
     program=$(echo $command | sed 's/ .*//')
-    printf "Checking for $program... "
+    echo "Checking for $program... "
     exec_and_log "$command" "Error: Missing program: $program not found."
     echo "ok."
 done
@@ -152,7 +144,7 @@ done
 # download or use already existing files.
 if [ "x" = "x$files" ]; then
     # create temporary directories for downloads.
-    printf "Creating temporary directory... "
+    echo "Creating temporary directory... "
     files=$(mktemp -d /tmp/zohmg-deps.XXXXXX)
     mkdir -p $files/patches
     echo "done."
@@ -179,7 +171,7 @@ if [ "x" = "x$files" ]; then
     fi
     echo "Done downloading files."
 else
-    printf "Using previously downloaded files in $files... "
+    echo "Using previously downloaded files in $files... "
     for file in "patches/$patch_1722" "patches/$patch_5450" "$hadoop_tar" "$hbase_tar"; do
         exec_and_log "ls $files/$file" "Error: Could not find file $files/$file."
     done
@@ -201,17 +193,17 @@ echo "Installing..."
 if [ ! "x" = "x$hbase_only" ]; then
     echo "Skipping installation of Apache Hadoop..."
 else
-    printf "Extracting Apache Hadoop... "
+    echo "Extracting Apache Hadoop... "
     exec_and_log "tar zxf $files/$hadoop_tar -C $prefix"
     echo "done."
     exec_and_log "echo ... Patching Apache Hadoop ..."
     for patch in "$patch_1722" "$patch_5450"; do
         num=$(echo $patch | sed 's/.patch$//')
-        printf "Applying patch $num... "
+        echo "Applying patch $num... "
         cd $hadoop
         # inlined exec_and_log because of sh -c "command".
         # execute and log to intermediate.
-        sh -c "patch -p0 <$files/patches/$patch" &>"$install_tmplog"
+        sh -c "patch -p0 <$files/patches/$patch | tee '$install_tmplog' | cat"
         ret=$?
 
         # log.
@@ -227,7 +219,7 @@ else
         echo "done."
     done
     exec_and_log "echo ok"
-    printf "Compiling Apache Hadoop... "
+    echo "Compiling Apache Hadoop... "
     exec_and_log "echo ... Compiling Apache Hadoop ..."
     cd $hadoop
     exec_and_log "ant package" "Error: Could not compile Apache Hadoop."
@@ -238,10 +230,10 @@ fi
 if [ ! "x" = "x$hadoop_only" ]; then
     echo "Skipping installation of Apache HBase..."
 else
-    printf "Extracting Apache HBase... "
+    echo "Extracting Apache HBase... "
     exec_and_log "tar zxf $files/$hbase_tar -C $prefix"
     echo "done."
-    printf "Compiling Apache HBase... "
+    echo "Compiling Apache HBase... "
     exec_and_log "echo ... Compiling Apache HBase ..."
     cd $hbase
     exec_and_log "ant package" "Error: Could not compile Apache HBase."
@@ -252,7 +244,7 @@ fi
 # configuration?
 if [ "x" = "x$no_config" ]; then
     if [ "x" = "x$hbase_only" ]; then
-        printf "Configuring Apache Hadoop... "
+        echo "Configuring Apache Hadoop... "
         # backup template configurations.
         exec_and_log "cp -v $hadoop_conf/hadoop-env.sh $hadoop_conf/hadoop-env.sh.dist"
         exec_and_log "cp -v $hadoop_conf/hadoop-site.xml $hadoop_conf/hadoop-site.xml.dist"
@@ -340,7 +332,7 @@ EOHADOOPSITE
         echo "done."
     fi
     if [ "x" = "x$hadoop_only" ]; then
-        printf "Configuring Apache HBase... "
+        echo "Configuring Apache HBase... "
         # backup template configuration.
         exec_and_log "cp -v $hbase_conf/hbase-env.sh $hbase_conf/hbase-env.sh.dist"
 
@@ -419,7 +411,7 @@ fi
 # clean up.
 rm $install_tmplog
 if [ "x" = "x$keep_files" ]; then
-    printf "Cleaning up downloaded files... "
+    echo "Cleaning up downloaded files... "
     exec_and_log "rm -rf $files" "Error: Could not remove $files."
     echo "done."
 else
