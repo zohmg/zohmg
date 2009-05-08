@@ -28,12 +28,28 @@ data. [DRAFT]}
 
 \vspace{12pt}
 
-\noindent 
-This thesis describes a data store for multi-dimensional time-series-based data. The data is aggregated over many units of measurements and across multiple dimensions. One of these dimensions is always time.
+\noindent
 
-Zohmg solves the problem of summing, storing and serving measurements. These measurements may be taken from log files or similar sources. Zohmg stores only the summarized data, not the atomic measurements. Zohmg is optimized for speed of data retrieval.
+This thesis describes a data store for multi-dimensional time-series-based
+data. The data is aggregated over many units of measurements and across
+multiple dimensions. One of these dimensions is always time.
 
-The thesis is presented in three major sections: problem statement, theoretical solution and implementation details.
+We present a data store called Zohmg. It is built on top of HBase and uses
+Hadoop to run import jobs in parallel. Zohmg stores and serves aggregates of
+measurements. The measurements are extracted taken from log files or similar
+sources with user-supplied code.
+
+The data store is optimized for speed of data retrieval: one of the design
+goals was to serve data at mouse-click rate and promote real-time data
+exploration. As such, Zohmg stores only the summarized data, not the atomic
+measurements.
+
+Similar data stores exist: they generally use a relational database system as
+their underlying data store. The novelty of our approach is to model OLAP
+cubes on top of a bigtable-like data store.
+
+The thesis is presented in three major sections: problem statement,
+theoretical solution and implementation details.
 
 
 \tableofcontents
@@ -44,32 +60,53 @@ The thesis is presented in three major sections: problem statement, theoretical 
 
 \chapter{Introduction}
 
-% TODO: den har texten passar battre i ett eget stycke/sektion, background reading style.
+Any organization will eventually wish to evaluate and analyze various
+characteristics of the service and operations they manage. These services can
+be anything from web sites to theme parks, and the evaluation might include
+characteristics such as the number of visitors per day, and the average time a
+theme park guest spends queueing for a particular ride.
 
-\chapterquote{Data warehouse is a repository of an organization's
-electronically stored data. Data warehouses are designed to facilitate
-reporting and analysis.}{Wikipedia}
+Inevitably, these services and operations will generate a log for later
+analysis. As the services grow in size, so will the data sets they generate.
 
-The main actions of a data warehouse is extract, transform and load data,
-although not necessarily in that order.
+An important property of these data sets is that they generally have a regular
+structure and are represented as a number of independent records. The records
+can be broken up without losing any of their meaning and are as such very well
+suited for parallel analysis. The data sets are not fit to store using
+traditional database techniques, if only for the fact that they are too large
+to fit in a relational database.
 
-The classic thinking in data warehousing is the divide between facts and dimensons. The facts are measures categorized by dimensions. In OLAP, a sort of data warehouse, the OLAP cube is typically modelled in fact tables and dimension tables in a relational database. The novelty of our approach is to model OLAP cube-like aggregation data store on top of a bigtable-like data store.
+Each log record typically contains quite a bit of information. For example, a
+log of visits to a web site might contain a timestamp, information about what
+country the visiting user is from, and a string of text that identifies the
+web browser that was used. From these base facts one can collect information
+about what countries generate the most traffic to the site, and which web
+browser is most popular in a certain country, for example.
 
+These bits of information can be thought of as points along an axis; Sweden,
+Norway and Denmark are all points along the country axis, for instance. This
+is an important concept and it will be used throughout the text.
 
-As large scale web services grow they generate vast volumes of log data,
-for instance Apache web logs. The ability to accurately analyse gathered
-data is important to the evaluation, planning, and success of the web
-service. Storing and analysing massive volumes of log data requires
-special measures to be taken. From an end-user perspective the requirement
-is an easy, complete and fast data analysing procedure. The technical
-aspects of this requirement boils down to the following key points:
-Visualising, storing and importing the data. The result is an
-multidimensional information system which is subject to
-OLAP\footnote{On-Line Analytical Processing}. \cite{olap_solutions}
+Typically, the size of a data set is in the range of several gigabytes of data
+per day. A single computer is not likely to be able to process that amount of
+data before a new batch arrives, and for very large data sets the single
+computer would simply not be able to fit the intermediate data set in its
+memory at all. Some data sets are many times larger than that and do not even
+fit inside a single computers storage devices.
 
-All three requirements are depend on one another, what data and how it is
-stored affects what can be visualised. Also, what data is imported---and
-how it is analysed---affects how it can be stored and hence visualised.
+It is suitable to store the data across many storage nodes in what is called a
+distributed filesystem and to to exploit the parallel nature of the records by
+breaking up the data sets in pieces and have each piece be processed
+separately on a node in a large compute cluster.
+
+% TODO: fixa cites. Luckily, this is a problem that has already been solved.
+Google has published papers on the MapReduce framework \cite{mapreduce}, which
+allows for parallel processing of large data sets, and The Google Filesystem
+\cite{gfs}, a scalable, distributed filesystem. The Apache Hadoop project has
+published open source implementations of a mapreduce framework and a
+distributed filesystem, both of which build on the ideas in the papers
+published by Google.
+
 
 
 
@@ -87,33 +124,6 @@ the restriction on the system that is built so that it only handles
 time-series. Because of this restriction the data store obviously becomes
 less general purpose. Although since most log data is time-series based
 this restriction does not cripple the system much---if at all.
-
-
-
-\subsection{Data size}
-
-The sheer size of the data makes it unfeasible to use a single computer.
-Eventually a single machine would be fed so much data that it cannot cope
-with it. For instance a single web log file for one day can be up to
-several gigabytes. It is problematic for a single machine to handle this
-because of the limitations of memory, loading the entire file in memory.
-Distributed computing solves this by spreading the computations out to
-several machines in parallel. The obvious gain is that the waiting time
-before a computation is done is divided by the amount of nodes used,
-compared to running the computation on one machine. There is also a gain
-related to the actual machines, it is possible to use commodity hardware.
-Because MapReduce and BigTable has high availability and reliability a node
-in the cluster can safely be replaced on the fly if it fails.
-
-Scalability is also very important. Using single machines for computing is
-problematic when the data set grows, more powerful machines has to be
-obtained. More power contained in a single machine results in higher price,
-eventually it is too expensive to perform computations on very large
-data sets. Both MapReduce and BigTable scale close to linearly, adding one
-machine to the cluster adds equal amount of processing power. Since
-MapReduce and BigTable can use commodity hardware it is reasonable to buy
-extra machines to gain extra computing power or storage space.
-
 
 \section{Overview}
 
@@ -139,6 +149,22 @@ presents the conclusion, respectively.
 arrival I was fully convinced that he understood it.}{Chaim Weizmann}
 
 
+\section{Other data warehouses}
+
+A data warehouse is a repository of an organization's
+electronically stored data. Data warehouses are designed to facilitate
+reporting and analysis. \cite{wikipedia}
+
+The core actions of a data warehouse is to load, transform and extract data.
+The classic thinking in modelling data warehouses is to divide data into facts
+and dimensons. The facts are measures categorized by dimensions.
+
+In OLAP\footnote{On-Line Analytical Processing}, which is a kind of data
+warehouse, the data is thought of as being structured as a cube. The cube is
+typically modelled in a realational database with fact tables and dimension
+tables, upon which the system performs joins to extract data.
+\cite{olap_solutions}
+
 \section{Data cubes}
 
 A data cube is a conceptual n-dimensional array of values, in which the values
@@ -162,7 +188,10 @@ attributes and dimensions.
 
 \subsection{Projections}
 
-One of the most common operations on a data cube is the projection. A projection is a dimensionality reduction, where one or more dimensions are discarded from the cube with the measurements along each axis summed up, leaving a data cube of a lesser dimension.
+One of the most common operations on a data cube is the projection. A
+projection is a dimensionality reduction, where one or more dimensions are
+discarded from the cube with the measurements along each axis summed up,
+leaving a data cube of a lesser dimension.
 
 A typical projection is that from an n-dimensional cube down to two
 dimensions, which is the case when plotting an object---with three or more
@@ -171,13 +200,21 @@ dimensions---on screen or paper.
 
 \subsection{Slice and dice}
 
-The slice operation fixes the values of one or several dimensions in the cube. The data omitted from this operation would be any data associated with the values of the dimension that were not fixed. The dice operation is a slice on more than two dimensions. [source: http://www.cs.ualberta.ca/~zaiane/courses/cmput690/glossary.html]
+The slice operation fixes the values of one or several dimensions in the cube.
+The data omitted from this operation would be any data associated with the
+values of the dimension that were not fixed. The dice operation is a slice on
+more than two dimensions. [source:
+http://www.cs.ualberta.ca/~zaiane/courses/cmput690/glossary.html]
 
 
 
 \section{Time series}
 
-Time is the most common of the dimensions in the data cube constructed for Zohmg. The time stamp is a common property for all data handled by Zohmg; every measurement is expected to have time as one of its dimensions. TODO: really, this belongs in the implementation section. I find nothing interesting to say about time series in this section.
+Time is the most common of the dimensions in the data cube constructed for
+Zohmg. The time stamp is a common property for all data handled by Zohmg;
+every measurement is expected to have time as one of its dimensions. TODO:
+really, this belongs in the implementation section. I find nothing interesting
+to say about time series in this section.
 
 
 
@@ -312,7 +349,8 @@ on each node. This behaviour makes it fast to access data while keeping
 reliability and scalability features.
 
 
-% TODO> why is this Tool & BigTable-subsection called Dimensions? Disambiguation needed. -fredrik
+% TODO> why is this Tool & BigTable-subsection called Dimensions?
+% Disambiguation needed. -fredrik
 \subsection{Dimensions}
 
 \subsubsection{Column-families}
@@ -553,7 +591,8 @@ uses Dumbo to run jobs on Apache Hadoop, and uses Apache HBase to persist the
 data.
 
 
-% TODO: not sure this is precisely a story about the implementation. putting it here for now.
+% TODO: not sure this is precisely a story about the implementation.
+% putting it here for now.
 
 -- A truly magnetic data store - the idea of enabling the user --
 
@@ -925,16 +964,24 @@ warehouse based on MapReduce and Bigtable. \cite{hdw}
 
 \section{Future work}
 
-Says Wikipedia: "Organizations generally start off with relatively simple use of data warehousing. Over time, more sophisticated use of data warehousing evolves." Zohmg is that relatively simple data warehouse; the seed from which a more sophisticated data warehouse may evolve.
+Says Wikipedia: "Organizations generally start off with relatively simple use
+of data warehousing. Over time, more sophisticated use of data warehousing
+evolves." Zohmg is that relatively simple data warehouse; the seed from which
+a more sophisticated data warehouse may evolve.
 
-There is as of yet no support for specifying granularities. The only supported resolution of time is the day.
+There is as of yet no support for specifying granularities. The only supported
+resolution of time is the day.
 
-The single aggregation performed is summing of the measurements. Future work may include average, max and min, etc.
+The single aggregation performed is summing of the measurements. Future work
+may include average, max and min, etc.
 
-There is no metadata store. It would be very helpful for the application writer to know what the known values are for each dimension.
+There is no metadata store. It would be very helpful for the application
+writer to know what the known values are for each dimension.
 
-It'd be interesting to think a bit about how the data store could be fully elastic, i.e. not require any data set definition from the user and instead create column-families on the fly based on the dimensions output from the user's map.
-
+It'd be interesting to think a bit about how the data store could be fully
+elastic, i.e. not require any data set definition from the user and instead
+create column-families on the fly based on the dimensions output from the
+user's map.
 \subsection{Multiple data sets}
 
 \subsection{Metadata}
