@@ -9,7 +9,7 @@ class Process(object):
         resolver = 'fm.last.darling.HBaseIdentifierResolver'
         outputformat = 'org.apache.hadoop.hbase.mapred.TableOutputFormat'
 
-        python_version = platform.python_version()[:-2]
+        python_version = platform.python_version()[:3]
         opts = [('jobconf',"hbase.mapred.outputtable=" + table),
                 ('jobconf','stream.io.identifier.resolver.class=' + resolver),
                 ('streamoutput','hbase'), # resolved by identifier.resolver
