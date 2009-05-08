@@ -95,16 +95,17 @@ memory at all. Some data sets are many times larger than that and do not even
 fit inside a single computers storage devices.
 
 It is suitable to store the data across many storage nodes in what is called a
-distributed filesystem and to to exploit the parallel nature of the records by
+distributed file system and to to exploit the parallel nature of the records by
 breaking up the data sets in pieces and have each piece be processed
 separately on a node in a large compute cluster.
 
-% TODO: fixa cites. Luckily, this is a problem that has already been solved.
-Google has published papers on the MapReduce framework \cite{mapreduce}, which
-allows for parallel processing of large data sets, and The Google Filesystem
-\cite{gfs}, a scalable, distributed filesystem. The Apache Hadoop project has
-published open source implementations of a mapreduce framework and a
-distributed filesystem, both of which build on the ideas in the papers
+% TODO: fixa cites.
+Luckily, this is a problem that has already been solved. Google has published
+papers on the MapReduce framework \cite{mapreduce}, which allows for parallel
+processing of large data sets, and The Google File System \cite{gfs}, a
+scalable, distributed file system. The Apache Hadoop \cite{hadoop} project has
+published free software implementations of a MapReduce framework and a
+distributed file system, both of which build on the ideas in the papers
 published by Google.
 
 
@@ -134,7 +135,7 @@ Chapter 2 establish the theoretical base of the problem statement.
 In chapter 3, the tools used for the implementation are declared, moving
 over to chapter 4 where the details of the implementation are presented.
 
-How to use the Zohmg system is presented in chapter 5, while chapter 6
+How to use the Zohmg system is presented in chapter~5, while chapter 6
 shows an example work flow.
 
 Chapters 7 and 8 discuss the results, related, and future work, and
@@ -622,7 +623,7 @@ def map(key, value):
   values = {'pageviews' : 1,
             'bytes'     : log.size}
 
- yield parsed.timestamp, dimensions, measurements
+ yield log.timestamp, dimensions, measurements
 \end{verbatim}
 
 \vspace{12pt}
@@ -641,8 +642,8 @@ useragents that are not web spiders and that resulted in a HTTP 200 status
 code.
 
 The last line \textit{yields} the tuple. This is a Python construct called a
-generator that lets the map function emit any number of tuples (or none!)
-for a single invocation.
+\textit{generator} that lets the map function emit any number of tuples (or
+none!) for a single invocation.
 
 The user will import a day worth of logs like so:
 
@@ -751,8 +752,8 @@ in the config/environment.py file.
 
 \section{Importing}
 
-The user writes a mapper which Zohmg wraps, interpreting the output from
-the mapper program and storing it in HBase.
+In order to import data to Zohmg, the user writes a mapper which Zohmg wraps;
+interpreting the output from the mapper program and storing it in HBase.
 
 Support exists for writing the mapper in Java or Python.
 
@@ -896,10 +897,13 @@ Based on the query---which the user submits---the corresponding data is
 served from HBase as JSONP. The query is a simple definition of wanted row
 range, dimensions, and values for these dimensions. The query is submitted
 to the data server via HTTP, an example query could look like (the URL is
-wrapped to fit the page) \\
+wrapped to fit the page)
 
-\texttt{http://localhost:8086/data/?t0=20090101 \\
-\&t1=20090420\&unit=pageviews\&d0=country\&d0v=SE} \\
+\begin{verbatim}
+   http://localhost:8086/data/?t0=20090101
+   &t1=20090420&unit=pageviews
+   &d0=country&d0v=SE
+\end{verbatim}
 
 The above query would return the pageviews for SE between 1 January 2009
 and 4 April 2009.
@@ -921,7 +925,7 @@ boxes---and then send this query to the data server and graph the resulting
 data.
 
 The data server serves static files from the project's \texttt{clients}
-directory at the server URL appended with \texttt{client/filename}.
+directory at the server URL appended with \texttt{/client/filename}.
 
 
 
