@@ -23,7 +23,7 @@ class Config(object):
         if config_file:
             self.config_file = config_file
         else:
-            self.config_file = config_path + "/dataset.yaml"
+            self.config_file = "dataset.yaml"
 
         self.config = {}
         self.__read_config()
@@ -31,16 +31,25 @@ class Config(object):
 
     def __read_config(self):
         import yaml
-        try:
-            f = open(self.config_file, "r")
-            self.config = yaml.load(f)
-            f.close()
-        except IOError, ioe:
-            msg = "[%s] Error: Could not read %s. %s." % (time.asctime(),self.config_file, ioe.strerror)
-            fail(msg, ioe.errno)
+        possible_configs = [self.config_file, "config/"+self.config_file]
+        config_loaded = False
+        for config_file in possible_configs:
+            if config_loaded:
+                continue
+            try:
+                f = open(config_file, "r")
+                self.config = yaml.load(f)
+                f.close()
+                config_loaded = True
+            except:
+                pass
+
+        if not config_loaded:
+            msg = "[%s] Error: Could not read configuration." % time.asctime()
+            fail(msg)
 
         if not self.sanity_check():
-            msg = "[%s] Error: Could not parse %s." % (time.asctime(),self.config_file)
+            msg = "[%s] Error: Could not parse configuration." % time.asctime()
             fail(msg)
 
         return self.config
