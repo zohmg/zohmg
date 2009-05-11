@@ -9,6 +9,8 @@ import os, re, sys, time
 
 # figure out if we are run inside dumbo.
 # files shipped to dumbo are all put in cwd.
+
+# FIXME: $HADOOP_HOME can and will be set outside of hadoop jobs.
 if "HADOOP_HOME" in os.environ:
     config_path = os.path.abspath("")
 else:

@@ -1,4 +1,5 @@
 priority zero:
++ config.py breaks (predictably) when HADOOP_HOME is set but if we're not running on hadoop.
 + clean docs, move back.
 + fix identity_mapper.py
 + change projections syntax to list of dimensions. (I know what I mean)
