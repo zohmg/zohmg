@@ -18,6 +18,7 @@ import fm.last.darling.io.records.NSpacePoint;
 import fm.last.darling.nspace.Dimension;
 import fm.last.darling.nspace.Projectionist;
 import fm.last.darling.user.UserMapper;
+import fm.last.darling.utils.Util;
 
 // the class we wrap around the user's mapper.
 public class MapperWrapper implements Mapper<LongWritable, Text, NSpacePoint, IntWritable> {
@@ -48,7 +49,7 @@ public class MapperWrapper implements Mapper<LongWritable, Text, NSpacePoint, In
 		TreeMap<String,String> points = o.getDimensions();
 		
 		// fan out into projections,
-		ArrayList<ArrayList<Dimension>> rps = readRequestedProjections();
+		ArrayList<ArrayList<Dimension>> rps = Util.readRequestedProjections();
 		for (ArrayList<Dimension> requested : rps) {
 			// reduce down to the dimensions we are interested in. 
 			TreeMap<String,String> projection = Projectionist.dimensionality_reduction(requested, points);
@@ -58,31 +59,5 @@ public class MapperWrapper implements Mapper<LongWritable, Text, NSpacePoint, In
 				collector.collect(point, o.getMeasurement(unit));
 			}
         }
-	}
-
-	private ArrayList<ArrayList<Dimension>> readRequestedProjections() {
-		ArrayList<ArrayList<Dimension>> list = new ArrayList<ArrayList<Dimension>>();
-
-		ArrayList<Dimension> projection0 = new ArrayList<Dimension>();
-		projection0.add(new Dimension("country"));
-		list.add(projection0);
-
-		ArrayList<Dimension> projection1 = new ArrayList<Dimension>();
-		projection1.add(new Dimension("country"));
-		projection1.add(new Dimension("service"));
-		list.add(projection1);
-
-		return list;
-	}
-	
-	// TODO: not used for anything else than illustrative purposes. remove at will.
-	public static void main(String[] args) throws Exception {
-		System.out.println("yeah, that's right.");
-
-		// proof of concept.
-		ZohmgOutputCollector o = new ZohmgOutputCollector();
-		String userclass = "fm.last.darling.user.ExampleMapper";
-		UserMapper usermapper = (UserMapper) Class.forName(userclass).newInstance();
-		usermapper.map(200, "123423423	SE	web	510", o);
 	}
 }

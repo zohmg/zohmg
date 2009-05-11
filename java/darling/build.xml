@@ -8,6 +8,10 @@
  
   <property name="src.dir"  location="${basedir}/src"/>
 
+  <property name="src.test"  location="${basedir}/test"/>
+  <property name="build.test"  location="${basedir}/build/test"/>
+  <property name="test.timeout" value="300"/>
+	
   <property name="lib.dir" value="${basedir}/lib"/>
   <property name="conf.dir" value="${basedir}/conf"/>
   <property name="docs.dir" value="${basedir}/docs"/>
