@@ -18,6 +18,7 @@ priority uno:
 + README with correct webberface urls
 + make doc/* consistent and non-repeating
 + zohmg/create.py: set default jars.
++ zohmg/create.py: make default dataset.yaml follow apache example.
 + think a bit more about serving static files.
 DONE>  - shell script to install dependencies
 DONE> + server
