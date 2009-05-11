@@ -1,6 +1,7 @@
 priority zero:
 + clean docs, move back.
 + fix identity_mapper.py
++ change projections syntax to list of dimensions. (I know what I mean)
 DONE> make sure all dependent eggs (paste, json, yaml, dumbo) are installed.
 DONE> ImportError: No module named setuptools
 DONE> ImportError: No module named hbase.ttypes
