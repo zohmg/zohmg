@@ -22,6 +22,8 @@ priority uno:
 + zohmg/create.py: set default jars.
 + zohmg/create.py: make default dataset.yaml follow apache example.
 + think a bit more about serving static files.
++ class Environment is broken.
++ (some day/maybe) warn user when config is missing.
 DONE>  - shell script to install dependencies
 DONE> + server
 DONE>  - transformers, plugin to data server

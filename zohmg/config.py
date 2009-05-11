@@ -107,14 +107,16 @@ class Environ(object):
         self.read_environ()
 
     def get(self,key):
+        # FIXME: catch KeyError.
         return self.environ[key]
 
     def read_environ(self):
+        # FIXME: think harder about paths; is environment.py really where you think it is?
         sys.path.append(config_path) # add config path so we can import from it.
         try:
             import environment
         except ImportError:
-            msg = "[%s] Error: Could not import %senvironment.py. %s." % (time.asctime(),config_path)
+            msg = "[%s] Error: Could not import environment. %s." % (time.asctime(), config_path)
             fail(msg)
 
         for key in dir(environment):
