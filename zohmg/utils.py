@@ -1,6 +1,5 @@
 import string, sys, time
 from random import Random
-from hbase.ttypes import *
 
 # TODO: move all hbase utils to it's own module.
 
@@ -25,7 +24,8 @@ def setup_transport(host):
 
 
 def create_or_bust(c, t, cfs=['fam']):
-    print "creating table %s with %s column-families." % (t, len(cfs))
+    from hbase.ttypes import *
+    print "creating hbase table %s." % t
     try:
         cds = []
         for cf in cfs:
