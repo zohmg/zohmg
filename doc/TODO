@@ -17,6 +17,8 @@ priority uno:
 + better webberface
 + README with correct webberface urls
 + make doc/* consistent and non-repeating
++ zohmg/create.py: set default jars.
++ think a bit more about serving static files.
 DONE>  - shell script to install dependencies
 DONE> + server
 DONE>  - transformers, plugin to data server
