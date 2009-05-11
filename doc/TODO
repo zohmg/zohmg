@@ -11,6 +11,10 @@ priority uno:
 + in usermapper, add timestamp to map of dimensions.
 + npe on empty mapper output.
 + support for mapper class.
++ in mapper, warn user if she supplies a string as value to measurements dictionary.
++ better webberface
++ README with correct webberface urls
++ make doc/* consistent and non-repeating
 DONE>  - shell script to install dependencies
 DONE> + server
 DONE>  - transformers, plugin to data server
