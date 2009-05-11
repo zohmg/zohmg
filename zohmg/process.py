@@ -21,9 +21,13 @@ class Process(object):
                 ('file','lib/usermapper.py') # TODO: handle this more betterer.
                ]
 
+        # check for '--lzo' as first extra argument.
+        if len(for_dumbo) > 0 and for_dumbo[0] == '--lzo':
+            opts.append(('inputformat', 'org.apache.hadoop.mapred.LzoTextInputFormat'))
+            for_dumbo.pop(0) # remove '--lzo'.
+
         # read environment and attach.
         env = Environ()
-
         hadoop_home = env.get("HADOOP_HOME")
         if not os.path.isdir(hadoop_home):
             msg = "Error: HADOOP_HOME not set in config/environment.py."
@@ -44,7 +48,6 @@ class Process(object):
             fail(msg)
 
         # pull everything in config and lib.
-        # TODO: why everything in config?
         file_opts = self.__add_files(["config","lib"])
         opts.extend(file_opts)
 
