@@ -1,22 +1,6 @@
 from zohmg.utils import fail
 import os, re, sys, time
 
-# TODO: is it a safe assumption that HADOOP_HOME is in os.environ when
-# running dumbo?
-# ALSO: is it safe to assume that HADOOP_HOME is *not* defined when
-# running locally?
-# TODO: why are we doing this in a global variable?
-
-# figure out if we are run inside dumbo.
-# files shipped to dumbo are all put in cwd.
-
-# FIXME: $HADOOP_HOME can and will be set outside of hadoop jobs.
-if "HADOOP_HOME" in os.environ:
-    config_path = os.path.abspath("")
-else:
-    config_path = os.path.abspath("config/")
-
-
 # TODO: multiple dataset files
 class Config(object):
     def __init__(self, config_file=None):
@@ -115,17 +99,21 @@ class Environ(object):
         self.environ = {}
         self.read_environ()
 
-    def get(self,key):
-        # FIXME: catch KeyError.
-        return self.environ[key]
+    def get(self, key):
+        try:
+            return self.environ[key]
+        except:
+            return ''
 
     def read_environ(self):
-        # FIXME: think harder about paths; is environment.py really where you think it is?
-        sys.path.append(config_path) # add config path so we can import from it.
+        # add config path so we can import from it.
+        sys.path.append(".")
+        sys.path.append("config")
+
         try:
             import environment
         except ImportError:
-            msg = "[%s] Error: Could not import environment. %s." % (time.asctime(), config_path)
+            msg = "[%s] Error: Could not import environment.py" % time.asctime()
             fail(msg)
 
         for key in dir(environment):
