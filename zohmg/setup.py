@@ -12,11 +12,9 @@ class Setup(object):
             projection = '-'.join(c.config['projections'][p])
             cfs.append(projection)
 
-        print "creating table:"
-        print "  * " + dataset
+        print "creating table '%s'" % dataset
         print " column families:"
-        print "".join((map( lambda cf: "  * "+str(cf)+"\n" , cfs)))
-        print
+        print "".join((map( lambda cf: "  + "+str(cf)+":\n" , cfs)))
 
         try:
             c = setup_transport("localhost")

@@ -25,7 +25,7 @@ def setup_transport(host):
 
 
 def create_or_bust(c, t, cfs=['fam']):
-    print "creating table %s with %s or so cfs" % (t, len(cfs))
+    print "creating table %s with %s column-families." % (t, len(cfs))
     try:
         cds = []
         for cf in cfs:
@@ -42,6 +42,7 @@ def create_or_bust(c, t, cfs=['fam']):
         print e
         print "create_or_bust => bust"
         exit(3)
+    print "ok."
 
 
 def random_string(size):
