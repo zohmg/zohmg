@@ -8,13 +8,20 @@ class Reducer(object):
 
     def __call__(self, key, values):
         #self.reduces += 1
-        ts, dims, unit = key
+        ts, ps, dims, unit = key
         value = sum(values)
 
         # rowkey: "unit-ymd".
         rk = '-'.join([unit, str(ts)])
-        cf = '-'.join(dims.keys())
-        q  = '-'.join(dims.values())
+
+        # construct column-family and qualifier strings.
+        cflist = []
+        qlist  = []
+        for p in ps:
+            cflist.append(p)
+            qlist.append(dims[p])
+        cf = '-'.join(cflist)
+        q  = '-'.join(qlist)
 
         # remember, we'll pass the output of this reducer to HBaseOutputReader.
         yield rk, json.dumps({cf+":"+q : {'value':value}})

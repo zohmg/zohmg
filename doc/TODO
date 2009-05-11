@@ -24,6 +24,7 @@ priority uno:
 + think a bit more about serving static files.
 + class Environment is broken.
 + (some day/maybe) warn user when config is missing.
+DONE> reducer (or something else) is getting the order of the dimensions wrong => the cf is wrong.
 DONE>  - shell script to install dependencies
 DONE> + server
 DONE>  - transformers, plugin to data server
