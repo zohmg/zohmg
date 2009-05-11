@@ -235,9 +235,9 @@ user. Pre-computing frequently requested aggregates is therefore regularly
 done in the background, giving the user fast access to these.
 \cite{olap_solutions}
 
-The classic trade-off between time and space applys to wether or not
+The classic trade-off between time and space applies to whether or not
 pre-compute an aggregate. Pre-computing to many aggregates might render an
-unfeasible of data amount to store, while pre-computing to few aggregates
+unfeasible amount of data to store, while pre-computing to few aggregates
 renders longer access times for aggregates which are not pre-computed. This
 problem is further discussed in the thesis, but left to the user of the
 Zohmg system to solve.
@@ -578,13 +578,13 @@ serious speed boost is included in simplejson. \cite{simplejson}
 
 \chapter{Implementation}
 
-%\chapterquote{A good idea is about ten percent and implementation and hard
-%work, and luck is 90 percent.}{Guy Kawasaki}
+\chapterquote{A good idea is about ten percent and implementation and hard
+work, and luck is 90 percent.}{Guy Kawasaki}
 
-\chapterquote{It is not always what we know or analyzed before we make a
-decision that makes it a great decision. It is what we do after we make the
-decision to implement and execute it that makes it a good
-decision.}{William Pollard}
+%\chapterquote{It is not always what we know or analyzed before we make a
+%decision that makes it a great decision. It is what we do after we make the
+%decision to implement and execute it that makes it a good
+%decision.}{William Pollard}
 
 % COMMENT: do we really need to repeat this?
 As stated in chapter 3, Zohmg is built upon existing tools and software. It
@@ -720,7 +720,7 @@ An alternative approach would have been to perform the dimensionality
 reduction at a later stage, namely in the reducer of a multi-pass MapReduce
 job.
 
-The reducer, then, is very simple: it's a simple sum of the values. The output
+The reducer, then, is very simple: it is a simple sum of the values. The output
 of the reducer will not be stored on disk as is usually the case, but will
 instead be interpreted by a custom OutputReader that persists the data to
 HBase.
@@ -932,7 +932,7 @@ directory at the server URL appended with \texttt{/client/filename}.
 \chapter{Examples}
 
 \chapterquote{Example is not the main thing in influencing others, it's
-the only thing}{Albert Schweitzer}
+the only thing.}{Albert Schweitzer}
 
 %\chapterquote{There is nothing so annoying as a good example!!}{Mark Twain}
 
