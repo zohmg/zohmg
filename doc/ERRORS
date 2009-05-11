@@ -1,0 +1,13 @@
++ Mon May 11 10:59:37 BST 2009, during install & apt-get:
+Setting up python-setuptools (0.6c8-0ubuntu2) ...
+pycentral: pycentral pkginstall: not overwriting local files
+pycentral pkginstall: not overwriting local files
+dpkg: error processing python-setuptools (--configure):
+ subprocess post-installation script returned error exit status 1
+dpkg: dependency problems prevent configuration of python-paste:
+ python-paste depends on python-setuptools (>= 0.6b3-1); however:
+  Package python-setuptools is not configured yet.
+dpkg: error processing python-paste (--configure):
+ dependency problems - leaving unconfigured
+
+
