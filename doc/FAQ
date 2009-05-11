@@ -1,0 +1,8 @@
+
++ Are you getting ImportError in your mapper?
+Make sure you put the eggs for all non-standard python modules
+that your mapper use in the lib directory of your application.
+
++ Are you getting this error: 'TypeError: sequence item 0: expected string, int found'?
+Make sure your mapper sets the value of all dimensions to strings, not integers.
+
