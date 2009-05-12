@@ -7,6 +7,7 @@ if [ $EUID -ne 0 ]; then
 fi
 
 
+
 # TODO:
 #  use mirrors for ${hadoop,hbase}_tar
 #  also, apache seems to mirror only the very latest point release :-(
@@ -130,6 +131,10 @@ while [ $1 ]; do
 done
 
 
+# make sure the user knows what's up.
+echo "this script will download, patch and install hadoop & hbase in $prefix"
+echo "any key to continue, CTRL-C to abort."
+read
 
 if [ -f $prefix ]; then
     echo "$prefix is a file; can't install there."
