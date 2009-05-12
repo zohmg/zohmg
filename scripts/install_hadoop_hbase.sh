@@ -1,11 +1,15 @@
-#!/bin/sh
-
+#!/bin/bash
+# install hadoop (patched) and hhbase in /opt
 
 if [ $EUID -ne 0 ]; then
-    echo "Error: Superuser privileges required."
+    echo "you need to be root. please sudo."
     exit 1
 fi
 
+
+# TODO:
+#  use mirrors for ${hadoop,hbase}_tar
+#  also, apache seems to mirror only the very latest point release :-(
 
 # set default variables.
 prefix="/opt"
@@ -13,12 +17,14 @@ hadoop_version="hadoop-0.19.1"
 hadoop_tar="$hadoop_version.tar.gz"
 patch_1722="HADOOP-1722-branch-0.19.patch"
 patch_5450="HADOOP-5450.patch"
-hbase_version="hbase-0.19.1"
+hbase_version="hbase-0.19.2"
 hbase_tar="$hbase_version.tar.gz"
-hadoop_release="http://mirrors.ukfast.co.uk/sites/ftp.apache.org/hadoop/core/hadoop-0.19.1/$hadoop_tar"
-hadoop_1722="https://issues.apache.org/jira/secure/attachment/12401426/$patch_1722"
-hadoop_5450="https://issues.apache.org/jira/secure/attachment/12401846/$patch_5450"
-hbase_release="http://mirrors.ukfast.co.uk/sites/ftp.apache.org/hadoop/hbase/hbase-0.19.1/$hbase_tar"
+#hadoop_release="http://mirrors.ukfast.co.uk/sites/ftp.apache.org/hadoop/core/$hadoop_version/$hadoop_tar"
+hadoop_release="http://apache.mirror.infiniteconflict.com/hadoop//core/$hadoop_version/$hadoop_tar"
+hadoop_1722="http://issues.apache.org/jira/secure/attachment/12401426/$patch_1722"
+hadoop_5450="http://issues.apache.org/jira/secure/attachment/12401846/$patch_5450"
+#hbase_release="http://mirrors.ukfast.co.uk/sites/ftp.apache.org/hadoop/hbase/$hbase_version/$hbase_tar"
+hbase_release="http://apache.mirror.infiniteconflict.com/hadoop/hbase/$hbase_version/$hbase_tar"
 install_log="$(pwd)/install_hadoop_hbase.log"
 install_tmplog=$(mktemp /tmp/zohmg-log.XXXXXXXX)
 
@@ -26,16 +32,21 @@ install_tmplog=$(mktemp /tmp/zohmg-log.XXXXXXXX)
 # helpers.
 
 # execute $1 and exit if it failed, displaying $2.
+# TODO: the third argument is ignored. why? what was its purpose?
 function exec_and_log() {
     # setup variables.
     command=$1
+
     [ "x" = "x$2" ] && msg="Error: Could not execute $command." || msg=$2
 
     # execute and log to intermediate.
-    $1 | tee "$install_tmplog" | cat
+    # FIXME: doesn't seem to log stderr
+    # FIXME: doesn't retain return code when using pipes
+    $1 # | tee "$install_tmplog" | cat
     ret=$?
 
     # log.
+    # FIXME: does append not work?  =>  cat $install_tmplog >> $install_log
     cat "$install_log" "$install_tmplog" >"$install_log.new"
     mv "$install_log.new" "$install_log"
 
@@ -119,16 +130,15 @@ while [ $1 ]; do
 done
 
 
+
+if [ -f $prefix ]; then
+    echo "$prefix is a file; can't install there."
+    exit 1
+fi
+
 # truncate logs.
 >"$install_log"
 >"$install_log.new"
-
-
-# set default paths.
-hadoop="$prefix/$hadoop_version"
-hbase="$prefix/$hbase_version"
-hadoop_conf=$hadoop/conf
-hbase_conf=$hbase/conf
 
 
 # check for necessary programs.
@@ -144,17 +154,17 @@ done
 # download or use already existing files.
 if [ "x" = "x$files" ]; then
     # create temporary directories for downloads.
-    echo "Creating temporary directory... "
+    echo "Creating temporary directory............... "
     files=$(mktemp -d /tmp/zohmg-deps.XXXXXX)
     mkdir -p $files/patches
     echo "done."
     echo "Downloading files... "
     # printing progress to screen, without logging.
-    cd $files
     # empty hadoop
     if [ ! "x" = "x$hbase_only" ]; then
         echo "Skipping download of Apache Hadoop..."
     else
+        cd $files
         # hadoop release file.
         exec_and_log "wget $hadoop_release" "Error: Could not download $hadoop_release" "true"
         # download patches.
@@ -185,9 +195,15 @@ if [ "$download_only" = "true" ]; then
     exit 0
 fi
 
-
 # install.
+mkdir $prefix
 echo "Installing..."
+
+# set default paths.
+hadoop="$prefix/$hadoop_version"
+hbase="$prefix/$hbase_version"
+hadoop_conf=$hadoop/conf
+hbase_conf=$hbase/conf
 
 # hadoop
 if [ ! "x" = "x$hbase_only" ]; then
@@ -220,7 +236,6 @@ else
     done
     exec_and_log "echo ok"
     echo "Compiling Apache Hadoop... "
-    exec_and_log "echo ... Compiling Apache Hadoop ..."
     cd $hadoop
     exec_and_log "ant package" "Error: Could not compile Apache Hadoop."
     echo "done."
@@ -234,7 +249,6 @@ else
     exec_and_log "tar zxf $files/$hbase_tar -C $prefix"
     echo "done."
     echo "Compiling Apache HBase... "
-    exec_and_log "echo ... Compiling Apache HBase ..."
     cd $hbase
     exec_and_log "ant package" "Error: Could not compile Apache HBase."
     echo "done."
@@ -408,15 +422,48 @@ else
 fi
 
 
+
+# change ownership of installation directories.
+if [ "empty" != "empty$SUDO_UID" ]; then 
+    # we're sudoing. let's go!
+    echo "chowning $hadoop and $hbase to user id $SUDO_UID"
+    chown -R $SUDO_UID $hadoop $hbase
+fi
+
+# print further instructions.
+echo "
+
+ok, friend!
+
+hadoop and hbase are installed in $prefix
+
+I'll leave it to you to start hadoop and hbase.
+
+you'll find help at http://hadoop.apache.org/core/docs/current/quickstart.html
+and http://wiki.apache.org/hadoop/Hbase/10Minutes
+
+it boils down to this:
+copy+paste the default configuration,
+setup passphraseless ssh,
+format namenode & start hadoop + hbase + thrift (as per below)
+
+
+# hadoop
+$hadoop/bin/hadoop namenode -format  # look twice!
+$hadoop/bin/start-all.sh
+
+# hbase
+$hbase/bin/start-all.sh
+$hbase/bin/hbase thrift start
+
+
+thank you for today, it's been fun!
+"
+
 # clean up.
 rm $install_tmplog
 if [ "x" = "x$keep_files" ]; then
-    echo "Cleaning up downloaded files... "
-    exec_and_log "rm -rf $files" "Error: Could not remove $files."
-    echo "done."
+    rm -rf $files # not using exec_and_log for a reason.
 else
-    echo "Not cleaning up files in $files."
+    echo "(keeping files in $files)"
 fi
-
-
-echo "Done."
