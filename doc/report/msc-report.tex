@@ -60,54 +60,51 @@ theoretical solution and implementation details.
 
 \chapter{Introduction}
 
-Any organization will eventually wish to evaluate and analyze various
-characteristics of the service and operations they manage. These services can
-be anything from web sites to theme parks, and the evaluation might include
-characteristics such as the number of visitors per day, and the average time a
-theme park guest spends queueing for a particular ride.
+Any organization will eventually wish to analyze various characteristics of
+its service and operations. These services can be anything from web sites to
+theme parks. The analysis might include characteristics such as the number of
+visitors per day, or the average time a theme park guest spends queueing for a
+particular ride.
 
-Inevitably, these services and operations will generate a log for later
+Inevitably, the services and operations will generate a log for later
 analysis. As the services grow in size, so will the data sets they generate.
 
 An important property of these data sets is that they generally have a regular
-structure and are represented as a number of independent records. The records
-can be broken up without losing any of their meaning and are as such very well
-suited for parallel analysis. The data sets are not fit to store using
-traditional database techniques, if only for the fact that they are too large
-to fit in a relational database.
+structure and are broken down into records that are independent of each other.
+The records can be analyzed one at a time without losing any of their meaning
+and are as such very well suited for parallel analysis.
 
-Each log record typically contains quite a bit of information. For example, a
-log of visits to a web site might contain a timestamp, information about what
-country the visiting user is from, and a string of text that identifies the
-web browser that was used. From these base facts one can collect information
-about what countries generate the most traffic to the site, and which web
-browser is most popular in a certain country, for example.
+Each log record typically contains a number of fields. For example, a log of
+visits to a web site might contain a timestamp, information about what country
+the visitor is from and what web browser she used. The values of the fields
+can be thought of as points along an axis; Sweden, Norway and Denmark are all
+points along the country axis, for instance. This is an important concept and
+it will be touched upon repeatedly throughout the text.
 
-These bits of information can be thought of as points along an axis; Sweden,
-Norway and Denmark are all points along the country axis, for instance. This
-is an important concept and it will be used throughout the text.
+After having collected these base facts, one can draw conclusions about what
+countries generate the most traffic to the site, and which web browser is most
+popular in a certain country, and so on.
 
 Typically, the size of a data set is in the range of several gigabytes of data
-per day. A single computer is not likely to be able to process that amount of
-data before a new batch arrives, and for very large data sets the single
-computer would simply not be able to fit the intermediate data set in its
-memory at all. Some data sets are many times larger than that and do not even
-fit inside a single computers storage devices.
+per day. Some data sets are many times larger.
+
+A single computer is not likely to be able to process that amount of data
+before a new batch arrives, and for very large data sets a single computer
+would simply not be able to fit the intermediate data set in its working
+memory.
 
 It is suitable to store the data across many storage nodes in what is called a
-distributed file system and to to exploit the parallel nature of the records by
-breaking up the data sets in pieces and have each piece be processed
+distributed file system and to to exploit the parallel nature of the records
+by breaking up the data sets in pieces and have each piece be processed
 separately on a node in a large compute cluster.
 
-% TODO: fixa cites.
-Luckily, this is a problem that has already been solved. Google has published
-papers on the MapReduce framework \cite{mapreduce}, which allows for parallel
-processing of large data sets, and The Google File System \cite{gfs}, a
-scalable, distributed file system. The Apache Hadoop \cite{hadoop} project has
-published free software implementations of a MapReduce framework and a
-distributed file system, both of which build on the ideas in the papers
-published by Google.
-
+% TODO: fixa cites. Luckily, this is a problem that has already been solved.
+Google has published papers on the MapReduce framework \cite{mapreduce}, which
+allows for parallel processing of large data sets, and The Google File System
+\cite{gfs}, a scalable, distributed file system. The Apache Hadoop
+\cite{hadoop} project has published free software implementations of a
+MapReduce framework and a distributed file system, both of which build on the
+ideas in the papers published by Google.
 
 
 
