@@ -113,7 +113,14 @@ published by Google.
 
 \section{Problem description}
 
-\subsection{Scope}
+Last.fm
+
+SQL
+
+EXPLODE
+
+
+\section{Scope}
 
 Time-series based analysis is the most important one when analysing web
 logs, it comes natural since all log entries are timestamped.
@@ -125,6 +132,33 @@ the restriction on the system that is built so that it only handles
 time-series. Because of this restriction the data store obviously becomes
 less general purpose. Although since most log data is time-series based
 this restriction does not cripple the system much---if at all.
+
+\subsubsection*{Related work}
+
+A data warehouse is a repository of an organization's
+electronically stored data. Data warehouses are designed to facilitate
+reporting and analysis. \cite{wikipedia}
+
+The core actions of a data warehouse is to load, transform and extract data.
+The classic thinking in modelling data warehouses is to divide data into facts
+and dimensons. The facts are measures categorized by dimensions.
+
+In OLAP\footnote{On-Line Analytical Processing}, which is a kind of data
+warehouse, the data is thought of as being structured as a cube. The cube is
+typically modelled in a realational database with fact tables and dimension
+tables, upon which the system performs joins to extract data.
+\cite{olap_solutions}
+
+HDW is system which goal is to create a high performance large scale data
+warehouse based on MapReduce and Bigtable. \cite{hdw}
+
+Omniture is used at Last.fm etc.
+
+
+\section{Goal}
+
+The goal (sv. syfte) with our work.
+
 
 \section{Overview}
 
@@ -144,27 +178,21 @@ presents the conclusion, respectively.
 
 
 
-\chapter{Theory}
+\chapter{Analysis}
 
-\chapterquote{Einstein explained his theory to me every day, and on my
-arrival I was fully convinced that he understood it.}{Chaim Weizmann}
+\chapterquote{Arrange whatever pieces come your way.}{Virgina Wolf}
 
 
-\section{Other data warehouses}
+\section{Task}
 
-A data warehouse is a repository of an organization's
-electronically stored data. Data warehouses are designed to facilitate
-reporting and analysis. \cite{wikipedia}
+\subsection{Import}
 
-The core actions of a data warehouse is to load, transform and extract data.
-The classic thinking in modelling data warehouses is to divide data into facts
-and dimensons. The facts are measures categorized by dimensions.
+\subsection{Store}
 
-In OLAP\footnote{On-Line Analytical Processing}, which is a kind of data
-warehouse, the data is thought of as being structured as a cube. The cube is
-typically modelled in a realational database with fact tables and dimension
-tables, upon which the system performs joins to extract data.
-\cite{olap_solutions}
+\subsection{Export}
+
+\section{Interface}
+
 
 \section{Data cubes}
 
@@ -243,15 +271,7 @@ problem is further discussed in the thesis, but left to the user of the
 Zohmg system to solve.
 
 
-
-\chapter{Tools}
-
-\chapterquote{Arrange whatever pieces come your way.}{Virgina Wolf}
-
-%\chapterquote{In short, intelligence, considered in what seems to be its
-%original feature, is the faculty of manufacturing artificial objects,
-%especially tools to make tools, and of indefinitely urging the
-%manufacture.}{Henri Bergson}
+\section{System}
 
 Regarding the infrastructure, both BigTable and MapReduce has high
 availability, scalability and reliability. Since BigTable runs on top of
@@ -261,10 +281,31 @@ replicated, usually three times, onto other nodes in the cluster.
 complete the job it is reassigned to another node. \cite{mapreduce}
 
 
-% TODO> I argue that we should have 'hadoop' and 'hbase' as the main sections,
-% and let mapreduce be a subsection of hadooop, bigtable a dito of hbase.
 
-\section{MapReduce}
+\chapter{Method}
+
+\section{Apache Hadoop}
+
+Hadoop is a free software implementation of Google's MapReduce-framework
+described in \cite{mapreduce}. Hadoop is written in Java and is part of
+the Apache Software Foundation.  It is a fairly mature piece of software
+and is used in production at numerous companies. \cite{hadoop}
+
+MapReduce is a framework for running jobs in parallel across multiple
+machines. As the name implies, MapReduce is made up of two parts or
+phases: map and reduce. The map phase consumes one piece of input at a
+time (a piece of input can be a line from a log file, for example), and
+emits an intermediate key and value. These keys and values are then
+processed by the reduce phase, which emits the final key-value pairs.
+
+MapReduce works by splitting the input, which commonly is in the size
+range of many gigabytes, into n parts and lets each node of the computing
+cluster work on one or more parts. The mapper on each node emits key-value
+pairs which are fed into the reduce phase. The final output is collated,
+usually on a distributed file system.
+
+
+\subsection{MapReduce}
 
 Analysing the massive amounts of log data raises high demand for computing
 power. The MapReduce \cite{mapreduce} pattern suits the analysing issue
@@ -276,12 +317,85 @@ single result.
 Basically MapReduce is a two phase computation. First the input data is
 partitioned and each of these partitions is sent to a \textit{mapper} which
 performs computations on each row of the data. The mapper then outputs each
-resulting computation on the format \texttt{key,value}. These key-value
-pairs are received by a \textit{reducer} which performs the second stage of
-the computation.
+resulting computation on the format $\langle$\textit{key,value}$\rangle$. These
+key-value pairs are received by a \textit{reducer} which performs the second
+stage of the computation.
+All Zohmg import programs are executed on Hadoop.
 
 
-\section{BigTable}
+\subsection{Hadoop Distributed File System}
+
+HDFS is a free software implementation of the GFS \cite{gfs}.
+
+The goal of HDFS is to store large data sets while being able to handle
+hardware failure and being deployed in heterogenous hardware and software
+eco systems. Additionally the Hadoop and HDFS interaction is designed with
+the notion that it is cheaper to move the computation, MapReduce programs,
+to the data than the other way around.
+
+Every Hadoop node can be formatted with HDFS, this reserves disk space on
+the node to be used for HDFS. The HDFS container resides on the nodes
+general purpose file system. It is also possible to use HDFS as a
+stand-alone general purpose distributed file system, without Hadoop.
+
+The default block size on HDFS 64 MB, significantly larger than
+file systems used for hard drives. The motivation is that applications
+that use HDFS are not general purpose applications which run on general
+purpose file systems, but batch applications which read, write, or both,
+large amounts of data.
+
+
+\subsection{Hadoop streaming}
+
+Any program that reads and outputs to the file pointers \texttt{stdin} and
+\texttt{stdout}, respectively, can be used as MapReduce programs with
+Hadoop Streaming. This makes it possible to use any shell script or
+program which inputs and outputs this way as a MapReduce program.
+
+
+\subsection{Dumbo}
+
+Dumbo is a Python framework for writing Hadoop programs in languages other than
+Java, in a so-called Streaming Mode. It is used extensively at Last.fm for
+writing short prototypes. \cite{dumbo}
+
+All Zohmg programs written in Python use Dumbo to execute on Hadoop.
+
+
+
+\section{Apache HBase}
+
+HBase is a free software implementation of Google's BigTable data store
+described in \cite{bigtable}. It is a sub-project of Hadoop, written in
+Java and a part of the Apache Software Foundation. HBase is still in its
+infancy and few organizations use it for mission-critical applications.
+\cite{hbase}
+
+BigTable is a data store designed for traversal of very large data sets.
+Time-stamped cells inside column-familes in rows. The row has a key and
+any number of cells attached to it. The rows in a table are sorted by the
+row key.  The typical use-case of BigTable is to scan a range of rows. It
+is therefor important to set up one's keys so that related data is close
+to each other. For example, if it makes sense to traverse the data in
+chronological order, the key might contain a representation of the data's
+timestamp. The classic example is to have the reversed domain name (i.e.
+com.google.www) as the row key, which means that all sub-domains of any
+domain are next to each other.
+
+Sparseness is a big thing. Null values are free of charge. TODO: *Describe
+how we leverage sparsity*.
+
+TODO: *this should go into implementation.*
+The typical use case for Zohmg is to read one or more column-qualifiers,
+which correspond to one or more points in n-space, over a range of time.
+Therefor, the keys are made up of the time and unit of the measurement,
+and the qualifier queried for represents the point in n-space. More on
+this in the data model section.
+
+All Zohmg data is stored in HBase.
+
+
+\subsection{BigTable}
 
 The data model is a simple one: Rows of data are stored in named tables.
 Each row consists of a sortable row key and an arbitrary number of columns.
@@ -327,7 +441,7 @@ close to each other. \cite{bigtable}
 Sorted distributed multidimensional sparse hashtable.
 
 
-\subsubsection{Rows}
+\subsubsection*{Rows}
 
 Each row in a BigTable is associated with a unique key. All the data is
 stored sorted by rowkey. Because of this it is important to have a thorough
@@ -336,7 +450,7 @@ efficiently.
 
 
 
-\subsubsection{Regions}
+\subsubsection*{Regions}
 
 BigTable use the concept of tablets, HBase in turn uses regions. In order
 to be consistent with the rest of this paper we henceforth use the term
@@ -352,19 +466,21 @@ reliability and scalability features.
 
 % TODO> why is this Tool & BigTable-subsection called Dimensions?
 % Disambiguation needed. -fredrik
-\subsection{Dimensions}
+\subsection*{Dimensions}
 
-\subsubsection{Column-families}
+The degrees of freedom in BigTable.
+
+\subsubsection*{Column-families}
 
 Each column-family is stored as a single map-file in HBase.
 
 
-\subsubsection{Column-qualifiers}
+\subsubsection*{Column-qualifiers}
 
 Each column-family is further divided into one or more column-qualifiers.
 
 
-\subsection{Hierarchies}
+\subsection*{Hierarchies}
 
 Depending on how the rowkeys are formatted different hierarchies are
 created. The order in which the data is stored is important, it defines how
@@ -379,93 +495,6 @@ The minimum cost of scanning data is achieved by ordering the data so that
 a scan uses every visited row. In the case with thousand rows of which ten
 are wanted, would mean that ten rows scan are scanned of which all are
 used.
-
-
-\section{Apache Hadoop}
-
-Hadoop is a free software implementation of Google's MapReduce-framework
-described in \cite{mapreduce}. Hadoop is written in Java and is part of
-the Apache Software Foundation.  It is a fairly mature piece of software
-and is used in production at numerous companies. \cite{hadoop}
-
-MapReduce is a framework for running jobs in parallel across multiple
-machines. As the name implies, MapReduce is made up of two parts or
-phases: map and reduce. The map phase consumes one piece of input at a
-time (a piece of input can be a line from a log file, for example), and
-emits an intermediate key and value. These keys and values are then
-processed by the reduce phase, which emits the final key-value pairs.
-
-MapReduce works by splitting the input, which commonly is in the size
-range of many gigabytes, into n parts and lets each node of the computing
-cluster work on one or more parts. The mapper on each node emits key-value
-pairs which are fed into the reduce phase. The final output is collated,
-usually on a distributed file system.
-
-All Zohmg import programs are executed on Hadoop.
-
-
-\subsection{Hadoop Distributed File System}
-
-HDFS is a free software implementation of the GFS \cite{gfs}.
-
-The goal of HDFS is to store large data sets while being able to handle
-hardware failure and being deployed in heterogenous hardware and software
-eco systems. Additionally the Hadoop and HDFS interaction is designed with
-the notion that it is cheaper to move the computation, MapReduce programs,
-to the data than the other way around.
-
-Every Hadoop node can be formatted with HDFS, this reserves disk space on
-the node to be used for HDFS. The HDFS container resides on the nodes
-general purpose file system. It is also possible to use HDFS as a
-stand-alone general purpose distributed file system, without Hadoop.
-
-The default block size on HDFS 64 MB, significantly larger than
-file systems used for hard drives. The motivation is that applications
-that use HDFS are not general purpose applications which run on general
-purpose file systems, but batch applications which read, write, or both,
-large amounts of data.
-
-
-\subsection{Hadoop streaming}
-
-Any program that reads and outputs to the file pointers \texttt{stdin} and
-\texttt{stdout}, respectively, can be used as MapReduce programs with
-Hadoop Streaming. This makes it possible to use any shell script or
-program which inputs and outputs this way as a MapReduce program.
-
-
-\section{Apache HBase}
-
-HBase is a free software implementation of Google's BigTable data store
-described in \cite{bigtable}. It is a sub-project of Hadoop, written in
-Java and a part of the Apache Software Foundation. HBase is still in its
-infancy and few organizations use it for mission-critical applications.
-\cite{hbase}
-
-BigTable is a data store designed for traversal of very large data sets.
-Time-stamped cells inside column-familes in rows. The row has a key and
-any number of cells attached to it. The rows in a table are sorted by the
-row key.  The typical use-case of BigTable is to scan a range of rows. It
-is therefor important to set up one's keys so that related data is close
-to each other. For example, if it makes sense to traverse the data in
-chronological order, the key might contain a representation of the data's
-timestamp. The classic example is to have the reversed domain name (i.e.
-com.google.www) as the row key, which means that all sub-domains of any
-domain are next to each other.
-
-Sparseness is a big thing. Null values are free of charge. TODO: *Describe
-how we leverage sparsity*.
-
-TODO: *this should go into implementation.*
-The typical use case for Zohmg is to read one or more column-qualifiers,
-which correspond to one or more points in n-space, over a range of time.
-Therefor, the keys are made up of the time and unit of the measurement,
-and the qualifier queried for represents the point in n-space. More on
-this in the data model section.
-
-All Zohmg data is stored in HBase.
-
-
 \subsection{Thrift}
 
 A remote procedure call framework for building scalable cross-language
@@ -479,23 +508,6 @@ released as free software. It entered the Apache Incubator in May 2008.
 HBase has a Thrift server which serves as the interface to languages other
 than Java---for instance Python.
 
-
-
-\section{Dumbo}
-
-Dumbo is a framework for writing Hadoop programs in languages other than
-Java, in a so-called Streaming Mode. Dumbo is written in Python. It is used
-extensively at Last.fm for writing short prototypes. \cite{dumbo}
-
-All Zohmg programs written in Python use Dumbo to execute on Hadoop.
-
-
-\section{Serializing}
-
-Serializing data is the task of converting an object into a sequence of
-bits so that it can be stored on a storage medium or transmitted over a
-network link. Rereading the sequence of bits should restore the original
-state of the object it was in before the serialization.
 
 
 \subsection{JSON}
@@ -528,29 +540,6 @@ native language of Hadoop. \cite{java}
 
 
 
-\section{Python}
-
-Python is a general-purpose high-level multi-paradigm---amongst others:
-object-oriented, imperative and functional---scripting language.
-\cite{python}
-
-Zohmg is written mostly in Python. Zohmg uses the following Python modules
-internally; it depends on them to be available on the system.
-
-
-\subsection{Paste}
-
-Python Paste is a framework for building WSGI\footnote{Web Server Gateway
-Interface, a HTTP extension where a CGI-like environment is passed around.}
-applications and middleware. \cite{definitive_guide_to_pylons}
-
-WSGI applications receive a WSGI request and returns a response with the
-built-in web server.
-
-Middleware is software that acts as an intermediary. WSGI middleware
-receives a WSGI request and then performs logic upon this request, before
-passing the request to a WSGI application. \cite{paste}
-
 
 \subsection{PyYAML}
 
@@ -574,17 +563,43 @@ has no external dependencies. However a C extension which provides a
 serious speed boost is included in simplejson. \cite{simplejson}
 
 
+\section{Configuration}
+
+Data sets and environment.
+
+
+\section{Python}
+
+Python is a general-purpose high-level multi-paradigm---amongst others:
+object-oriented, imperative and functional---scripting language.
+\cite{python}
+
+Zohmg is written mostly in Python. Zohmg uses the following Python modules
+internally; it depends on them to be available on the system.
+
+
+\section{Exporting data}
+
+TODO: More general about middleware, move Paste mentioning to Implementation
+chapter.
+
+Python Paste is a framework for building WSGI\footnote{Web Server Gateway
+Interface, a HTTP extension where a CGI-like environment is passed around.}
+applications and middleware. \cite{definitive_guide_to_pylons}
+
+WSGI applications receive a WSGI request and returns a response with the
+built-in web server.
+
+Middleware is software that acts as an intermediary. WSGI middleware
+receives a WSGI request and then performs logic upon this request, before
+passing the request to a WSGI application. \cite{paste}
+
 
 
 \chapter{Implementation}
 
 \chapterquote{A good idea is about ten percent and implementation and hard
 work, and luck is 90 percent.}{Guy Kawasaki}
-
-%\chapterquote{It is not always what we know or analyzed before we make a
-%decision that makes it a great decision. It is what we do after we make the
-%decision to implement and execute it that makes it a good
-%decision.}{William Pollard}
 
 % COMMENT: do we really need to repeat this?
 As stated in chapter 3, Zohmg is built upon existing tools and software. It
@@ -820,157 +835,12 @@ dumped as JSONP.
 
 
 
+\chapter{Results}
+
+\chapterquote{When we can't dream any longer we die.}{Emma Goldman}
 
 
-\chapter{Usage}
-
-\chapterquote{There comes a time when all people break down and do the
-unthinkable: They read the manual.}{Unknown}
-
-This is the user manual.
-
-\section{Deployment}
-
-A manage script is used to create tables from a pre-defined schema.
-
-\begin{verbatim}
-   zohmg create project
-\end{verbatim}
-
-\noindent Edit the configuration files, which are text files in YAML and
-Python format.
-
-\begin{verbatim}
-   zohmg setup
-\end{verbatim}
-
-\noindent The above command executes the configuration made and creates the
-infrastructure (HBase tables) for the project.
-
-
-\section{Import}
-
-The user writes the map part of the MapReduce programs which imports
-log-like data to the data store. The reduce step is taken care of by Zohmg,
-which uses sum reducer that simply sums up values with the same keys.
-
-
-\subsection{User mappers}
-
-Import jobs use mappers written by the user, either in Python or Java.
-Mappers written by the user import each line from the input file and set
-the arguments to the map function, key and value, as line number and line
-contents, respectively. The user can then perform computations on these
-entities and finally yield the results as a dictionary. The resulting
-dictionary will be interpreted by Zohmg and stored accordingly.
-
-\begin{verbatim}
-   zohmg import mappers/somemapper.py hdfs/path
-\end{verbatim}
-
-
-\section{Storing data}
-
-% COMMENT: I don't think we should mention the underlying store in the usage section.
-Data is stored in Apache HBase. A natural consequence of this that the
-data is stored sorted by rowkey allowing fast access to an arbitrary
-(sequential) range.
-
-
-
-\section{Export}
-
-It is possible to query Zohmg about metadata it has on each of the imported
-data sets.
-
-Data is served to the user either over HTTP in JSON format or over Thrift.
-
-\begin{verbatim}
-   zohmg serve
-\end{verbatim}
-
-\noindent The above serves on default port 8086, with the \texttt{--port}
-argument it is possible to change server port.
-
-The data server have three methods of serving data: raw, transformed, or
-static. The raw and transformed data are aggregates served from HBase,
-transformed in the latter case, while the static method just serve static
-files from the project's \texttt{clients} directory. Aggregates served from
-HBase are returned to the user as JSONP.
-
-
-\subsection{Data}
-
-Based on the query---which the user submits---the corresponding data is
-served from HBase as JSONP. The query is a simple definition of wanted row
-range, dimensions, and values for these dimensions. The query is submitted
-to the data server via HTTP, an example query could look like (the URL is
-wrapped to fit the page)
-
-\begin{verbatim}
-   http://localhost:8086/data/?t0=20090101
-   &t1=20090420&unit=pageviews
-   &d0=country&d0v=SE
-\end{verbatim}
-
-The above query would return the pageviews for SE between 1 January 2009
-and 4 April 2009.
-
-
-\subsection{Transformers}
-
-Fetches data from HBase and transforms it with the requested transform
-program from the project's \texttt{transformers} directory, output is
-dumped as JSONP.
-
-
-\subsection{Clients}
-
-It is possible to build static web pages out of HTML and JavaScript, which
-can interact with the data server. These static pages can for instance
-present some sort of query building mechanism---for instance with drop down
-boxes---and then send this query to the data server and graph the resulting
-data.
-
-The data server serves static files from the project's \texttt{clients}
-directory at the server URL appended with \texttt{/client/filename}.
-
-
-
-\chapter{Examples}
-
-\chapterquote{Example is not the main thing in influencing others, it's
-the only thing.}{Albert Schweitzer}
-
-%\chapterquote{There is nothing so annoying as a good example!!}{Mark Twain}
-
-%\chapterquote{Example isn't another way to teach, it is the only way to
-%teach}{Albert Einstein}
-
-
-\section{Web log analysis}
-
-Configure the dataset.yaml.
-
-Write a custom mapper, which imports data from web logs.
-
-Start data server and extract data from it.
-
-Possibly write a transformer which performs some transformation on the
-aggregated data.
-
-Possibly write a client which will render a graph.
-
-
-
-\chapter{Discussion}
-
-\chapterquote{In discussion comes the light!}{Unknown}
-
-\section{Related work}
-
-HDW is system which goal is to create a high performance large scale data
-warehouse based on MapReduce and Bigtable. \cite{hdw}
+\section{Discussion}
 
 
 
@@ -1020,9 +890,7 @@ service.
 
 
 
-\chapter{Conclusion}
-
-\chapterquote{When we can't dream any longer we die.}{Emma Goldman}
+\section{Conclusion}
 
 Last.fm is investigating the possibility for using Zohmg for multiple
 application areas, such as radio stats and web page stats.
@@ -1033,6 +901,143 @@ application areas, such as radio stats and web page stats.
 
 
 \bibliographystyle{plain} \bibliography{references}
+
+
+
+\appendix
+
+
+
+\chapter{Usage}
+
+\chapterquote{There comes a time when all people break down and do the
+unthinkable: They read the manual.}{Unknown}
+
+\noindent The following chapter will describe how the Zohmg system is used.
+Project deployment and data import and export will be described briefly.
+
+\section{Deployment}
+
+The Zohmg manage script is used to create a project directory
+
+\begin{verbatim}
+   zohmg create project
+\end{verbatim}
+
+\noindent The next step is editing the configuration files, which are located in
+the project's \texttt{config} directory. The configuration files are text files
+in YAML and Python format. When the files are edited, run the setup command;
+this executes the configuration and creates infrastructure (HBase tables) for
+the project.
+
+\begin{verbatim}
+   zohmg setup
+\end{verbatim}
+
+
+\section{Import}
+
+In order to import log-like data to the data store, the map part of the
+MapReduce program needs to be created. The reduce step is taken care of by
+Zohmg, which uses sum reducer that simply sums up values with the same keys.
+
+
+\subsection*{User mappers}
+
+Import jobs use mappers written either in Python or Java. User mappers import
+each line from the input file and set the arguments to the map function, key and
+value, as line number and line contents, respectively. The user can then perform
+computations on these entities and finally yield the results as a dictionary.
+The resulting dictionary will be interpreted by Zohmg and stored accordingly.
+
+\begin{verbatim}
+   zohmg import mappers/somemapper.py hdfs/path
+\end{verbatim}
+
+
+\section{Export}
+
+It is possible to query Zohmg about metadata it has on each of the imported
+data sets.
+
+Data is served to the user over HTTP in JSONP format or. To start the data
+server execute
+
+\begin{verbatim}
+   zohmg serve
+\end{verbatim}
+
+The command above starts the data server on default port 8086, with the
+\texttt{--port} argument it is possible to change server port.
+
+The data server have three methods of serving data: raw, transformed, or
+static. The raw and transformed data are aggregates served from HBase,
+transformed in the latter case, while the static method just serve static
+files from the project's \texttt{clients} directory. Aggregates served from
+HBase are returned to the user as JSONP.
+
+
+\subsection*{Data}
+
+Based on the query---which the user submits---the corresponding data is
+served from HBase as JSONP. The query is a simple definition of wanted row
+range, dimensions, projections, or both, and values for these. The query is
+submitted to the data server via HTTP, a query could look like
+
+\begin{verbatim}
+   http://localhost:8086/data/?t0=20090101
+   &t1=20090420&unit=pageviews
+   &d0=country&d0v=SE
+\end{verbatim}
+
+\noindent The above query would return the pageviews for SE between 1 January
+2009 and 4 April 2009.
+
+
+\subsection*{Transformers}
+
+Fetches data from HBase and transforms it with the requested transform
+program from the project's \texttt{transformers} directory, output is
+dumped as JSONP.
+
+Accessing transformed data is done similarly to the raw data extraction.
+
+\begin{verbatim}
+   http://localhost:8086/transform/transformer/
+   ?t0=20090101&t1=20090420&unit=pageviews
+   &d0=country&d0v=SE
+\end{verbatim}
+
+\noindent The above query extracts the same data as the query from the Data
+section. This data is run through the \texttt{transformer.py} application and
+is, again, served to the user as JSONP.
+
+
+\subsection*{Clients}
+
+It is possible to build static web pages out of HTML and JavaScript, which
+can interact with the data server. These static pages can for instance
+present some sort of query building mechanism---for instance with drop down
+boxes---and then send this query to the data server and graph the resulting
+data.
+
+The data server serves static files from the project's \texttt{clients} from
+
+\begin{verbatim}
+   http://localhost:8086/clients/filename
+\end{verbatim}
+
+
+
+\chapter{Glossary}
+
+\begin{itemize}
+\item \texttt{Serializing}
+
+Serializing data is the task of converting an object into a sequence of
+bits so that it can be stored on a storage medium or transmitted over a
+network link. Rereading the sequence of bits should restore the original
+state of the object it was in before the serialization.
 
 
 
