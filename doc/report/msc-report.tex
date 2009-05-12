@@ -60,6 +60,8 @@ theoretical solution and implementation details.
 
 \chapter{Introduction}
 
+\section{Background}
+
 Any organization will eventually wish to analyze various characteristics of
 its service and operations. These services can be anything from web sites to
 theme parks. The analysis might include characteristics such as the number of
@@ -98,39 +100,77 @@ distributed file system and to to exploit the parallel nature of the records
 by breaking up the data sets in pieces and have each piece be processed
 separately on a node in a large compute cluster.
 
-% TODO: fixa cites. Luckily, this is a problem that has already been solved.
-Google has published papers on the MapReduce framework \cite{mapreduce}, which
-allows for parallel processing of large data sets, and The Google File System
-\cite{gfs}, a scalable, distributed file system. The Apache Hadoop
-\cite{hadoop} project has published free software implementations of a
-MapReduce framework and a distributed file system, both of which build on the
-ideas in the papers published by Google.
-
+Luckily, this is a problem that has already been solved. Google has published
+papers on the MapReduce framework \cite{mapreduce}, which allows for parallel
+processing of large data sets, and The Google File System \cite{gfs}, a
+scalable, distributed file system. The Apache Hadoop \cite{hadoop} project has
+published free software implementations of a MapReduce framework and a
+distributed file system, both of which build on the ideas in the papers
+published by Google.
 
 
 \section{Problem description}
+% Problemsbeskrivning.
 
-Last.fm
+At last.fm there is a central repository where metrics and statistics for
+various services are stored. There is a web site for internal use that
+displays graphs of the services and their statistics. Examples of statistics
+are web site usage broken down by country, scrobbling broken down by client
+and daily subscription counts.
 
-SQL
+The statistics are stored in a relational database. Each measure is stored
+atomically; a summing operation across numerous rows is required to answer
+queries. The database is bursting at the seams because of the size of the
+data. Some of the problems with the current setup is that adding a new data
+source to the database requires manual intervention and that some of the
+questions that analysts ask can not be answered in real-time.
 
-EXPLODE
+Last.fm foresees that its data sets will continue to grow and would like to
+move away from the current setup towards a scalable data store. The data store
+should be able to answers most questions in real time. It should be easy
+to publish new data sets.
+
+
+\section{Goal}
+% Syftesformulering.
+
+The goal is to build a tool that enables its users to easily turn log files
+into aggregates. The tool should provide a simple mechanism for data analysis
+(import) and querying (export).
+
+The data analysis will require the user to write a MapReduce map. The queries
+will be performed via an export API for consumption by computer programs.
+
+The queries will always be made over a time range and for a single unit. The
+tool will support analytical functions such as drill-down, slicing, etc.
+
+The tool should be aware of dimensions in general and the dimension of time in
+particular. Measurements will be specified in a unit. There will be no limit
+on the number of units.
+
+There should be no theoretical boundary on the number of dimensions. Common
+queries must be answered expediently to allow for analysts to explore data in
+real time.
+
 
 
 \section{Scope}
+% Avgransning.
 
-Time-series based analysis is the most important one when analysing web
-logs, it comes natural since all log entries are timestamped.
-\cite{discoveringweb} It is also the most common form we have seen for logs
-in general.
+The data store is just that: a data store with import and export
+functionality. The data store does not interpret the data it store.
 
-Assuming that time-series analysis is the most important, we have imposed
-the restriction on the system that is built so that it only handles
-time-series. Because of this restriction the data store obviously becomes
-less general purpose. Although since most log data is time-series based
-this restriction does not cripple the system much---if at all.
+The data store is time-series-based: all data must include the time dimension.
 
-\subsubsection*{Related work}
+All measures are integers. Sum is the only supported aggregation function. The
+data store does not support reach-like data (i.e. number of unique visitors)
+since it is not summable.
+
+There is no functionality for plotting data sets, etc.
+
+
+
+\section{Related work}
 
 A data warehouse is a repository of an organization's
 electronically stored data. Data warehouses are designed to facilitate
@@ -151,10 +191,6 @@ warehouse based on MapReduce and Bigtable. \cite{hdw}
 
 Omniture is used at Last.fm etc.
 
-
-\section{Goal}
-
-The goal (sv. syfte) with our work.
 
 
 \section{Overview}
