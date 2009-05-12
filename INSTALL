@@ -1,11 +1,17 @@
 
-To install zohmg, simply run:
+Install Zohmg:
 
-    $> sudo python install.py
-
-Verify the installation by running:
-
-   $> zohmg help
+	$> sudo python install.py
 
 
-If you are the curious kind, please read install.py and INSTALL.manual.
+Verify that the installation works:
+
+	$> zohmg help
+
+
+Get help with installing Hadop and HBase:
+
+	$> sudo scripts/install_hadoop_hbase.sh
+
+
+Please see README for getting started.

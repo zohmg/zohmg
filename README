@@ -1,0 +1,156 @@
+
+INTRODUCING: ZOHMG.
+-------------------
+
+Zohmg is a data store for aggregated multi-dimensional time-series-based data. It is built on top of HBase and provides tools for data aggregation using Hadoop.
+
+Zohmg is alpha software. Be gentle.
+
+This README assumes a working installation of zohmg. Please see INSTALL for installation instructions.
+
+
+
+RUN THE ZOHMG
+-------------
+
+Zohmg is installed as a command line script. Try it out:
+
+	$> zohmg help
+
+
+
+CREATE YOUR FIRST 'PROJECT'
+---------------------------
+
+    $> zohmg create crazydata
+
+This command creates a project directory named "crazydata". Its contents are:
+
+config       - environment and dataset configuration.
+lib          - eggs or jars that will be automatically included in job jar.
+mappers      - user defined MapReduce maps.
+transformers - user defined data extraction transformations.
+
+
+
+CONFIGURE YOUR 'PROJECT'
+------------------------
+
+The next step is to configure environment.py and dataset.yaml.
+
+
+config/environment.py:
+
+Define HADOOP_HOME and paths to all three jars (hadoop, hadoop-streaming, hbase). You might need to run 'ant package' in $HADOOP_HOME to have all jars built for you.
+
+
+config/dataset.yaml:
+
+Define your data set. This means setting up the dimensions and projectionswill be used. The dimensions lets Zohmg know what your data might look like while the projections list hints at what queries you will ask the data store.
+
+Example config/dataset.yaml:
+
+    dataset: weblogs
+
+    dimensions:
+     - user
+     - status
+
+	# TODO: this style is not implemented yet(!)
+    projections:
+     - user
+     - status
+     - user-status
+
+    units:
+     - pageviews
+
+
+After you've edited environment.py and dataset.yaml:
+
+    $> zohmg setup
+
+This command creates an HBase table with the same name as your dataset.
+
+Verify that the table was created:
+
+    $> hbase shell
+    hbase(main):001:0> list
+    weblogs
+    1 row(s) in 0.1337 seconds
+
+	# ok!
+
+
+
+RUN YOUR MAPPER
+---------------
+
+After the project is created and setup correctly it is time to import some
+data. This is done in two steps: Write a map function and then run that
+function over the data, which is stored on HDFS.
+
+Firstly, writing the mapper. (Assuming Apache common log format, see
+http://httpd.apache.org/docs/2.0/logs.html for more information.)
+
+In the arguments to map there are key and value. The argument key is the
+row number in the file being processed, the value argument is the actual
+line data from the file.
+
+In this example, the access time, user (HTTP auth) and the status for each
+request are requested and passed along to the data store.
+
+    def map(key,value):
+        # parse log string, extract year, month and day
+        import re
+        mo = re.search(r"\[(\d{2})/(\w{3})/(\d{4})",value) # [20/Apr/2009
+        year  = mo.group(3)
+        month = mo.group(2)
+        day   = mo.group(1)
+
+        time  = year + month + day
+        dimensions = {'user'   : value.split(" ")[2],
+                      'status' : value.split(" ")[8]
+                     }
+        values = {'pageviews' : 1}
+
+        yield time,dimensions,values
+
+
+The output of the mapper goes into a reducir that, for each
+dimension-tuple, sums the values of each unit and passes them along to the
+actual underlying data stare.
+
+Secondly, run the mapper
+
+	$> zohmg import mappers/mapper.py /data/weblogs/2009/05/11
+
+The first argument to import is the path to the python file containing the map function, the second is a path on HDFS.
+
+
+
+SERVE DATA
+----------
+
+Assuming the mapper finished successfully there will now be some data in the HBase table.
+
+The data server uses a Thrift interface to HBase so make sure the thrift
+server is on (i.e. 'hbase thrift start').
+
+Start the data server with
+
+	$> zohmg serve
+
+Visiting the URL for extracting data and supplying query string with what
+data to retrieve:
+
+    http://127.0.0.1:8086/?t0=20090420&t1=20090423&unit=pageviews&d0=user&d0v=goldman,kropotkin
+
+The result returned is a JSON feed of the data with the pageviews done by
+users goldman and kropotkin.
+
+
+Plotting the data
+-----------------
+
+[Using html+js, plot with google charts.]
