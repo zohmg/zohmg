@@ -7,6 +7,7 @@
 data. [DRAFT]}
 
 
+% chapterquote
 \newcommand{\chapterquote}[2] {
 \begin{quote}
 \textit{"{#1}"}
@@ -112,7 +113,7 @@ published by Google.
 \section{Problem description}
 % Problemsbeskrivning.
 
-At last.fm there is a central repository where metrics and statistics for
+At Last.fm there is a central repository where metrics and statistics for
 various services are stored. There is a web site for internal use that
 displays graphs of the services and their statistics. Examples of statistics
 are web site usage broken down by country, scrobbling broken down by client
@@ -156,6 +157,8 @@ real time.
 
 \section{Scope}
 % Avgransning.
+
+% TODO: Why do we do these avgränsningar.
 
 The data store is just that: a data store with import and export
 functionality. The data store does not interpret the data it store.
@@ -205,13 +208,15 @@ presents the conclusion, respectively.
 
 \section{Task}
 
+Mention data sets here.
+
+
 \subsection{Import}
 
 \subsection{Store}
 
 \subsection{Export}
 
-\section{Interface}
 
 
 \section{Data cubes}
@@ -252,19 +257,13 @@ dimensions---on screen or paper.
 The slice operation fixes the values of one or several dimensions in the cube.
 The data omitted from this operation would be any data associated with the
 values of the dimension that were not fixed. The dice operation is a slice on
-more than two dimensions. [source:
-http://www.cs.ualberta.ca/~zaiane/courses/cmput690/glossary.html]
-
+more than two dimensions.
 
 
 \section{Time series}
 
-Time is the most common of the dimensions in the data cube constructed for
-Zohmg. The time stamp is a common property for all data handled by Zohmg;
-every measurement is expected to have time as one of its dimensions. TODO:
-really, this belongs in the implementation section. I find nothing interesting
-to say about time series in this section.
-
+TODO: Time series is one of the most important measures in log analyzing, it
+is also very natural when the data is time-stamped. \cite{discoveringweb}
 
 
 \section{Aggregates}
@@ -291,151 +290,10 @@ problem is further discussed in the thesis, but left to the user of the
 Zohmg system to solve.
 
 
-\section{System}
 
-Regarding the infrastructure, both BigTable and MapReduce has high
-availability, scalability and reliability. Since BigTable runs on top of
-GFS\footnote{Google File System}, the data stored in BigTable is
-replicated, usually three times, onto other nodes in the cluster.
-\cite{gfs} Likewise, if a node in a MapReduce job goes down or fails to
-complete the job it is reassigned to another node. \cite{mapreduce}
+\section{Techniques and tools}
 
-
-
-\chapter{Method}
-
-\section{Apache Hadoop}
-
-Hadoop is a free software implementation of Google's MapReduce-framework
-described in \cite{mapreduce}. Hadoop is written in Java and is part of
-the Apache Software Foundation.  It is a fairly mature piece of software
-and is used in production at numerous companies. \cite{hadoop}
-
-MapReduce is a framework for running jobs in parallel across multiple
-machines. As the name implies, MapReduce is made up of two parts or
-phases: map and reduce. The map phase consumes one piece of input at a
-time (a piece of input can be a line from a log file, for example), and
-emits an intermediate key and value. These keys and values are then
-processed by the reduce phase, which emits the final key-value pairs.
-
-MapReduce works by splitting the input, which commonly is in the size
-range of many gigabytes, into n parts and lets each node of the computing
-cluster work on one or more parts. The mapper on each node emits key-value
-pairs which are fed into the reduce phase. The final output is collated,
-usually on a distributed file system.
-
-
-\subsection{MapReduce}
-
-Analysing the massive amounts of log data raises high demand for computing
-power. The MapReduce \cite{mapreduce} pattern suits the analysing issue
-well. The great benefit of MapReduce is that it runs on a computer cluster
-of commodity hardware where computation takes place independently in
-parallel. All results computed by each node are then reduced into one
-single result.
-
-Basically MapReduce is a two phase computation. First the input data is
-partitioned and each of these partitions is sent to a \textit{mapper} which
-performs computations on each row of the data. The mapper then outputs each
-resulting computation on the format $\langle$\textit{key,value}$\rangle$. These
-key-value pairs are received by a \textit{reducer} which performs the second
-stage of the computation.
-All Zohmg import programs are executed on Hadoop.
-
-
-\subsection{Hadoop Distributed File System}
-
-HDFS is a free software implementation of the GFS \cite{gfs}.
-
-The goal of HDFS is to store large data sets while being able to handle
-hardware failure and being deployed in heterogenous hardware and software
-eco systems. Additionally the Hadoop and HDFS interaction is designed with
-the notion that it is cheaper to move the computation, MapReduce programs,
-to the data than the other way around.
-
-Every Hadoop node can be formatted with HDFS, this reserves disk space on
-the node to be used for HDFS. The HDFS container resides on the nodes
-general purpose file system. It is also possible to use HDFS as a
-stand-alone general purpose distributed file system, without Hadoop.
-
-The default block size on HDFS 64 MB, significantly larger than
-file systems used for hard drives. The motivation is that applications
-that use HDFS are not general purpose applications which run on general
-purpose file systems, but batch applications which read, write, or both,
-large amounts of data.
-
-
-\subsection{Hadoop streaming}
-
-Any program that reads and outputs to the file pointers \texttt{stdin} and
-\texttt{stdout}, respectively, can be used as MapReduce programs with
-Hadoop Streaming. This makes it possible to use any shell script or
-program which inputs and outputs this way as a MapReduce program.
-
-
-\subsection{Dumbo}
-
-Dumbo is a Python framework for writing Hadoop programs in languages other than
-Java, in a so-called Streaming Mode. It is used extensively at Last.fm for
-writing short prototypes. \cite{dumbo}
-
-All Zohmg programs written in Python use Dumbo to execute on Hadoop.
-
-
-
-\section{Apache HBase}
-
-HBase is a free software implementation of Google's BigTable data store
-described in \cite{bigtable}. It is a sub-project of Hadoop, written in
-Java and a part of the Apache Software Foundation. HBase is still in its
-infancy and few organizations use it for mission-critical applications.
-\cite{hbase}
-
-BigTable is a data store designed for traversal of very large data sets.
-Time-stamped cells inside column-familes in rows. The row has a key and
-any number of cells attached to it. The rows in a table are sorted by the
-row key.  The typical use-case of BigTable is to scan a range of rows. It
-is therefor important to set up one's keys so that related data is close
-to each other. For example, if it makes sense to traverse the data in
-chronological order, the key might contain a representation of the data's
-timestamp. The classic example is to have the reversed domain name (i.e.
-com.google.www) as the row key, which means that all sub-domains of any
-domain are next to each other.
-
-Sparseness is a big thing. Null values are free of charge. TODO: *Describe
-how we leverage sparsity*.
-
-TODO: *this should go into implementation.*
-The typical use case for Zohmg is to read one or more column-qualifiers,
-which correspond to one or more points in n-space, over a range of time.
-Therefor, the keys are made up of the time and unit of the measurement,
-and the qualifier queried for represents the point in n-space. More on
-this in the data model section.
-
-All Zohmg data is stored in HBase.
-
-
-\subsection{BigTable}
-
-The data model is a simple one: Rows of data are stored in named tables.
-Each row consists of a sortable row key and an arbitrary number of columns.
-The columns are of the form "column-family:qualifier", where the column
-family is one of a number of fixed column families defined by the table,
-and the qualifier is an arbitrary string specified by the application. In
-effect, column families are pre-announced while qualifiers are not. The
-contents of each column family are stored together, so the user will want
-to store items that have similar characteristics in the same column family.
-Each data point is called a cell. A cell is an uninterpreted array of
-bytes---there are no data types, and it is up to the application to
-interpret the data correctly. The table can store any number of timestamped
-versions of each cell, allowing versioning of data.
-
-The model above can indeed be thought of as a sparse distributed
-multidimensional sorted map. In concept, this multidimensional map is
-identical to a nested hash map from your favourite programming language. The
-dimensions of this multidimensional map is mapped out on the row key, the
-column family and the column qualifier, and possibly also of the version
-timestamp.
+TODO: Why do we chose HBase in favour of other techniques (i.e. SQL)?
 
 In actual practice, the main difference between the two models is that
 querying is highly restricted in a BigTable-like data store---there are no
@@ -455,137 +313,229 @@ column or column-family are picked up and returned. Certainly, you will
 want to store those data points that are likely to be needed simultaneously
 close to each other. \cite{bigtable}
 
+Sparseness is a big thing. Null values are free of charge. TODO: *Describe
+how we leverage sparsity*.
+
+
+\chapter{Method}
+
+\section{Procedure}
+
+TODO: Explain our working procedure regarding
+\begin{itemize}
+\item[-] Exploration
+\item[-] Prototyping
+\item[-] Real-world data
+\item[-] Litterature studies
+\item[-] Design phase
+\end{itemize}
+
+
+
+\section{Apache Hadoop}
+
+Hadoop is a free software implementation of Google's MapReduce-framework; it is
+written in Java and is part of the Apache Software Foundation. Hadoop is a
+fairly mature piece of software and is used in production at numerous companies,
+among them Last.fm.
+\cite{hadoop}
+
+
+\subsection{MapReduce}
+
+MapReduce is a framework for running jobs in parallel across multiple
+machines. As the name implies, MapReduce is made up of two parts or
+phases: map and reduce. The map phase consumes one piece of input at a
+time (a piece of input can be a line from a log file, for example), and
+emits an intermediate key and value. These keys and values are then
+processed by the reduce phase, which emits the final key-value pairs.
+
+MapReduce works by splitting the input, which commonly is in the size
+range of many gigabytes, into \textit{n} parts and lets each node of the
+computing cluster work on one or more parts. The mapper on each node emits
+key-value pairs which are fed into the reduce phase. The final output is
+collated, usually on a distributed file system.
+
+
+\subsection*{Hadoop Distributed File System}
+
+HDFS is a free software implementation of the GFS \cite{gfs}.
+
+The goal of HDFS is to store large data sets while being able to handle
+hardware failure and being deployed in heterogenous hardware and software
+eco systems. Additionally, the Hadoop and HDFS interaction is designed with
+the notion that it is cheaper to move the computation, MapReduce programs,
+to the data than the other way around.
+
+Every Hadoop node can be formatted with HDFS, this reserves disk space on
+the node to be used for HDFS. The HDFS container resides on the nodes
+general purpose file system. It is also possible to use HDFS as a
+stand-alone general purpose distributed file system, without Hadoop.
+
+The default block size on HDFS 64 MB, significantly larger than
+file systems used for hard drives. The motivation is that applications
+that use HDFS are not general purpose applications which run on general
+purpose file systems, but batch applications which read, write, or both,
+large amounts of data.
+
+
+\subsection*{Hadoop streaming}
+
+Any program that reads and outputs to the file pointers \texttt{stdin} and
+\texttt{stdout}, respectively, can be used as MapReduce programs with
+Hadoop Streaming. This makes it possible to use any shell script or
+program which inputs and outputs this way as a MapReduce program.
+
+
+\subsubsection*{Dumbo}
+
+Dumbo is a Python framework for writing Hadoop programs in Python; it exploits
+the Hadoop Streaming Mode to do so. It is used extensively at Last.fm for
+writing short prototypes. \cite{dumbo}
+
+
+\section{Apache HBase}
+
+HBase is a free software implementation of Google's BigTable. \cite{bigtable} It
+is a sub-project of Hadoop, written in Java and a part of the Apache Software
+Foundation. HBase is still in its infancy and few organizations use it for
+mission-critical applications. \cite{hbase}
+
+
+\subsection{BigTable}
+
+BigTable is a data store designed for traversal of very large data sets.
+Time-stamped cells inside column-families in rows. The row has a key and any
+number of cells attached to it. The rows in a table are sorted by the key.
+The typical use-case of BigTable is to scan a range of rows. It is therefor
+important to set up the row keys so that related data is close to each other.
+For example, if it makes sense to traverse the data in chronological order, the
+key might contain a representation of the data's timestamp. The classic example
+is to have the reversed domain name (i.e. com.google.www) as the row key, which
+means that all sub-domains of any domain are next to each other.
+
 
 \subsection{Data model}
 
-Sorted distributed multidimensional sparse hashtable.
+The data model is a simple one: Rows of data are stored in labeled tables. Each
+row is indexed with a row key, a column key, and a timestamp.  The columns are
+of the form "column-family:qualifier", where the column-family is one of a
+number of fixed column-families defined by the table, and the qualifier is an
+arbitrary string specified by the application. In effect, column families are
+pre-announced when creating the table while qualifiers are not. The contents of
+each column family are stored together, so the user will want to store items
+that have similar characteristics in the same column family.  Each data point is
+called a cell. A cell is an uninterpreted array of bytes, there are no data
+types, and it is up to the application to interpret the data correctly. The
+table can store any number of timestamped versions of each cell, allowing
+versioning of data.
 
+\begin{center}
+    \begin{table}[h]
+    \begin{tabular}{|l|l|l|l|l|}
+    \hline
+    \small \bf Row Key & \small \bf Time & \small \bf Column &
+    \multicolumn{2}{|c|}{\small \bf Column} \\
+     & \small \bf Stamp & \small "contents:" &
+    \multicolumn{2}{|c|}{\small "anchor:"} \\
+    \hline
+     & t9 & & \small "anchor:cnnsi.com" & "CNN" \\
+     & t8 & & \small "anchor:my.lok.ca" & "CNN.com" \\
+    "com.cnn.www" & t6 & \small "{\textless}html\textgreater..." & & \\
+     & t5 & \small "{\textless}html\textgreater..." & & \\
+     & t3 & \small "{\textless}html\textgreater..." & & \\
+    \hline
+    \end{tabular}
+    \caption{Example HBase table.}
+    \end{table}
+\end{center}
 
-\subsubsection*{Rows}
+\vspace{-24pt}
 
-Each row in a BigTable is associated with a unique key. All the data is
-stored sorted by rowkey. Because of this it is important to have a thorough
-analysis of how the data is going to be accessed in order to store it
-efficiently.
-
-
-
-\subsubsection*{Regions}
-
-BigTable use the concept of tablets, HBase in turn uses regions. In order
-to be consistent with the rest of this paper we henceforth use the term
-region.
-
-A region is a partition of the data stored on a node in the computer
-cluster. A region server (referred to as tablet server in \cite{bigtable})
-holds information on which regions are located on which nodes. More
-precisely the region server knows what range of rowkeys are in each region
-on each node. This behaviour makes it fast to access data while keeping
-reliability and scalability features.
-
+\noindent The model above can indeed be thought of as a sparse distributed
+multidimensional sorted map. In concept, this multidimensional map is identical
+to a nested hash map. The dimensions of this multidimensional map is mapped out
+on the row key, the column family and the column qualifier, and possibly also of
+the version timestamp.
 
 % TODO> why is this Tool & BigTable-subsection called Dimensions?
 % Disambiguation needed. -fredrik
-\subsection*{Dimensions}
+\subsection*{Physical storage}
 
-The degrees of freedom in BigTable.
+Each column-family is stored as a single file in HBase; it is then subdivided
+into column-qualifiers within the same file. This is important to consider when
+designing application and schemas, since reading from several column-families
+will open several files.
 
-\subsubsection*{Column-families}
 
-Each column-family is stored as a single map-file in HBase.
+\subsection*{Sparsity}
 
-
-\subsubsection*{Column-qualifiers}
-
-Each column-family is further divided into one or more column-qualifiers.
+When many cells are empty, the table is said to be sparse. This can potentially
+be a problem, because even sparse cells may cost storage space.  BigTable and
+HBase, however, don't store empty cells; as consequence sparsity is not
+associated with a great storage cost.
+\cite{olap_data_scalability,olap_solutions}
 
 
 \subsection*{Hierarchies}
 
-Depending on how the rowkeys are formatted different hierarchies are
-created. The order in which the data is stored is important, it defines how
-effective scanning data will be. In the case of having thousand rows and
-requesting ten out of these, then only one por cent of the data is
-interesting. If a scan would be required to visit all the thousand rows a
-lot of rows are skipped. Skipping rows is expensive in that sense that they
-are but the result is thrown away. The goal is to push this cost to a bare
-minimum, using as many of the rows as possible.
+Depending on how the row keys are formatted different, hierarchies are created.
+The order in which the data is stored is important, it defines how effective
+scanning data will be. Sparsity also comes into play concerning effective
+scanning. In the case of having thousand rows and requesting ten out of these,
+then only one por cent of the data is interesting. If a scan would be required
+to visit all the thousand rows a lot of rows are skipped. Skipping rows is
+expensive in that sense that they are but the result is thrown away. The goal is
+to push this cost to a bare minimum, using as many of the rows as possible.
 
 The minimum cost of scanning data is achieved by ordering the data so that
 a scan uses every visited row. In the case with thousand rows of which ten
 are wanted, would mean that ten rows scan are scanned of which all are
 used.
-\subsection{Thrift}
 
-A remote procedure call framework for building scalable cross-language
+
+\subsection*{Thrift}
+
+HBase has a Thrift server which serves as the interface to languages other than
+Java---for instance Python.
+
+Thrift is a remote procedure call framework for building scalable cross-language
 services. Thrift combines a software stack with a code generation engine to
 build services that work seamlessly between a wide range of programming and
-scripting languages. \cite{thrift}
-
-Thrift was originally developed at Facebook and in April 2007 it was
-released as free software. It entered the Apache Incubator in May 2008.
-
-HBase has a Thrift server which serves as the interface to languages other
-than Java---for instance Python.
-
-
-
-\subsection{JSON}
-
-JSON\footnote{JavaScript Object Notation} is a lightweight text-based
-human-readable data interchange format. It is used for representing simple
-data structures and associative arrays (called objects). JSON is often used
-for serializing structured data and transmitting it over network
-connection.
-
-
-\subsection{YAML}
-
-YAML\footnote{YAML Ain't a Markup Language} is a human-readable data
-serialization format available for a wide range of programming and
 scripting languages.
 
-The outline and markup of YAML documents makes it well suited for data
-which humans are likely to view or edit, such as configuration files.
+Thrift was originally developed at Facebook and in April 2007 it was released as
+free software. It entered the Apache Incubator in May 2008. \cite{thrift}
 
 
+\section{Dependability}
 
-\section{Java}
+Regarding the infrastructure, both Hadoop and HBase have high availability,
+reliability, and scalability.
 
-Both Hadoop and HBase are written in Java---a high-level object-oriented
-programming language.
+Both Hadoop and HBase are distributed systems; making them highly available out
+of the box. Although the Job Tracker\footnote{All client applications are
+submitted to Hadoop's Job Tracker.} is a single point of failure for Hadoop.
+The HDFS NameNode\footnote{A unique server which keeps the directory tree of all
+files in HDFS.} is also a single point of failure. However, a secondary HDFS
+NameNode, which regularly takes a snapshot of the primary NameNode's state, is
+spawned. There exist no automatic fail-over though, if the main the primary
+NameNode crashes manual intervention is needed.
 
-Most Hadoop users write their MapReduce programs in Java, since this is the
-native language of Hadoop. \cite{java}
+Both systems have high reliability. Data on HDFS are replicated to---typically
+three---other nodes in the cluster. Jobs submitted to Hadoop also have a high
+reliability: If a node does not succeed with a job it is rescheduled to another
+free node which executes it.
 
+Regarding scalability Hadoop and HBase scales close to linearly when nodes are
+added to the cluster.
 
+While relational databases can be made highly available and reliable with load
+balancing and so called \textit{Sharding}, the setup is non-trivial. Regarding
+scalability, relational databases are highly dependent on having data in working
+memory; thus they scale poorly.
+% TODO: [citation needed]
 
-
-\subsection{PyYAML}
-
-PyYAML is a complete YAML 1.1 compliant parser and emitter for Python.
-\cite{pyyaml}
-
-
-\subsection{Setuptools}
-
-Python Setuptools is a framework---built on top of the Python module
-distutils---for basic package management of Python software. Amongst other
-things it creates and installs Python Eggs\footnote{A Zip file which
-bundles Python software files.}. \cite{setuptools}
-
-
-\subsection{simplejson}
-
-A simple, fast, complete and extensible JSON encoder and decoder for
-Python. The Python module simplejson is implemented entirely in Python and
-has no external dependencies. However a C extension which provides a
-serious speed boost is included in simplejson. \cite{simplejson}
-
-
-\section{Configuration}
-
-Data sets and environment.
 
 
 \section{Python}
@@ -594,25 +544,43 @@ Python is a general-purpose high-level multi-paradigm---amongst others:
 object-oriented, imperative and functional---scripting language.
 \cite{python}
 
-Zohmg is written mostly in Python. Zohmg uses the following Python modules
-internally; it depends on them to be available on the system.
+Because there existed a Python module for writing MapReduce programs (Dumbo),
+Python was a natural choice during the design and exploration phases. The main
+reason was the rapid development of Python programs, several times shorter than
+their Java counter parts made them faster to develop.
+
+
+\section{Configuration}
+
+The Zohmg needs configuration of the user's data sets and the environment for
+Hadoop and Dumbo.
+
+The data sets are configured using YAML\footnote{YAML Ain't a Markup Language},
+a human-readable data serializaton format. Any human-readable configure file
+method could have been chosen, e.g. INI files\footnote{A simple configuration
+mechanims where one would have lines of \texttt{variable = value}.}. YAML was
+choosen because it is is very simple for humans to read and edit, and likewise
+for machines.
+
+The environment is a Python script which defines run-time variables, required by
+Hadoop and Dumbo. Using a Python scripts for run-time variables leaves the
+problem of validation to Python.
 
 
 \section{Exporting data}
 
-TODO: More general about middleware, move Paste mentioning to Implementation
-chapter.
+In order to join together all the different abilities which were wanted from the
+data server, it was designed as a middleware application. Since the main goal
+was not to build a middleware framework from scratch, an existing such was used.
 
-Python Paste is a framework for building WSGI\footnote{Web Server Gateway
-Interface, a HTTP extension where a CGI-like environment is passed around.}
-applications and middleware. \cite{definitive_guide_to_pylons}
+The data export server is built with a WSGI\footnote{Web Server Gateway
+Interface} framework, it includes both middleware and application parts. The
+middleware applications are responsible for dispatching requests to the
+corresponding application or file.
 
-WSGI applications receive a WSGI request and returns a response with the
-built-in web server.
-
-Middleware is software that acts as an intermediary. WSGI middleware
-receives a WSGI request and then performs logic upon this request, before
-passing the request to a WSGI application. \cite{paste}
+When a user queries the data server, JSON\footnote{JavaScript Object Notation}
+is returned. JSON was chosen because it is i simple text serialization format
+which is widely used in web development.
 
 
 
@@ -621,11 +589,13 @@ passing the request to a WSGI application. \cite{paste}
 \chapterquote{A good idea is about ten percent and implementation and hard
 work, and luck is 90 percent.}{Guy Kawasaki}
 
-% COMMENT: do we really need to repeat this?
-As stated in chapter 3, Zohmg is built upon existing tools and software. It
-uses Dumbo to run jobs on Apache Hadoop, and uses Apache HBase to persist the
-data.
 
+TODO: *this should go into implementation.*
+The typical use case for Zohmg is to read one or more column-qualifiers,
+which correspond to one or more points in n-space, over a range of time.
+Therefor, the keys are made up of the time and unit of the measurement,
+and the qualifier queried for represents the point in n-space. More on
+this in the data model section.
 
 % TODO: not sure this is precisely a story about the implementation.
 % putting it here for now.
@@ -820,6 +790,17 @@ for serializing data.
 The data export server is built with Python Paste---a middleware
 framework---the data server dispatches to the requested application
 depending on the URI it was fed.
+
+Python Paste is a framework for building WSGI\footnote{Web Server Gateway
+Interface, a HTTP extension where a CGI-like environment is passed around.}
+applications and middleware. \cite{definitive_guide_to_pylons}
+
+WSGI applications receive a WSGI request and returns a response with the
+built-in web server.
+
+Middleware is software that acts as an intermediary. WSGI middleware
+receives a WSGI request and then performs logic upon this request, before
+passing the request to a WSGI application. \cite{paste}
 
 
 \subsubsection{URLParser}
@@ -1051,13 +1032,21 @@ The data server serves static files from the project's \texttt{clients} from
 
 \chapter{Glossary}
 
-\begin{itemize}
-\item \texttt{Serializing}
-Serializing data is the task of converting an object into a sequence of
-bits so that it can be stored on a storage medium or transmitted over a
-network link. Rereading the sequence of bits should restore the original
-state of the object it was in before the serialization.
-\end{itemize}
+\begin{tabular}[t]{lp{100mm}}
+\textbf{JSON} &
+JavaScript Object Notation, a lightweight text-based human-readable data
+interchange format. It is used for representing simple data structures and
+associative arrays (called objects). JSON is often used for serializing
+structured data and transmitting it over network connection.
+
+ \\
+
+\textbf{Serializing} &
+Serializing data is the task of converting an object into a sequence of bits,
+making it possible to store on a storage medium or transmitted over a network
+link. Rereading the sequence of bits should restore the original state of the
+object it was in before the serialization. \\
+\end{tabular}
 
 \chapter{Text with no home and no current purpose}
 
