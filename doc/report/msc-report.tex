@@ -615,15 +615,15 @@ Going back to the running example of apache access logs, a usermap function
 might look something like this:
 
 \begin{verbatim}
-def map(key, value):
-  log = parse_apache_log(value)
-  dimensions = {'useragent' : log.useragent,
-                'path'      : log.path,
-                'status'    : log.statuscode}
-  values = {'pageviews' : 1,
-            'bytes'     : log.size}
+  def map(key, value):
+    log = parse_apache_log(value)
+    dimensions = {'useragent' : log.useragent,
+                  'path'      : log.path,
+                  'status'    : log.statuscode}
+    values = {'pageviews' : 1,
+              'bytes'     : log.size}
 
- yield log.timestamp, dimensions, measurements
+    yield log.timestamp,dimensions,measurements
 \end{verbatim}
 
 \vspace{12pt}
@@ -763,7 +763,15 @@ Support exists for writing the mapper in Java or Python.
 
 \subsection{Internal}
 
+Typed bytes
+
+
 \subsubsection{Input formats}
+
+TextInputFormat
+
+LzoInputFormat
+
 
 \subsubsection{Output formats}
 
@@ -986,13 +994,24 @@ It'd be interesting to think a bit about how the data store could be fully
 elastic, i.e. not require any data set definition from the user and instead
 create column-families on the fly based on the dimensions output from the
 user's map.
+
+
 \subsection{Multiple data sets}
 
+
 \subsection{Metadata}
+
+data set introspection
+
+roll-up and drill-down
+
+good when creating apps
+
 
 \subsection{Updating data set files}
 
 Update tables on changes in configuration---data set files.
+
 
 \subsection{Importing without MapReduce}
 
@@ -1005,8 +1024,8 @@ service.
 
 \chapterquote{When we can't dream any longer we die.}{Emma Goldman}
 
-Last.fm is looking at using Zohmg for multiple application areas, such as
-radio stats and web page stats.
+Last.fm is investigating the possibility for using Zohmg for multiple
+application areas, such as radio stats and web page stats.
 
 
 \pagebreak
