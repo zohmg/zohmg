@@ -1,21 +1,21 @@
 from zohmg.utils import fail
 import os, sys
 
-
-DIRS = ["clients","config","lib","mappers","transformers"]
+# FIXME: temporarily disabled 'clients'
+DIRS = ["config","lib","mappers","transformers"]
 
 # config/environment.py
 ENV_SCRIPT = """# Please define the following environment variables.
 
 # Path to Hadoop directory.
-#HADOOP_HOME = '/opt/hadoop-0.19.1'
+HADOOP_HOME = '/opt/hadoop-0.19.1'
 
 # Jars for Hadoop Core, Hadoop Streaming and HBase
 CLASSPATH = (
   # be sure to set these correctly!
-  #'/opt/hadoop-0.19.1/build/hadoop-0.19.2-dev-core.jar',
-  #'/opt/hadoop-0.19.1/build/contrib/streaming/hadoop-0.19.2-dev-streaming.jar',
-  #'/opt/hbase-0.19.1/build/hbase-0.19.1.jar'
+  '/opt/hadoop-0.19.1/build/hadoop-0.19.2-dev-core.jar',
+  '/opt/hadoop-0.19.1/build/contrib/streaming/hadoop-0.19.2-dev-streaming.jar',
+  '/opt/hbase-0.19.2/build/hbase-0.19.2.jar'
 )
 """
 
@@ -38,7 +38,7 @@ Static files here will be served from the url http://host:port/client/filename.
 
 MAPPER = """# identity mapper.
 def map(key, value):
-    yield key, value
+    # egads!
 """
 
 TRANSFORMER = """# identity transformer.
@@ -67,7 +67,7 @@ class Create(object):
         # Create .zohmg, README, client, environment, mapper and transformer.
         self.__write_to_file('.zohmg')
         self.__write_to_file('README', README)
-        self.__write_to_file("clients/client.html",CLIENT)
+        #self.__write_to_file("clients/client.html",CLIENT)
         self.__write_to_file('config/environment.py', ENV_SCRIPT)
         self.__write_to_file('mappers/identity_mapper.py', MAPPER)
         self.__write_to_file("transformers/identity_transformer.py",TRANSFORMER)
