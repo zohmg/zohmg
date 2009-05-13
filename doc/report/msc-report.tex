@@ -108,15 +108,32 @@ these variables are placed in a spreadsheet, which organizations are wont to
 do, the variables are set on the x and y axes. Each axis represents a logical
 grouping of variables. In the example of a log file of visits to a web site
 above, country of origin is one such variable. A variable is generally called
-a dimension in this paper.
+a dimension in this thesis.
 
 The International Aerodyne Corporation, a leading exporter of woodworking
 nails, uses a spreadsheet to keep track of the number of nails exported to
 each country every month (see figure). 
 
-% image of a spreadsheet.
-%\includegraphics[width=70mm]{pictars/aerodyne-nails.png}
-%\imagecaptionplease{crates of nails exported}
+\begin{table}[h]
+    \begin{center}
+        \begin{tabular}{|l|l|l|l|}
+        \hline
+         & January & February & March \\
+        \hline
+        Canada & 120 & 140 & 120 \\
+        \hline
+        Great Britain & 60 & 50 & 50 \\
+        \hline
+        Germany & 80 & 100 & 110 \\
+        \hline
+        Sweden & 40 & 30 & 30 \\
+        \hline
+        \end{tabular}
+        \caption{Spreadsheet showing crates of nails exported.}
+    \end{center}
+\end{table}
+
+\vspace{-12pt}
 
 In the figure above, the time dimension is set on the x-axis and the country
 dimension is set on the y-axis. If the Aerodyne Corporation were to start
@@ -234,6 +251,9 @@ presents the conclusion, respectively.
 % CONCEPTS IN DATA WAREHOUSING, by clark de jean
 \chapter{Concepts in Data Warehousing}
 
+\chapterquote{Some random quote might be suitable here.}{Per}
+\section*{Introduction}
+
 This chapter introduces data warehouses and the concept of data cubes. It then
 introduces common operations on data cubes: projections, slicing and dicing,
 and aggregation.
@@ -245,10 +265,10 @@ A data warehouse is a repository of an organization's electronically stored
 data. Data warehouses are designed to facilitate reporting and analysis; the
 core actions of a data warehouse are to load, transform and extract data.
 
-\subsection{OLAP}
+\subsection*{OLAP}
 
-OLAP, which is an acronym for Online analytical processing, is an approach to
-quickly answer multi-dimensional analytical queries.
+OLAP\footnote{On-Line Analytical Processing} is an approach to quickly answer
+multi-dimensional analytical queries.
 
 At the core of any OLAP system is the OLAP cube (also known as a
 multi-dimensional cube or a hypercube). The cube consists of numeric facts
@@ -261,7 +281,7 @@ cube.
 \section{Data cubes}
 
 A data cube is a conceptual n-dimensional array of values. It aids in
-reasoning about dimensions. In the context of this paper, each dimension of
+reasoning about dimensions. In the context of this thesis, each dimension of
 the cube corresponds to an attribute of the data in question and each point
 along the dimension's axis is a value of the corresponding attribute. At any
 point where the n dimensions intersect, a measure can be found. For example,
@@ -273,7 +293,7 @@ Data cubes are traditionally modeled as star schemas in relational database
 systems. \cite{olap_solutions}
 
 
-\subsection{Projections}
+\subsection*{Projections}
 
 One of the most common operations on a data cube is the projection. A
 projection is a function to another data cube, where one or more dimensions
@@ -287,7 +307,7 @@ country dimension: the measurements in the new cube represent the global sales
 of each nail type for each month.
 
 
-\subsection{Slice and dice}
+\subsection*{Slice and dice}
 
 The slice operation fixes the values of one or several dimensions in the cube.
 The data omitted from this operation would be any data associated with the
@@ -594,33 +614,33 @@ types, and it is up to the application to interpret the data correctly. The
 table can store any number of timestamped versions of each cell, allowing
 versioning of data.
 
-\begin{center}
-    \begin{table}[h]
-    \begin{tabular}{|l|l|l|l|l|}
-    \hline
-    \small \bf Row Key & \small \bf Time & \small \bf Column &
-    \multicolumn{2}{|c|}{\small \bf Column} \\
-     & \small \bf Stamp & \small "contents:" &
-    \multicolumn{2}{|c|}{\small "anchor:"} \\
-    \hline
-     & t9 & & \small "anchor:cnnsi.com" & "CNN" \\
-     & t8 & & \small "anchor:my.lok.ca" & "CNN.com" \\
-    "com.cnn.www" & t6 & \small "{\textless}html\textgreater..." & & \\
-     & t5 & \small "{\textless}html\textgreater..." & & \\
-     & t3 & \small "{\textless}html\textgreater..." & & \\
-    \hline
-    \end{tabular}
-    \caption{Example HBase table.}
-    \end{table}
-\end{center}
+\begin{table}[h]
+    \begin{center}
+        \begin{tabular}{|l|l|l|l|l|}
+        \hline
+        \small \bf Row Key & \small \bf Time & \small \bf Column &
+        \multicolumn{2}{|c|}{\small \bf Column} \\
+         & \small \bf Stamp & \small "contents:" &
+        \multicolumn{2}{|c|}{\small "anchor:"} \\
+        \hline
+         & t9 & & \small "anchor:cnnsi.com" & "CNN" \\
+         & t8 & & \small "anchor:my.lok.ca" & "CNN.com" \\
+        "com.cnn.www" & t6 & \small "{\textless}html\textgreater..." & & \\
+         & t5 & \small "{\textless}html\textgreater..." & & \\
+         & t3 & \small "{\textless}html\textgreater..." & & \\
+        \hline
+        \end{tabular}
+        \caption{Example HBase table.}
+    \end{center}
+\end{table}
 
-\vspace{-24pt}
+\vspace{-12pt}
 
-\noindent The model above can indeed be thought of as a sparse distributed
+The model above can indeed be thought of as a sparse distributed
 multidimensional sorted map. In concept, this multidimensional map is identical
-to a nested hash map. The dimensions of this multidimensional map is mapped out
-on the row key, the column family and the column qualifier, and possibly also of
-the version timestamp.
+to a nested hash table. The dimensions of this multidimensional map is mapped
+out on the row key, the column family and the column qualifier, and possibly
+also of the version timestamp.
 
 % TODO> why is this Tool & BigTable-subsection called Dimensions?
 % Disambiguation needed. -fredrik
