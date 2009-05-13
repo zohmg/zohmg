@@ -196,25 +196,7 @@ Chapters 7 and 8 discuss the results, related, and future work, and
 presents the conclusion, respectively.
 
 
-
-
-\chapter{Analysis}
-
-\chapterquote{Arrange whatever pieces come your way.}{Virgina Wolf}
-
-
-\section{Task}
-
-Mention data sets here.
-
-
-\subsection{Import}
-
-\subsection{Store}
-
-\subsection{Export}
-
-
+\chapter{Concepts in Data Warehousing}
 
 \section{Data cubes}
 
@@ -292,30 +274,26 @@ unfeasible amount of data, while pre-computing too few aggregates results in
 longer access times for those aggregates that were not pre-computed.
 
 
-\section{Techniques and tools}
 
-% TODO: Why do we chose HBase in favour of other techniques (i.e. SQL)?
 
-In actual practice, the main difference between the two models is that
-querying is highly restricted in a BigTable-like data store---there are no
-joins, for example---whereas the relational database was born to be queried.
-On the other hand, the restrictions placed upon the BigTable models are
-what allows it to scale to such a large data set. Indeed, BigTable was born
-to scale.
 
-% TODO: elaborate on reasons to why starsql does not scale
+\chapter{Analysis}
 
-Many applications have the behaviour where they write data once and read it
-a lot more, log analysers for instance. This writing-once-reading-many
-behaviour is precisely what BigTable is designed for. BigTable is designed
-for sequential, as opposed to random, data access. A typical use case is
-the scan, where a large number of rows are read in sequence and a certain
-column or column-family are picked up and returned. Certainly, you will
-want to store those data points that are likely to be needed simultaneously
-close to each other. \cite{bigtable}
+\chapterquote{Arrange whatever pieces come your way.}{Virgina Wolf}
 
-Sparseness is a big thing. Null values are free of charge. TODO: *Describe
-how we leverage sparsity*.
+
+\section{Task}
+
+Mention data sets here.
+
+
+\subsection{Import}
+
+\subsection{Store}
+
+\subsection{Export}
+
+
 
 
 \chapter{Method}
@@ -1075,6 +1053,32 @@ scalable, distributed file system. The Apache Hadoop \cite{hadoop} project has
 published free software implementations of a MapReduce framework and a
 distributed file system, both of which build on the ideas in the papers
 published by Google.
+
+
+\section{Techniques and tools}
+
+% TODO: Why do we chose HBase in favour of other techniques (i.e. SQL)?
+
+In actual practice, the main difference between the two models is that
+querying is highly restricted in a BigTable-like data store---there are no
+joins, for example---whereas the relational database was born to be queried.
+On the other hand, the restrictions placed upon the BigTable models are
+what allows it to scale to such a large data set. Indeed, BigTable was born
+to scale.
+
+% TODO: elaborate on reasons to why starsql does not scale
+
+Many applications have the behaviour where they write data once and read it
+a lot more, log analysers for instance. This writing-once-reading-many
+behaviour is precisely what BigTable is designed for. BigTable is designed
+for sequential, as opposed to random, data access. A typical use case is
+the scan, where a large number of rows are read in sequence and a certain
+column or column-family are picked up and returned. Certainly, you will
+want to store those data points that are likely to be needed simultaneously
+close to each other. \cite{bigtable}
+
+Sparseness is a big thing. Null values are free of charge. TODO: *Describe
+how we leverage sparsity*.
 
 
 \end{document}
