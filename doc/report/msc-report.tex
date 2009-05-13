@@ -1,35 +1,28 @@
-\documentclass[a4paper]{report}
-
-
-\author{Per Andersson, Fredrik M{\"o}llerstrand}
-
-\title{Zohmg---a large scale data store for aggregated time-series-based
-data. [DRAFT]}
-
-
-% chapterquote
+% chapterquote command.
 \newcommand{\chapterquote}[2] {
 \begin{quote}
 \textit{"{#1}"}
 
 --- {#2}
 \end{quote}
-
 \vspace{24pt}
 }
 
 
+\documentclass[a4paper]{report}
 
+\author{Per Andersson, Fredrik M{\"o}llerstrand}
+\title{Zohmg---a large scale data store for aggregated time-series-based
+data. [DRAFT]}
 
 \begin{document}
-
 \maketitle
 
 \noindent {\Large \textbf{Abstract}}
-
 \vspace{12pt}
-
 \noindent
+
+% TODO: use less buzzwords; focus on the problem.
 
 This thesis describes a data store for multi-dimensional time-series-based
 data. The data is aggregated over many units of measurements and across
@@ -54,18 +47,19 @@ theoretical solution and implementation details.
 
 
 \tableofcontents
-
 \vfill
-
 \pagebreak
 
 \chapter{Introduction}
 
 \section{Background}
 
-Any organization will eventually wish to analyze various characteristics of
-its service and operations. These services can be anything from web sites to
-theme parks. The analysis might include characteristics such as the number of
+% TODO: introduce time-series, data warehousing, mapreduce, bigtable
+% TODO: why is time important? (we query for time, etc.)
+
+Any organization will eventually want to analyze various characteristics of
+its service and operations. The services can be anything from web sites to
+theme park; the analysis might include characteristics such as the number of
 visitors per day, or the average time a theme park guest spends queueing for a
 particular ride.
 
@@ -84,12 +78,13 @@ can be thought of as points along an axis; Sweden, Norway and Denmark are all
 points along the country axis, for instance. This is an important concept and
 it will be touched upon repeatedly throughout the text.
 
-After having collected these base facts, one can draw conclusions about what
-countries generate the most traffic to the site, and which web browser is most
-popular in a certain country, and so on.
+When the records in the data set have been analyzed, one can draw conclusions
+about what countries generate the most traffic to the site, which web browser
+is most popular in a certain country, etc.
 
-Typically, the size of a data set is in the range of several gigabytes of data
-per day. Some data sets are many times larger.
+The size of the data sets at last.fm is in the range of several gigabytes per
+day. Some data sets are many times larger. It is our belief that this is
+typical.
 
 A single computer is not likely to be able to process that amount of data
 before a new batch arrives, and for very large data sets a single computer
@@ -101,13 +96,8 @@ distributed file system and to to exploit the parallel nature of the records
 by breaking up the data sets in pieces and have each piece be processed
 separately on a node in a large compute cluster.
 
-Luckily, this is a problem that has already been solved. Google has published
-papers on the MapReduce framework \cite{mapreduce}, which allows for parallel
-processing of large data sets, and The Google File System \cite{gfs}, a
-scalable, distributed file system. The Apache Hadoop \cite{hadoop} project has
-published free software implementations of a MapReduce framework and a
-distributed file system, both of which build on the ideas in the papers
-published by Google.
+% TODO: write about how mapreduce already solves the problem of parallel
+% computation, and how gfs solves the problem of distributed storage.
 
 
 \section{Problem description}
@@ -135,6 +125,8 @@ to publish new data sets.
 \section{Goal}
 % Syftesformulering.
 
+% TODO: define aggregates!
+
 The goal is to build a tool that enables its users to easily turn log files
 into aggregates. The tool should provide a simple mechanism for data analysis
 (import) and querying (export).
@@ -158,7 +150,7 @@ real time.
 \section{Scope}
 % Avgransning.
 
-% TODO: Why do we do these avgränsningar.
+% TODO: argue why we do these avgränsningar.
 
 The data store is just that: a data store with import and export
 functionality. The data store does not interpret the data it store.
@@ -175,9 +167,11 @@ There is no functionality for plotting data sets, etc.
 
 \section{Related work}
 
+% TODO: this section.
+
 OLAP is something. It's drawbacks are unknown.
 
-HDW is system which goal is to create a high performance large scale data
+HDW is a system whose goal is to create a high performance large scale data
 warehouse based on MapReduce and Bigtable. \cite{hdw}
 
 Omniture is used at Last.fm etc.
@@ -186,6 +180,9 @@ Omniture is used at Last.fm etc.
 \section{Overview}
 
 This thesis describes the Zohmg system and how to use it.
+
+% TODO: make correct.
+The following overview is entirely incorrect:
 
 Chapter 2 establish the theoretical base of the problem statement.
 
@@ -254,6 +251,8 @@ dimensions---on screen or paper.
 
 \subsection{Slice and dice}
 
+% TODO: example.
+
 The slice operation fixes the values of one or several dimensions in the cube.
 The data omitted from this operation would be any data associated with the
 values of the dimension that were not fixed. The dice operation is a slice on
@@ -262,11 +261,16 @@ more than two dimensions.
 
 \section{Time series}
 
-TODO: Time series is one of the most important measures in log analyzing, it
+% TODO: this section.
+
+Time series is one of the most important measures in log analyzing, it
 is also very natural when the data is time-stamped. \cite{discoveringweb}
 
 
 \section{Aggregates}
+
+% TODO: be clear about how aggregates are *derived* from one or several vars.
+% TODO: example.
 
 An aggregate is a composite of several values. Typical examples of
 aggregate functions are average, count, and sum.
@@ -282,18 +286,15 @@ user. Pre-computing frequently requested aggregates is therefore regularly
 done in the background, giving the user fast access to these.
 \cite{olap_solutions}
 
-The classic trade-off between time and space applies to whether or not
-pre-compute an aggregate. Pre-computing to many aggregates might render an
-unfeasible amount of data to store, while pre-computing to few aggregates
-renders longer access times for aggregates which are not pre-computed. This
-problem is further discussed in the thesis, but left to the user of the
-Zohmg system to solve.
-
+The classic trade-off between time and space applies to whether or not to
+pre-compute an aggregate. Pre-computing too many aggregates might result in an
+unfeasible amount of data, while pre-computing too few aggregates results in
+longer access times for those aggregates that were not pre-computed.
 
 
 \section{Techniques and tools}
 
-TODO: Why do we chose HBase in favour of other techniques (i.e. SQL)?
+% TODO: Why do we chose HBase in favour of other techniques (i.e. SQL)?
 
 In actual practice, the main difference between the two models is that
 querying is highly restricted in a BigTable-like data store---there are no
@@ -302,7 +303,7 @@ On the other hand, the restrictions placed upon the BigTable models are
 what allows it to scale to such a large data set. Indeed, BigTable was born
 to scale.
 
-\textbf{TODO: -- elaborate on reasons to why starsql does not scale--}
+% TODO: elaborate on reasons to why starsql does not scale
 
 Many applications have the behaviour where they write data once and read it
 a lot more, log analysers for instance. This writing-once-reading-many
@@ -1050,6 +1051,7 @@ object it was in before the serialization. \\
 
 \chapter{Text with no home and no current purpose}
 
+\section{Stop making speeches}
 A data warehouse is a repository of an organization's electronically stored
 data. Data warehouses are designed to facilitate reporting and analysis.
 \cite{wikipedia}
@@ -1064,6 +1066,15 @@ typically modelled in a realational database with fact tables and dimension
 tables, upon which the system performs joins to extract data.
 \cite{olap_solutions}
 
+\section{It's not like the movies}
+
+Luckily, this is a problem that has already been solved. Google has published
+papers on the MapReduce framework \cite{mapreduce}, which allows for parallel
+processing of large data sets, and The Google File System \cite{gfs}, a
+scalable, distributed file system. The Apache Hadoop \cite{hadoop} project has
+published free software implementations of a MapReduce framework and a
+distributed file system, both of which build on the ideas in the papers
+published by Google.
 
 
 \end{document}

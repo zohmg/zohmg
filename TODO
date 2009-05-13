@@ -1,3 +1,18 @@
+report:
++ add running example.
++ abstract: non-buzzword; focus on problem
++ introduction: introduce time-series, data warehousing, mapreduce, bigtable
++ introduction: why is time important? we query for time, etc.
++ concepts in data warehousing: write intro, summary.
++ concepts: is our use of 'hypercube' standard?
++ concepts: explain sice&dice clearer.
++ analysis: write intro, contents, summary.
++ method:
++ implementation:
++ discussion:
++ write about related work.
+
+
 priority zero:
 DONE perfect docs.
 + make sure it's easy to get zohmg up and running.
