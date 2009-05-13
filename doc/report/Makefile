@@ -16,4 +16,4 @@ msc-report: msc-report.tex
 	-rm -rf *.aux *.log
 
 clean:
-	-rm -rf *.dvi *.pdf
+	-rm -rf *.dvi *.pdf *.aux *.log
