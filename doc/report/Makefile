@@ -1,6 +1,6 @@
-BIBTEX=/usr/bin/bibtex
-LATEX=/usr/bin/latex
-PDFLATEX=/usr/bin/pdflatex
+BIBTEX=bibtex
+LATEX=latex
+PDFLATEX=pdflatex
 
 
 all: msc-report
