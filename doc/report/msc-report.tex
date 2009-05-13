@@ -92,10 +92,11 @@ before a new batch arrives, and for very large data sets a single computer
 would simply not be able to fit the intermediate data set in its working
 memory.
 
-It is suitable to to exploit the parallel nature of the records by breaking up
-the data sets in pieces and to have each piece be processed separately on a
+It is suitable to exploit the parallel nature of the records by breaking up
+the data sets in pieces and to have each piece be processed on a separate
 node in a large compute cluster. It is also suitable to store the data across
 many storage nodes in what is called a distributed file system.
+
 
 % TODO: write about how mapreduce already solves the problem of parallel
 % computation, and how gfs solves the problem of distributed storage.
@@ -247,19 +248,21 @@ core actions of a data warehouse are to load, transform and extract data.
 
 \subsection{OLAP}
 
-OLAP, which is an acronym for Online analytical processing, is an approach to
-quickly answer multi-dimensional analytical queries.
+OLAP, which is an acronym for Online analytical processing, is an umbrella
+term for systems built in a certain manner and that are optimized quickly
+answer multi-dimensional analytical queries.
 
 At the core of any OLAP system is the OLAP cube (also known as a
 multi-dimensional cube or a hypercube). The cube consists of numeric facts
-called measures which are categorized by dimensions. For example, the number
+-- called measures -- which are grouped by dimensions. For example, the number
 of nails sold is a measure while country, month and type of nail are
-dimensions. It is from OLAP that we have appropriated the concept of a data
+dimensions. It is from OLAP that [we] have appropriated the concept of a data
 cube.
 
 
 \section{Data cubes}
 
+% looking for a mathier explanation here.
 A data cube is a conceptual n-dimensional array of values. It aids in
 reasoning about dimensions. In the context of this paper, each dimension of
 the cube corresponds to an attribute of the data in question and each point
@@ -361,7 +364,7 @@ Last.fm has a central statistics and metrics tool built on a relational
 database. It is possible to import analyzed data to this tool; the data is
 presented to the user as graphs. Disadvantages of this system include problems
 with new data source additions: they can sometimes not be loaded because they
-are to big. If a user wants to perform a custom query, manual intervention by
+are too big. If a user wants to perform a custom query, manual intervention by
 the developer is necessary. There is no way for this system to handle custom
 queries.
 
@@ -371,7 +374,7 @@ each line, this makes writing a program for analyzing the entire data set as
 simple as analyzing a single line.
 
 Reporting the analyzed data is the final step. This is what the user is
-interested in: Viewing the analyzed data. The tool at Last.fm presents the user
+interested in: viewing the analyzed data. The tool at Last.fm presents the user
 with a dashboard that has a selection of graphs on primary metrics; it also has
 a list of all available graphs. All the graphs are pre-aggregated, no support
 exists for custom queries. Enabling the user to query the aggregated data---for
@@ -381,8 +384,8 @@ possibly be discovered; details which may be excluded from the pre-rendered
 aggregates.
 
 Since the data sources at Last.fm are time-stamped logs, the constraint to only
-handle, time-series was brought upon the Zohmg system. This decision was
-reached mainly to keep the implementation simple.
+handle time-series was brought upon the system. This decision was reached
+mainly to keep the implementation simple.
 
 
 \subsection*{System components}
@@ -390,14 +393,16 @@ reached mainly to keep the implementation simple.
 The following three components form the outline of the Zohmg system: importing,
 storing, and exporting data.
 
+<<<<<<< Updated upstream:doc/report/msc-report.tex
 At Last.fm there are several different facilities which produce logs, among
 them: web servers, scrobbling\footnote{Last.fm users can submit what music they
 listen to, this is called scrobbling.}, radio streaming etc. This data reside
-on a commodity hardware cluster used for parallel computation. The system needs
-to be able to easily import data from this source.
+on a commodity hardware cluster used for parallel computation. The system needs to
+be able to easily import data from these logs, taking in to account both the
+locality of the data as well as the structure of the individual data records.
 
 % storage.
-Because the data sources are typically large, the storage need to be efficient.
+Because the data sources are typically large, the storage needs to be efficient.
 Storing the analyzed data can be done in different ways, for instance storing
 the raw data or just aggregates. Storing the raw data is very expensive, since
 it would basically copy the data to the data store. Because of this the decision
@@ -407,18 +412,23 @@ There are several different ways of modelling multidimensional data.
 
 TODO: How to discuss modelling of data in a general sense, without mentioning
 MapReduce and BigTable?
+% thinking in simple data structures,
+% ..
 
 % export.
-Due to the several different data sources, there exist several different types
-of applications. Therefor the Zohmg system does not implement any user
-interface, this is left for the developer to implement.
+Due to the several different data sources, there exist several
+different types of applications. Therefor the system does not implement any user
+interface other than the REST API\footnote{The REST API is detailed in appendix
+X}. Making sense of the data is left for the developer.
 
 
 \section{System requirements}
 
+
 The four key requirements of the Zohmg system are: ease of use, speed,
-scalability, and being able to fit in the existing software and hardware
-eco-system.
+scalability, and adoption, where adoption means being able to fit in the
+existing software and hardware eco-system.
+% dave probably knows a better word than 'fit'.
 
 % ease of use.
 The system should have an easy facility for importing and analyzing new data
