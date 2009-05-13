@@ -332,6 +332,8 @@ concept of data cubes was introduced by OLAP. The chapter was rounded off with
 a discussion of dimensionality reducing operations and aggregations of data
 cubes.
 
+
+
 \chapter{System Analysis}
 
 \chapterquote{Methods and means cannot be separated from the ultimate aim.}{Emma
@@ -340,14 +342,16 @@ Goldman}
 
 \section*{Introduction}
 
-This chapter will discuss and analyze the system that is to be built. First the
-function wanted from the system is presented; while discussing the input and
-output characteristics, and possible challenges. Secondly, a rough sketch and
-discussion of the system's different parts will be presented. Thirdly, the
-requirements of the system will be featured.
+This chapter will discuss and analyze the Zohmg system, that is to be built.
+
+First the application area and the wanted system functionality are presented;
+while discussing the input and output characteristics, and possible challenges.
+Furthermore, a rough sketch and discussion of the Zohmg systems different
+components will be presented. Secondly, the Zohmg system requirements will be
+featured.
 
 Throughout this chapter distinction is made between the developer: who develops
-the system, and the user: who uses the product which the developer
+the application, and the user: who uses the product which the developer
 creates. Although, in reality, they might be the same person.
 
 
@@ -355,41 +359,42 @@ creates. Although, in reality, they might be the same person.
 
 Last.fm has a central statistics and metrics tool built on a relational
 database. It is possible to import analyzed data to this tool; the data is
-presented to the user as graphs. Drawbacks of the system include problems with
-new data source additions: they can sometime not be loaded because they are to
-big. If a user wants to perform a custom query, manual intervention by the
-developer is necessary. There is no way for the system to handle custom queries.
+presented to the user as graphs. Disadvantages of this system include problems
+with new data source additions: they can sometimes not be loaded because they
+are to big. If a user wants to perform a custom query, manual intervention by
+the developer is necessary. There is no way for this system to handle custom
+queries.
 
 The data source is typically a log file; it is often a large file, up to
 gigabytes in size, of structured data. The data is structured the same way on
 each line, this makes writing a program for analyzing the entire data set as
 simple as analyzing a single line.
 
-Reporting the analyzed is the data is the final step. This is what the user is
+Reporting the analyzed data is the final step. This is what the user is
 interested in: Viewing the analyzed data. The tool at Last.fm presents the user
 with a dashboard that has a selection of graphs on primary metrics; it also has
 a list of all available graphs. All the graphs are pre-aggregated, no support
-exist for custom queries. Enabling the user to query the aggregated data---for
+exists for custom queries. Enabling the user to query the aggregated data---for
 instance viewing the most popular web browser in a country---would open
 possibilities to explore the data. During exploration interesting details could
 possibly be discovered; details which may be excluded from the pre-rendered
 aggregates.
 
 Since the data sources at Last.fm are time-stamped logs, the constraint to only
-handle, time-series was brought upon the system. This decision was reached
-mainly to keep the implementation simple.
+handle, time-series was brought upon the Zohmg system. This decision was
+reached mainly to keep the implementation simple.
 
 
-\subsection*{System parts}
+\subsection*{System components}
 
-The following three components form the outline of the system: importing,
+The following three components form the outline of the Zohmg system: importing,
 storing, and exporting data.
 
 At Last.fm there are several different facilities which produce logs, among
 them: web servers, scrobbling\footnote{Last.fm users can submit what music they
-listen to, this is called scrobbling.}, radio etc. This data reside on a
-commodity hardware cluster used for parallel computation. The system needs to be
-able to easily import data from this source.
+listen to, this is called scrobbling.}, radio streaming etc. This data reside
+on a commodity hardware cluster used for parallel computation. The system needs
+to be able to easily import data from this source.
 
 % storage.
 Because the data sources are typically large, the storage need to be efficient.
@@ -405,14 +410,15 @@ MapReduce and BigTable?
 
 % export.
 Due to the several different data sources, there exist several different types
-of applications. Therefor the system does not implement any user interface, this
-is left for the developer to implement.
+of applications. Therefor the Zohmg system does not implement any user
+interface, this is left for the developer to implement.
 
 
 \section{System requirements}
 
-The four key requirements of the system are: ease of use, speed, scalability,
-and being able to fit in the existing software and hardware eco-system.
+The four key requirements of the Zohmg system are: ease of use, speed,
+scalability, and being able to fit in the existing software and hardware
+eco-system.
 
 % ease of use.
 The system should have an easy facility for importing and analyzing new data
@@ -437,14 +443,14 @@ powerful machines are acquired they might not have enough power for processing
 several gigabytes of data: the data to be processed might not fit in the working
 memory.
 
-Another technique is parallelizing, using a cluster of commodity hardware
+The other technique, parallelizing, uses a cluster of commodity hardware
 machines. Using commodity hardware for computation significantly reduces the
 cost, since commodity hardware is cheap; thusly preferred in most situations.
 
 % scaling.
-In order for a computational setup, cluster or otherwise, to be efficient it
-needs to scale well, this means adding more hardware should add as close as
-possible to the hardware's potential addition to the computational power.
+In order for a computational setup, cluster or other, to be efficient it needs
+to scale well, this means adding more hardware should add as close as possible
+to the hardware's potential addition to the computational power.
 
 
 % fit in existing eco system.
@@ -458,13 +464,14 @@ already existing software a natural choice.
 This chapter has analyzed and discussed the function and requirements of the
 system to be built.
 
-The system function part discussed the system's goals and parts. The goals are
-to have a system which enables the developer to easily import and analyze new
-data sources and to be fast enough to serve the analyzed data at mouse-click
-rate to the user. The system's three core parts---importing, storing, and
-extracting data---have also been discussed.
+The system function section discussed the Zohmg system's goal and its
+components. The goal is to have a system which enables the developer to easily
+import and analyze new data sources and to be fast enough to serve the analyzed
+data at mouse-click rate to the user. The system's three core
+components---importing, storing, and extracting data---have also been
+discussed.
 
-Furthermore the requirements on the system were discussed; the four key
+Furthermore the requirements on the Zohmg system were discussed; the four key
 requirements are: ease of use, speed, scaling, and fitting into the existing
 hardware and software eco-system.
 
