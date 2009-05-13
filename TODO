@@ -8,49 +8,41 @@ report:
 + implementation:
 + discussion:
 + write about related work.
-DONE add running example - aerodyne
-DONE concepts in data warehousing: write intro, summary.
-DONE concepts: is our use of 'hypercube' standard? => yes, common OLAP term.
-DONE concepts: explain slice&dice clearer.
-
 
 priority zero:
 + make sure it's easy to get zohmg up and running.
 + verify that zohmg works with hbase-0.19.2
-DONE perfect docs.
++ example firstapp: zohmg create zohmg-apps/firstapp ; cd zohmg-apps/firstapp
++ make data export simpler - why is this not a thrift interface anyways?
++ integrate js example. [paste.fileapp]
 
 docs:
++ add description of what zohmg is and what its long term goals are
 + verify webberface url in README
-DONE clean docs, move back & make docs consistent and non-repeating
-DONE (j) hadoop install scriptet nämns inte i docs
-DONE (j) peka folk till rätt fil i readme
-DONE (j) det nämns inte att man ska köra thrift interface
-DONE (j) ge usern steg för steg hur man startar hadoop
 
 priority uno:
-+ make data export simpler.
 + nice-up export section of wiki page and docs.
-+ integrate js example.
 + use combiner
 + support for mapper class.
-+ compress map output - mapred.compress.map.output=true
-+ in usermapper, add timestamp to map of dimensions.
-+ recreate error, fix: npe on empty mapper output
-+ in mapper, warn user if she supplies string as measurements value - or fix!
-+ in mapper, warn user if she supplies int as dimensional value - or fix!
 + change projections syntax to list of dimensions. (I know what I mean)
-+ think a bit more about serving static files.
 + add support for data sets.
 + zohmg/create.py: do not try and create project if directory exists.
 + zohmg/create.py: make default dataset.yaml follow apache example.
 + zohmg/create.py: add apache.py to mapper examples.
 + zohmg/create.py: remove identity_mapper.py, instead bundle examples.
-DONE efter install-scriptet kan man inte starta hadoop/hbase
-DONE environment.py: use proper defaults.
-DONE zohmg/create.py: set default jars.
 
+optimizations:
++ compress map output - mapred.compress.map.output=true
++ in usermapper, add timestamp to map of dimensions.
++ cache JSON and CHARTS.
+
+showstoppers:
++ recreate error, fix: npe on empty mapper output
++ in mapper, warn user if she supplies string as measurements value - or fix!
++ in mapper, warn user if she supplies int as dimensional value - or fix!
 
 priority due:
++ think a bit more about serving static files.
 + source dist, would distribute source and depend on thrift etc to build.
 + binary dist, ready to use eggs.
 + some update step for post-setup alterations to dataset.yaml
@@ -62,22 +54,36 @@ priority due:
 + (some day/maybe) verify dimensions and units outputted by mapper.
 + (maybe never) support auto-installation on non-debian system.
 + (maybe never) support for installing in user-home
-+ add description of what zohmg is and its long term goal (where?)
 + document how user contributed code is shipped to dumbo/hadoop.
++ connect metadata to select-dropdowns.
+
+per check these:
 + sanity check for files shipped off to dumbo/hadoop.
   - check for existance.
   - especially for environment stuff (*_HOME and CLASSPATH).
-+ better way of importing usermapper.
-  - adding -pyfile to dumbo.core?
-    * dumbo always does a local run before hadoop, can fail if file is not
-      in PYTHONPATH (-file does not put files in PYTHONPATH, naturally).
-    * set PYTHONPATH locally is the requirement.
-  - "more careful" way of importing usermapper (think Mapper constructor).
++ better way of importing usermapper:
+  either adding -pyfile to dumbo.core? (dumbo always does a local run before hadoop,
+  can fail if file is not in PYTHONPATH (-file does not put files in PYTHONPATH,
+  naturally). set PYTHONPATH locally is the requirement.)
+  or "more careful" way of importing usermapper (think Mapper constructor).
 
-
+DONE perfect docs.
+DONE add running example - aerodyne
+DONE concepts in data warehousing: write intro, summary.
+DONE concepts: is our use of 'hypercube' standard? => yes, common OLAP term.
+DONE concepts: explain slice&dice clearer.
+DONE efter install-scriptet kan man inte starta hadoop/hbase
+DONE environment.py: use proper defaults.
+DONE zohmg/create.py: set default jars.
+DONE clean docs, move back & make docs consistent and non-repeating
+DONE (j) hadoop install scriptet nämns inte i docs
+DONE (j) peka folk till rätt fil i readme
+DONE (j) det nämns inte att man ska köra thrift interface
+DONE (j) ge usern steg för steg hur man startar hadoop
 DONE config.py breaks (predictably) when HADOOP_HOME is set.
 WONTFIX remove the dimensions list from configuration? it's never used.
 WONTFIX remove the units list from configuration? it's never used.
+WONTFIX> add lfm.data.parse egg.
 DONE> make sure all dependent eggs (paste, json, yaml, dumbo) are installed.
 DONE> ImportError: No module named setuptools
 DONE> ImportError: No module named hbase.ttypes
@@ -99,10 +105,3 @@ DONE> in config, rename 'project_name' to 'dataset'.
 DONE> sanity check of environment.
 DONE> sanity check configuration.
 DONE> darling: remove grat. prints.
-WONTFIX> add lfm.data.parse egg.
-
-examples:
- js-or-what:
-  + serve html&js - maybe with paste.fileapp? => http://pythonpaste.org/modules/fileapp.html
-  + cache JSON and CHARTS.
-  + connect metadata to select-dropdowns.
