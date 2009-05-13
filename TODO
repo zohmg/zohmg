@@ -1,11 +1,11 @@
 report:
-+ add running example.
+DONE add running example - aerodyne
 + abstract: non-buzzword; focus on problem
 + introduction: introduce time-series, data warehousing, mapreduce, bigtable
 + introduction: why is time important? we query for time, etc.
-+ concepts in data warehousing: write intro, summary.
-+ concepts: is our use of 'hypercube' standard?
-+ concepts: explain sice&dice clearer.
+DONE concepts in data warehousing: write intro, summary.
+DONE concepts: is our use of 'hypercube' standard? => yes, common OLAP term.
+DONE concepts: explain slice&dice clearer.
 + analysis: write intro, contents, summary.
 + method:
 + implementation:
