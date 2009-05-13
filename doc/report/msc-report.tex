@@ -10,6 +10,7 @@
 
 
 \documentclass[a4paper]{report}
+\usepackage{graphicx}
 
 \author{Per Andersson, Fredrik M{\"o}llerstrand}
 \title{Zohmg---a large scale data store for aggregated time-series-based
@@ -73,14 +74,14 @@ and are as such very well suited for parallel analysis.
 
 Each log record typically contains a number of fields. For example, a log of
 visits to a web site might contain a timestamp, information about what country
-the visitor is from and what web browser she used. The values of the fields
-can be thought of as points along an axis; Sweden, Norway and Denmark are all
-points along the country axis, for instance. This is an important concept and
-it will be touched upon repeatedly throughout the text.
+the visitor is from and what web browser she used.
 
 When the records in the data set have been analyzed, one can draw conclusions
 about what countries generate the most traffic to the site, which web browser
-is most popular in a certain country, etc.
+is most popular in a certain country, etc. Summaries of data are generally
+called aggregates. To aggregate data, for example to compute the sum of
+visitors for all European countries, is a common technique for speeding up
+data lookup in data stores.
 
 The size of the data sets at last.fm is in the range of several gigabytes per
 day. Some data sets are many times larger. It is our belief that this is
@@ -91,13 +92,41 @@ before a new batch arrives, and for very large data sets a single computer
 would simply not be able to fit the intermediate data set in its working
 memory.
 
-It is suitable to store the data across many storage nodes in what is called a
-distributed file system and to to exploit the parallel nature of the records
-by breaking up the data sets in pieces and have each piece be processed
-separately on a node in a large compute cluster.
+It is suitable to to exploit the parallel nature of the records by breaking up
+the data sets in pieces and to have each piece be processed separately on a
+node in a large compute cluster. It is also suitable to store the data across
+many storage nodes in what is called a distributed file system.
 
 % TODO: write about how mapreduce already solves the problem of parallel
 % computation, and how gfs solves the problem of distributed storage.
+
+
+% introducing variables and dimensions.
+
+Organizations measure their operations by considering many variables. When
+these variables are placed in a spreadsheet, which organizations are wont to
+do, the variables are set on the x and y axes. Each axis represents a logical
+grouping of variables. In the example of a log file of visits to a web site
+above, country of origin is one such variable. A variable is generally called
+a dimension in this paper.
+
+The International Aerodyne Corporation, a leading exporter of woodworking
+nails, uses a spreadsheet to keep track of the number of nails exported to
+each country every month (see figure). 
+
+% image of a spreadsheet.
+%\includegraphics[width=70mm]{pictars/aerodyne-nails.png}
+%\imagecaptionplease{crates of nails exported}
+
+In the figure above, the time dimension is set on the x-axis and the country
+dimension is set on the y-axis. If the Aerodyne Corporation were to start
+keeping track of the kind of nails they sell (pins, tacks, spikes, etc.) in
+addition to the country to which the nails were sold, they would effectively
+have added a new dimension to their data.
+
+Many organizations work with data that have more than three dimensions. Such
+data is hard to manage in a spreadsheet, and the organizations need
+specialized tools to analyze and visualize their data.
 
 
 \section{Problem description}
@@ -127,13 +156,18 @@ to publish new data sets.
 
 % TODO: define aggregates!
 
-The goal is to build a tool that enables its users to easily turn log files
-into aggregates. The tool should provide a simple mechanism for data analysis
-(import) and querying (export).
+The goal is to build a data store that enables its users to perform
+multi-dimensional analysis.
 
+In addition, the secondary goal is to build a tool that allows users to easily
+store their data sets in the data store. The tool should provide a simple – as
+in minimalistic – mechanism for data analysis (import) and querying (export).
+
+% is mapreduce part of the goal? hardly.
 The data analysis will require the user to write a MapReduce map. The queries
 will be performed via an export API for consumption by computer programs.
 
+% these are more likely part of the scope.
 The queries will always be made over a time range and for a single unit. The
 tool will support analytical functions such as drill-down, slicing, etc.
 
@@ -196,7 +230,34 @@ Chapters 7 and 8 discuss the results, related, and future work, and
 presents the conclusion, respectively.
 
 
+
+% CONCEPTS IN DATA WAREHOUSING, by clark de jean
 \chapter{Concepts in Data Warehousing}
+
+This chapter will serve as an introduction to various concepts in data
+warehousing.
+
+\section{Data Warehouses}
+
+A data warehouse is a repository of an organization's electronically stored
+data. Data warehouses are designed to facilitate reporting and analysis; the
+core actions of a data warehouse are to load, transform and extract data.
+
+\section{Data Warehouse implementations}
+
+\subsection{OLAP}
+
+OLAP, which is an acronym for Online analytical processing, is an approach to
+quickly answer multi-dimensional analytical queries.
+
+At the core of any OLAP system is the OLAP cube (also known as a
+multidimensional cube or a hypercube). It consists of numeric facts called
+measures which are categorized by dimensions.
+
+The cube is typically modelled in a relational database with fact tables
+and dimension tables, upon which the system performs joins to extract data.
+\cite{olap_solutions}
+
 
 \section{Data cubes}
 
@@ -1027,22 +1088,8 @@ link. Rereading the sequence of bits should restore the original state of the
 object it was in before the serialization. \\
 \end{tabular}
 
+
 \chapter{Text with no home and no current purpose}
-
-\section{Stop making speeches}
-A data warehouse is a repository of an organization's electronically stored
-data. Data warehouses are designed to facilitate reporting and analysis.
-\cite{wikipedia}
-
-The core actions of a data warehouse is to load, transform and extract data.
-The classic thinking in modelling data warehouses is to divide data into facts
-and dimensons. The facts are measures categorized by dimensions.
-
-In OLAP\footnote{On-Line Analytical Processing}, which is a kind of data
-warehouse, the data is thought of as being structured as a cube. The cube is
-typically modelled in a realational database with fact tables and dimension
-tables, upon which the system performs joins to extract data.
-\cite{olap_solutions}
 
 \section{It's not like the movies}
 
