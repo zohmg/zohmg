@@ -5,7 +5,7 @@
 
 --- {#2}
 \end{quote}
-\vspace{24pt}
+\vspace{12pt}
 }
 
 
@@ -196,6 +196,7 @@ Chapters 7 and 8 discuss the results, related, and future work, and
 presents the conclusion, respectively.
 
 
+
 \chapter{Concepts in Data Warehousing}
 
 \section{Data cubes}
@@ -275,32 +276,153 @@ longer access times for those aggregates that were not pre-computed.
 
 
 
+\chapter{System Analysis}
+
+\chapterquote{Methods and means cannot be separated from the ultimate aim.}{Emma
+Goldman}
 
 
-\chapter{Analysis}
+\section*{Introduction}
 
-\chapterquote{Arrange whatever pieces come your way.}{Virgina Wolf}
+This chapter will discuss and analyze the system that is to be built. First the
+function wanted from the system is presented; while discussing the input and
+output characteristics, and possible challenges. Secondly, a rough sketch and
+discussion of the system's different parts will be presented. Thirdly, the
+requirements of the system will be featured.
+
+Throughout this chapter distinction is made between the developer: who develops
+the system, and the user: who uses the product which the developer
+creates. Although, in reality, they might be the same person.
 
 
-\section{Task}
+\section{System function}
 
-Mention data sets here.
+Last.fm has a central statistics and metrics tool built on a relational
+database. It is possible to import analyzed data to this tool; the data is
+presented to the user as graphs. Drawbacks of the system include problems with
+new data source additions: they can sometime not be loaded because they are to
+big. If a user wants to perform a custom query, manual intervention by the
+developer is necessary. There is no way for the system to handle custom queries.
+
+The data source is typically a log file; it is often a large file, up to
+gigabytes in size, of structured data. The data is structured the same way on
+each line, this makes writing a program for analyzing the entire data set as
+simple as analyzing a single line.
+
+Reporting the analyzed is the data is the final step. This is what the user is
+interested in: Viewing the analyzed data. The tool at Last.fm presents the user
+with a dashboard that has a selection of graphs on primary metrics; it also has
+a list of all available graphs. All the graphs are pre-aggregated, no support
+exist for custom queries. Enabling the user to query the aggregated data---for
+instance viewing the most popular web browser in a country---would open
+possibilities to explore the data. During exploration interesting details could
+possibly be discovered; details which may be excluded from the pre-rendered
+aggregates.
+
+Since the data sources at Last.fm are time-stamped logs, the constraint to only
+handle, time-series was brought upon the system. This decision was reached
+mainly to keep the implementation simple.
 
 
-\subsection{Import}
+\subsection*{System parts}
 
-\subsection{Store}
+The following three components form the outline of the system: importing,
+storing, and exporting data.
 
-\subsection{Export}
+At Last.fm there are several different facilities which produce logs, among
+them: web servers, scrobbling\footnote{Last.fm users can submit what music they
+listen to, this is called scrobbling.}, radio etc. This data reside on a
+commodity hardware cluster used for parallel computation. The system needs to be
+able to easily import data from this source.
 
+% storage.
+Because the data sources are typically large, the storage need to be efficient.
+Storing the analyzed data can be done in different ways, for instance storing
+the raw data or just aggregates. Storing the raw data is very expensive, since
+it would basically copy the data to the data store. Because of this the decision
+was made to only store aggregates.
+
+There are several different ways of modelling multidimensional data.
+
+TODO: How to discuss modelling of data in a general sense, without mentioning
+MapReduce and BigTable?
+
+% export.
+Due to the several different data sources, there exist several different types
+of applications. Therefor the system does not implement any user interface, this
+is left for the developer to implement.
+
+
+\section{System requirements}
+
+The four key requirements of the system are: ease of use, speed, scalability,
+and being able to fit in the existing software and hardware eco-system.
+
+% ease of use.
+The system should have an easy facility for importing and analyzing new data
+sources, while still being fast and efficient. A simple script---or tweak of an
+already existing data import script---should be enough for importing and
+analyzing a new data source.
+
+% speed.
+Time is of essence when exporting data to the user. The user should be able to
+explore the data at mouse-click rate, not having to wait for computation. This
+is usually solved by pre-rendering the data which can be viewed or queried.
+
+Importing data requires computing power, which is a limited resource. This calls
+for the need to make the import phase efficient. Using a desktop workstation to
+process several gigabytes of data is simply impossible; it might require more
+time than the actual worth of data it is importing---for instance taking more
+than one day to import a days worth of data. There are a number of ways to solve
+this, among them: more powerful machines and parallelizing.
+
+Acquiring more powerful machines quickly becomes expensive. Even if more
+powerful machines are acquired they might not have enough power for processing
+several gigabytes of data: the data to be processed might not fit in the working
+memory.
+
+Another technique is parallelizing, using a cluster of commodity hardware
+machines. Using commodity hardware for computation significantly reduces the
+cost, since commodity hardware is cheap; thusly preferred in most situations.
+
+% scaling.
+In order for a computational setup, cluster or otherwise, to be efficient it
+needs to scale well, this means adding more hardware should add as close as
+possible to the hardware's potential addition to the computational power.
+
+
+% fit in existing eco system.
+The system needs to co-exist and integrate seamlessly with the already existing
+hardware and software eco-system at Last.fm. Thus, building on top of the
+already existing software a natural choice.
+
+
+\section*{Summary}
+
+This chapter has analyzed and discussed the function and requirements of the
+system to be built.
+
+The system function part discussed the system's goals and parts. The goals are
+to have a system which enables the developer to easily import and analyze new
+data sources and to be fast enough to serve the analyzed data at mouse-click
+rate to the user. The system's three core parts---importing, storing, and
+extracting data---have also been discussed.
+
+Furthermore the requirements on the system were discussed; the four key
+requirements are: ease of use, speed, scaling, and fitting into the existing
+hardware and software eco-system.
 
 
 
 \chapter{Method}
 
+\chapterquote{Arrange whatever pieces come your way.}{Virgina Wolf}
+
+
 \section{Procedure}
 
 TODO: Explain our working procedure regarding
+
 \begin{itemize}
 \item[-] Exploration
 \item[-] Prototyping
