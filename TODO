@@ -1,22 +1,23 @@
 report:
-DONE add running example - aerodyne
++ graphs! images! examples!
 + abstract: non-buzzword; focus on problem
 + introduction: introduce time-series, data warehousing, mapreduce, bigtable
 + introduction: why is time important? we query for time, etc.
-DONE concepts in data warehousing: write intro, summary.
-DONE concepts: is our use of 'hypercube' standard? => yes, common OLAP term.
-DONE concepts: explain slice&dice clearer.
 + analysis: write intro, contents, summary.
 + method:
 + implementation:
 + discussion:
 + write about related work.
+DONE add running example - aerodyne
+DONE concepts in data warehousing: write intro, summary.
+DONE concepts: is our use of 'hypercube' standard? => yes, common OLAP term.
+DONE concepts: explain slice&dice clearer.
 
 
 priority zero:
-DONE perfect docs.
 + make sure it's easy to get zohmg up and running.
 + verify that zohmg works with hbase-0.19.2
+DONE perfect docs.
 
 docs:
 + verify webberface url in README
@@ -27,8 +28,6 @@ DONE (j) det nämns inte att man ska köra thrift interface
 DONE (j) ge usern steg för steg hur man startar hadoop
 
 priority uno:
-DONE efter install-scriptet kan man inte starta hadoop/hbase
-DONE environment.py: use proper defaults.
 + make data export simpler.
 + nice-up export section of wiki page and docs.
 + integrate js example.
@@ -40,13 +39,15 @@ DONE environment.py: use proper defaults.
 + in mapper, warn user if she supplies string as measurements value - or fix!
 + in mapper, warn user if she supplies int as dimensional value - or fix!
 + change projections syntax to list of dimensions. (I know what I mean)
-DONE zohmg/create.py: set default jars.
 + think a bit more about serving static files.
 + add support for data sets.
 + zohmg/create.py: do not try and create project if directory exists.
 + zohmg/create.py: make default dataset.yaml follow apache example.
 + zohmg/create.py: add apache.py to mapper examples.
 + zohmg/create.py: remove identity_mapper.py, instead bundle examples.
+DONE efter install-scriptet kan man inte starta hadoop/hbase
+DONE environment.py: use proper defaults.
+DONE zohmg/create.py: set default jars.
 
 
 priority due:
