@@ -3,7 +3,7 @@ report:
 + abstract: non-buzzword; focus on problem
 + introduction: introduce time-series, data warehousing, mapreduce, bigtable
 + introduction: why is time important? we query for time, etc.
-+ analysis: write intro, contents, summary.
+DONE + analysis: write intro, contents, summary.
 + method:
 + implementation:
 + discussion:
