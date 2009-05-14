@@ -9,8 +9,9 @@
 }
 
 
-\documentclass[a4paper]{report}
+\documentclass[a4paper,10pt]{report}
 \usepackage{graphicx}
+\usepackage{listings}
 
 \author{Per Andersson, Fredrik M{\"o}llerstrand}
 \title{Zohmg---a large scale data store for aggregated time-series-based
@@ -804,37 +805,15 @@ reason was the rapid development of Python programs, several times shorter than
 their Java counter parts made them faster to develop.
 
 
-\section{Configuration}
+\section*{Summary}
 
-The Zohmg needs configuration of the user's data sets and the environment for
-Hadoop and Dumbo.
+Summarize the method chapter.
 
-The data sets are configured using YAML\footnote{YAML Ain't a Markup Language},
-a human-readable data serializaton format. Any human-readable configure file
-method could have been chosen, e.g. INI files\footnote{A simple configuration
-mechanims where one would have lines of \texttt{variable = value}.}. YAML was
-choosen because it is is very simple for humans to read and edit, and likewise
-for machines.
+Working methods.
 
-The environment is a Python script which defines run-time variables, required by
-Hadoop and Dumbo. Using a Python scripts for run-time variables leaves the
-problem of validation to Python.
+Tools.
 
-
-\section{Exporting data}
-
-In order to join together all the different abilities which were wanted from the
-data server, it was designed as a middleware application. Since the main goal
-was not to build a middleware framework from scratch, an existing such was used.
-
-The data export server is built with a WSGI\footnote{Web Server Gateway
-Interface} framework, it includes both middleware and application parts. The
-middleware applications are responsible for dispatching requests to the
-corresponding application or file.
-
-When a user queries the data server, JSON\footnote{JavaScript Object Notation}
-is returned. JSON was chosen because it is i simple text serialization format
-which is widely used in web development.
+Something else-or-another.
 
 
 
@@ -844,24 +823,74 @@ which is widely used in web development.
 work, and luck is 90 percent.}{Guy Kawasaki}
 
 
-TODO: *this should go into implementation.*
-The typical use case for Zohmg is to read one or more column-qualifiers,
-which correspond to one or more points in n-space, over a range of time.
-Therefor, the keys are made up of the time and unit of the measurement,
-and the qualifier queried for represents the point in n-space. More on
-this in the data model section.
+\section*{Introduction}
 
-% TODO: not sure this is precisely a story about the implementation.
-% putting it here for now.
+This chapter will present the implementation of the Zohmg system. For a usage
+manual see the appendix.
 
--- A truly magnetic data store - the idea of enabling the user --
+% TODO: Do we need to talk about the storage implementation?
 
-From a user's perspective, storing aggregates in Zohmg is as simple as writing
-a map function (in the MapReduce sense) and letting Zohmg run that map function
-over the data set. The user's map function is called \textit{usermap function}
-from here on. In order to let Zohmg know what output to expect from the mapper,
-the user also defines the dimensions and units of his data. After all, the user
-most likely knows his own data better than anyone else.
+In the first section the implementation of project creation, configuration, and
+setup, will be presented. The second section features the data import
+implementation. The third section presents the implementation of data
+interchange between Zohmg and other software but also throughout the Zohmg
+system. The fourth, and final, section presents the implementation details of
+the Zohmg system's exporting compontent.
+
+
+\section{Project management}
+
+A Zohmg project is necessary for using Zohmg; they are created with a management
+script, which is also used for interacting with the Zohmg system. When the user
+has created a Zohmg project directory further actions can be performed.  The
+
+Zohmg projects reside within a project directory, which contains five
+directories: \texttt{clients}, \texttt{config}, \texttt{lib}, \texttt{mappers},
+and \texttt{transformers}. The details of these directories are presented
+throughout this chapter.
+
+
+\subsection*{Configuration}
+
+The Zohmg system needs configuration of the user's data sets and the environment
+for Hadoop and Dumbo. When the data set files are configured, the user runs the
+management script, which executes the configuration and creates tables in HBase
+according to the configuration.
+
+
+\subsubsection*{Data sets}
+
+% TODO: define what a data set is, and what makes it different from a project.
+
+In this context a data set is the schema that the user defines for wanted data
+sets to be handled by Zohmg. The configuration of a data set is simply a list
+of dimensions and projections, which will layout the HBase tables according to
+the schema. This configuration will also be read during the import phase, for
+handling data to be imported.
+
+The data set files reside in the project's \texttt{config} directory. The data
+sets are configured using YAML\footnote{YAML Ain't a Markup Language}, a
+human-readable data serializaton format. Any human-readable configure file
+method could have been chosen. YAML was choosen because it is is very simple
+for humans to read and edit, and likewise for machines. The Python module
+PyYAML was used to implement the YAML configuration reading part. \cite{pyyaml}
+
+
+\subsubsection*{Environment}
+
+The environment is a Python script which defines run-time variables, required by
+Hadoop and Dumbo. Using a Python scripts for run-time variables leaves the
+problem of validation to Python. The environment configuration file resides in
+the project's \texttt{config} directory.
+
+
+
+
+\section{Importing}
+
+In order to import data to Zohmg, the user writes a map function in Python which
+Zohmg wraps; interpreting the output from the mapper program and storing it in
+HBase.
 
 A standard MapReduce map function emits key-value pairs. Not so in the case of
 the Zohmg mapper: the usermap function emits triples (that is, a tuple of three
@@ -873,17 +902,19 @@ at that point.
 Going back to the running example of apache access logs, a usermap function
 might look something like this:
 
-\begin{verbatim}
-  def map(key, value):
-    log = parse_apache_log(value)
-    dimensions = {'useragent' : log.useragent,
-                  'path'      : log.path,
-                  'status'    : log.statuscode}
-    values = {'pageviews' : 1,
-              'bytes'     : log.size}
+\vspace{12pt}
 
-    yield log.timestamp,dimensions,measurements
-\end{verbatim}
+\begin{lstlisting}[language=Python]
+   def map(key, value):
+      log = parse_apache_log(value)
+      dimensions = {'useragent' : log.useragent,
+                    'path'      : log.path,
+                    'status'    : log.statuscode}
+      values = {'pageviews' : 1,
+                'bytes'     : log.size}
+
+      yield log.timestamp,dimensions,measurements
+\end{lstlisting}
 
 \vspace{12pt}
 
@@ -992,32 +1023,6 @@ emitting the row key as the key and a JSON-serialized map of the form
 The OutputReader interprets the JSON and persists the data. Et voila!
 
 
-\section{Configuration}
-
-\subsection{Data sets}
-
-% TODO: define what a data set is, and what makes it different from a project.
-
-The user's data sets are defined using YAML. The data set files reside in
-the project's \texttt{config} directory.
-
-
-\subsection{Environment}
-
-Certain paths need to be known by Zohmg in order to function, these are set
-in the config/environment.py file.
-
-
-
-\section{Importing}
-
-In order to import data to Zohmg, the user writes a mapper which Zohmg wraps;
-interpreting the output from the mapper program and storing it in HBase.
-
-Support exists for writing the mapper in Java or Python.
-
-
-
 \section{Data interchange}
 
 \subsection{Internal}
@@ -1039,22 +1044,36 @@ The Darling output format for HBase. Between Zohmg and Hadoop JSON is used
 for serializing data.
 
 
+\section{Exporting data}
+
+In order to join together all the different abilities wanted from the data
+server, it was designed as a middleware application. Middleware is software
+that acts as an intermediary.
+
+The data export server is built with a WSGI\footnote{Web Server Gateway
+Interface, a HTTP extension where a CGI-like environment is passed around.}
+framework, which includes both middleware and application parts. The middleware
+applications are responsible for dispatching requests to the corresponding
+application or file.
+WSGI middleware receives a
+WSGI request and then performs logic upon this request, before passing the
+request to a WSGI application. \cite{definitive_guide_to_pylons,paste}
+Since the main goal was not
+to build a middleware framework from scratch, an existing such was used.
+
+
+When a user queries the data server, JSON\footnote{JavaScript Object Notation}
+is returned. JSON was chosen because it is i simple text serialization format
+which is widely used in web development.
+
 \subsection{External}
 
 The data export server is built with Python Paste---a middleware
 framework---the data server dispatches to the requested application
-depending on the URI it was fed.
-
-Python Paste is a framework for building WSGI\footnote{Web Server Gateway
-Interface, a HTTP extension where a CGI-like environment is passed around.}
-applications and middleware. \cite{definitive_guide_to_pylons}
+depending on the URI it was fed. \cite{python_paste}
 
 WSGI applications receive a WSGI request and returns a response with the
 built-in web server.
-
-Middleware is software that acts as an intermediary. WSGI middleware
-receives a WSGI request and then performs logic upon this request, before
-passing the request to a WSGI application. \cite{paste}
 
 
 \subsubsection{URLParser}
@@ -1089,6 +1108,11 @@ program from the project's transformers directory, output is
 dumped as JSONP.
 
 
+\section*{Summary}
+
+Summary here.
+
+
 
 \chapter{Results}
 
@@ -1097,6 +1121,7 @@ dumped as JSONP.
 
 \section{Discussion}
 
+Discussion here.
 
 
 \section{Future work}
@@ -1170,6 +1195,38 @@ unthinkable: They read the manual.}{Unknown}
 
 \noindent The following chapter will describe how the Zohmg system is used.
 Project deployment and data import and export will be described briefly.
+
+
+\section{Installation}
+
+During the installation phase superuser (root) privileges are required.
+
+Install Hadoop and HBase.
+
+\begin{verbatim}
+   sh scripts/install_hadoop_hbase.sh
+\end{verbatim}
+
+The above command will install Hadoop and HBase to \texttt{/opt} by default,
+this is customizable with script arguments. Both Hadoop and HBase will be
+configured for local (standalone) mode when the installation is done. Installing
+Hadoop and HBase on a cluster requires additional attention, for
+instance passphraseless SSH\footnote{Secure Shell, an encrypted data transport
+protocol; it is commonly used for remote access.} keys and additional program
+configuration.
+
+When Hadoop and HBase is installed install Zohmg by invoking the following
+command in the root of the source tree
+
+\begin{verbatim}
+   python install.py
+\end{verbatim}
+
+Creates eggs of Zohmg system and puts them in system-wide directory for python
+packages.
+
+Zohmg files copied, scripts, documentation, library files (other's software).
+
 
 \section{Deployment}
 
@@ -1303,6 +1360,7 @@ object it was in before the serialization. \\
 \end{tabular}
 
 
+
 \chapter{Text with no home and no current purpose}
 
 \section{It's not like the movies}
@@ -1318,7 +1376,7 @@ published by Google.
 
 \section{Techniques and tools}
 
-% TODO: Why do we chose HBase in favour of other techniques (i.e. SQL)?
+TODO: Why do we chose HBase in favour of other techniques (i.e. SQL)?
 
 In actual practice, the main difference between the two models is that
 querying is highly restricted in a BigTable-like data store---there are no
@@ -1327,7 +1385,7 @@ On the other hand, the restrictions placed upon the BigTable models are
 what allows it to scale to such a large data set. Indeed, BigTable was born
 to scale.
 
-% TODO: elaborate on reasons to why starsql does not scale
+TODO: elaborate on reasons to why starsql does not scale
 
 Many applications have the behaviour where they write data once and read it
 a lot more, log analysers for instance. This writing-once-reading-many
@@ -1340,6 +1398,28 @@ close to each other. \cite{bigtable}
 
 Sparseness is a big thing. Null values are free of charge. TODO: *Describe
 how we leverage sparsity*.
+
+
+\section{Electromagnetic field theory}
+
+-- A truly magnetic data store - the idea of enabling the user --
+
+From a user's perspective, storing aggregates in Zohmg is as simple as writing
+a map function (in the MapReduce sense) and letting Zohmg run that map function
+over the data set. The user's map function is called \textit{usermap function}
+from here on. In order to let Zohmg know what output to expect from the mapper,
+the user also defines the dimensions and units of his data. After all, the user
+most likely knows his own data better than anyone else.
+
+
+\section{Typical use case}
+
+The typical use case for Zohmg is to read one or more column-qualifiers,
+which correspond to one or more points in n-space, over a range of time.
+Therefor, the keys are made up of the time and unit of the measurement,
+and the qualifier queried for represents the point in n-space. More on
+this in the data model section.
+
 
 
 \end{document}
