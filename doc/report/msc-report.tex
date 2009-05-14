@@ -25,23 +25,20 @@ data. [DRAFT]}
 
 % TODO: use less buzzwords; focus on the problem.
 
-This thesis describes a data store for multi-dimensional time-series-based
-data. The data is aggregated over many units of measurements and across
-multiple dimensions. One of these dimensions is always time.
+Making sense of data at a massive scale is one of the biggest challenges we face
+at Last.fm. Interpreting patterns in user behaviour becomes a challenge when
+millions of users interact in billions of combinations; the data sets must be
+analyzed, summarized and presented visually in order to convey their meaning.
 
-We present a data store called Zohmg. It is built on top of HBase and uses
-Hadoop to run import jobs in parallel. Zohmg stores and serves aggregates of
-measurements. The measurements are extracted taken from log files or similar
-sources with user-supplied code.
+This thesis describes a data store for multi-dimensional time-series-based data.
+Measurements are summarized across multiple dimensions. The data store is
+optimized for speed of data retrieval: one of the design goals is to serve data
+at mouse-click rate to promote real-time data exploration.
 
-The data store is optimized for speed of data retrieval: one of the design
-goals was to serve data at mouse-click rate and promote real-time data
-exploration. As such, Zohmg stores only the summarized data, not the atomic
-measurements.
-
-Similar data stores exist: they generally use a relational database system as
-their underlying data store. The novelty of our approach is to model OLAP
-cubes on top of a bigtable-like data store.
+Similar data stores exist; they generally use relational database systems as
+their backing database. The novelty of our approach is to model multidimensional
+data cubes on top of a column-oriented database, reaping the scalability
+benefits of such databases.
 
 The thesis is presented in three major sections: problem statement,
 theoretical solution and implementation details.
