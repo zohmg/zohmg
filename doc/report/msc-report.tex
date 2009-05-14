@@ -510,15 +510,79 @@ hardware and software eco-system.
 
 \section{Procedure}
 
-TODO: Explain our working procedure regarding
+This section describes how we structured our work over the course of the thesis
+project. It describes how we, by working in an exploratory fashion, reached a
+good understanding of the problem at hand, and how we successively inched closer
+to a working solution by building early prototypes and iteratively improving
+upon them.
 
-\begin{itemize}
-\item[-] Exploration
-\item[-] Prototyping
-\item[-] Real-world data
-\item[-] Litterature studies
-\item[-] Design phase
-\end{itemize}
+The design phase, which we entered once our understanding of the problem scope
+and its theoretical solution was satisfactory, and the following implementation
+are described, followed by a summary of our literature studies.
+
+\subsection*{Beginning}
+
+% not so sure I like this section much..
+
+We entered this project with a basic understanding of the problem Last.fm wanted
+to solve but with little formal knowledge of the problem domain. We were tasked
+with building a data store that would hopefully replace the store that was
+presently in use.
+
+We met the relevant people, were introduced to the current system and were
+presented with literature in the area, namely OLAP Solutions and Whatever in
+Data Warehousing.
+
+\subsection*{Exploration by prototyping}
+
+We explored the problem domain by asking questions about the environment, the
+system we were to build and its requirements.
+
+To explore the environment, for example, we asked what data sources there are
+(web logs, scrobbling logs and radio streaming logs) and where that data is
+stored (on HDFS, it turned out). We asked how much data the system was supposed
+to handle (lots) and what the output format ought to be (any format, within
+reason).
+
+Most of the exploration was straight forward: many questions could be answered
+from observations or by logical reasoning. Others were more open-ended, such as
+deciding on a suitable output format. For the open-ended questions we would list
+reasonable options and pitt them against each other, first on the drawing board
+and eventually as prototypes.
+
+% this is a little thin. The prototypes are small pieces of code that would
+answer questions such as Is it at all possible to.. ? and What is the most
+efficient way to..?
+
+\subsection*{Design Phase}
+
+After having become familiar with the problem and its theoretical solution, it
+was time to design the software.
+
+Our initial design was ambitious: it contained, amongst other things, a query
+language and sub-components for query analyzation, to identity the most common
+queries, and for query optimization. These are likely advantageous features in a
+large data store but one can do without them.
+
+In the end, we much simplified our initial design and ended up with a design
+that was simpler and more to-the-point.
+
+\subsection*{Implementation}
+
+The implementation phase was rather small: we would simply stitch together our evolved prototypes and arrive at a solid ground to stand on: we had a system for running MapReduce jobs, storing data in HBase, etc.
+
+Writing code on top of this that performed data cube manipulation was a kinch!
+
+\subsection*{Literature studies}
+% vet inte riktigt vad jag vill saga om det har.
+
+Studying previous work in related fields brought OLAP systems to our attention.
+It was to become very influential in our theoretical understanding of the
+subject.
+
+\subsection*{Summary}
+
+This section has talked about the procedure we followed during our thesis work. It described our exploratory model and the prototyping we did, as well as the design phase that led up to the implementation.
 
 
 
