@@ -48,7 +48,7 @@ benefits of such databases.
 
 \chapter{Introduction}
 
-\section{Background}
+\section*{Background}
 
 % TODO: introduce time-series, data warehousing, mapreduce, bigtable
 % TODO: why is time important? (we query for time, etc.)
@@ -158,7 +158,7 @@ of data every day.
 
 
 
-\section{Problem description}
+\section*{Problem description}
 % Problemsbeskrivning.
 
 At Last.fm there is a central repository where metrics and statistics for
@@ -180,7 +180,7 @@ should be able to answers most questions in real time. It should be easy
 to publish new data sets.
 
 
-\section{Goal}
+\section*{Goal}
 % Syftesformulering.
 
 % TODO: define aggregates!
@@ -210,7 +210,7 @@ real time.
 
 
 
-\section{Scope}
+\section*{Scope}
 % Avgransning.
 
 % TODO: argue why we do these avgränsningar.
@@ -228,7 +228,7 @@ There is no functionality for plotting data sets, etc.
 
 
 
-\section{Related work}
+\section*{Related work}
 
 % TODO: this section.
 
@@ -240,7 +240,7 @@ warehouse based on MapReduce and Bigtable. \cite{hdw}
 Omniture is used at Last.fm etc.
 
 
-\section{Overview}
+\section*{Overview}
 
 This thesis describes the Zohmg system and how to use it.
 
@@ -261,16 +261,20 @@ presents the conclusion, respectively.
 
 
 % CONCEPTS IN DATA WAREHOUSING, by clark de jean
-\chapter{Concepts in Data Warehousing}
+\chapter{Concepts}
 
-\chapterquote{Some random quote might be suitable here.}{Per}
+\chapterquote{ I don't let go of concepts - I meet them with understanding.
+Then they let go of me.}{Byron Katie}
 
 
 \section*{Introduction}
 
-This chapter introduces data warehouses and the concept of data cubes. It then
-introduces common operations on data cubes: projections, slicing and dicing,
-and aggregation.
+This chapters first section presents data warehouses and the concept of data
+cubes. It then introduces common operations on data cubes: projections, slicing
+and dicing, and aggregation.
+
+Secondly, this chapter features new techniques in distributed storage and
+computing; these techniques are Google's BigTable and MapReduce.
 
 
 \section{Data Warehouses}
@@ -287,14 +291,14 @@ built in a certain manner and that are optimized quickly answer
 multi-dimensional analytical queries.
 
 At the core of any OLAP system is the OLAP cube (also known as a
-multi-dimensional cube or a hypercube). The cube consists of numeric facts
--- called measures -- which are grouped by dimensions. For example, the number
-of nails sold is a measure while country, month and type of nail are
+multi-dimensional cube or a hypercube). The cube consists of numeric
+facts---called measures---which are grouped by dimensions. For example, the
+number of nails sold is a measure while country, month and type of nail are
 dimensions. It is from OLAP that [we] have appropriated the concept of a data
 cube.
 
 
-\section{Data cubes}
+\subsection*{Data cubes}
 
 % looking for a mathier explanation here.
 A data cube is a conceptual n-dimensional array of values. It aids in
@@ -310,7 +314,7 @@ Data cubes are traditionally modeled as star schemas in relational database
 systems. \cite{olap_solutions}
 
 
-\subsection*{Projections}
+\subsubsection*{Projections}
 
 One of the most common operations on a data cube is the projection. A
 projection is a function to another data cube, where one or more dimensions
@@ -319,12 +323,14 @@ summed up, leaving a data cube of a lesser dimension.
 
 For example, consider the three-dimensional data cube that represents sales of
 nails; the dimensions are nail type, country and month. A projection from that
-cube to one with two dimensions -- month and nail type -- would flatten the
+cube to one with two dimensions---month and nail type---would flatten the
 country dimension: the measurements in the new cube represent the global sales
 of each nail type for each month.
 
 
-\subsection*{Slice and dice}
+\subsubsection*{Slice and dice}
+
+% TODO: this is actually exactly the same thing as projection.
 
 The slice operation fixes the values of one or several dimensions in the cube.
 The data omitted from this operation would be any data associated with the
@@ -337,7 +343,7 @@ that cube with the country dimension fixed to Germany would contains sales
 figures for each nail type and month for Germany only.
 
 
-\section{Aggregates}
+\subsection*{Aggregates}
 
 An aggregate is a composite value that is derived from several variables.
 Typical examples of aggregate functions are average, count, and sum.
@@ -362,12 +368,104 @@ unfeasible amount of data, while pre-computing too few aggregates results in
 longer access times for those aggregates that were not pre-computed.
 
 
+\section{New techniques}
+
+Classic data warehouses use relational databases as storage. A star or snowflake
+schema would be used to modell the dimensions.
+
+New techniques that have appeared include column-oriented, schema free
+databases. Google's BigTable is such a database. Another new technique for
+distributed processing is Google's MapReduce.
+
+
+\subsection{BigTable}
+
+BigTable is a data store designed for traversal of very large data sets.
+Time-stamped cells inside column-families in rows. The row has a key and any
+number of cells attached to it. The rows in a table are sorted by the key.
+The typical use-case of BigTable is to scan a range of rows. It is therefor
+important to set up the row keys so that related data is close to each other.
+For example, if it makes sense to traverse the data in chronological order, the
+key might contain a representation of the data's timestamp. The classic example
+is to have the reversed domain name (i.e. com.google.www) as the row key, which
+means that all sub-domains of any domain are next to each other.
+
+
+\subsubsection{Data model}
+
+The data model is a simple one: Rows of data are stored in labeled tables. Each
+row is indexed with a row key, a column key, and a timestamp. The columns are
+of the form "column-family:qualifier", where the column-family is one of a
+number of fixed column-families defined by the table, and the qualifier is an
+arbitrary string specified by the application. In effect, column families are
+pre-announced when creating the table while qualifiers are not. The contents of
+each column family are stored together, so the user will want to store items
+that have similar characteristics in the same column family.  Each data point is
+called a cell. A cell is an uninterpreted array of bytes, there are no data
+types, and it is up to the application to interpret the data correctly. The
+table can store any number of timestamped versions of each cell, allowing
+versioning of data.
+
+% TODO: fix positioning.
+\begin{table}[h]
+    \begin{center}
+        \begin{tabular}{|l|l|l|l|l|}
+        \hline
+        \small \bf Row Key & \small \bf Time & \small \bf Column &
+        \multicolumn{2}{|c|}{\small \bf Column} \\
+         & \small \bf Stamp & \small "contents:" &
+        \multicolumn{2}{|c|}{\small "anchor:"} \\
+        \hline
+         & t9 & & \small "anchor:cnnsi.com" & "CNN" \\
+         & t8 & & \small "anchor:my.lok.ca" & "CNN.com" \\
+        "com.cnn.www" & t6 & \small "{\textless}html\textgreater..." & & \\
+         & t5 & \small "{\textless}html\textgreater..." & & \\
+         & t3 & \small "{\textless}html\textgreater..." & & \\
+        \hline
+        \end{tabular}
+        \caption{Example HBase table.}
+    \end{center}
+\end{table}
+
+\vspace{-12pt}
+
+The model above can indeed be thought of as a sparse distributed
+multidimensional sorted map. In concept, this multidimensional map is identical
+to a nested hash table. The dimensions of this multidimensional map is mapped
+out on the row key, the column family and the column qualifier, and possibly
+also of the version timestamp.
+
+\vspace{12pt}
+
+\begin{lstlisting}[caption=BigTable data model illustration.,captionpos=b]
+   (row key,column key,timestamp) -> value
+\end{lstlisting}
+
+
+\subsection{MapReduce}
+
+MapReduce is a framework for running jobs in parallel across multiple
+machines. As the name implies, MapReduce is made up of two parts or
+phases: map and reduce. The map phase consumes one piece of input at a
+time (a piece of input can be a line from a log file, for example), and
+emits an intermediate key and value. These keys and values are then
+processed by the reduce phase, which emits the final key-value pairs.
+
+MapReduce works by splitting the input, which commonly is in the size
+range of many gigabytes, into \textit{n} parts and lets each node of the
+computing cluster work on one or more parts. The mapper on each node emits
+key-value pairs which are fed into the reduce phase. The final output is
+collated, usually on a distributed file system.
+
+
 \section*{Summary}
 
 This chapter introduced Data Warehouses in general and OLAP in particular. The
-concept of data cubes was introduced by OLAP. The chapter was rounded off with
-a discussion of dimensionality reducing operations and aggregations of data
-cubes.
+concept of data cubes was introduced by OLAP. Dimensionality reducing operations
+and aggregations of data cubes was also introduced in this chapter.
+
+The chapter rounded of with a presentation of new techniques for distributed
+storage and processing; namely Google's BigTable and MapReduce techniques.
 
 
 
@@ -527,10 +625,15 @@ hardware and software eco-system.
 
 \section*{Introduction}
 
-Introduce the chapter here.
+The first section in this chapter will present the work procedure during the
+master thesis. The following chapters will discuss selected tools and their
+impact on design and implementation choices for the Zohmg system.
 
 
 \section{Procedure}
+
+% TODO: generally use passive tense.
+% TODO: renskriv.
 
 This section describes how we structured our work over the course of the thesis
 project. It describes how we, by working in an exploratory fashion, reached a
@@ -555,10 +658,11 @@ We met the relevant people, were introduced to the current system and were
 presented with literature in the area, namely OLAP Solutions and Whatever in
 Data Warehousing.
 
+
 \subsection*{Exploration by prototyping}
 
-We explored the problem domain by asking questions about the environment, the
-system we were to build and its requirements.
+The problem domain was explored by asking, the system to be built and the
+requirements upon it.
 
 To explore the environment, for example, we asked what data sources there are
 (web logs, scrobbling logs and radio streaming logs) and where that data is
@@ -573,8 +677,29 @@ reasonable options and pitt them against each other, first on the drawing board
 and eventually as prototypes.
 
 % this is a little thin. The prototypes are small pieces of code that would
-answer questions such as Is it at all possible to.. ? and What is the most
+TODO: answer questions such as Is it at all possible to.. ? and What is the most
 efficient way to..?
+
+
+\subsubsection*{Literature studies}
+% vet inte riktigt vad jag vill saga om det har.
+
+Studying previous work in related fields brought OLAP systems to our attention.
+It was to become very influential in our theoretical understanding of the
+subject.
+
+
+\subsubsection*{Python}
+
+Python is a general-purpose high-level multi-paradigm---amongst others:
+object-oriented, imperative and functional---scripting language. \cite{python}
+
+Because there existed a Python module for writing MapReduce programs (Dumbo,
+further later in this chapter), Python was a natural choice during the design
+and exploration phases. The main reason was the rapid development of Python
+programs, several times shorter than their Java counter parts made them faster
+to develop.
+
 
 \subsection*{Design Phase}
 
@@ -589,53 +714,26 @@ large data store but one can do without them.
 In the end, we much simplified our initial design and ended up with a design
 that was simpler and more to-the-point.
 
+
 \subsection*{Implementation}
 
 The implementation phase was rather small: we would simply stitch together our evolved prototypes and arrive at a solid ground to stand on: we had a system for running MapReduce jobs, storing data in HBase, etc.
 
 Writing code on top of this that performed data cube manipulation was a kinch!
 
-\subsection*{Literature studies}
-% vet inte riktigt vad jag vill saga om det har.
-
-Studying previous work in related fields brought OLAP systems to our attention.
-It was to become very influential in our theoretical understanding of the
-subject.
-
-\subsection*{Summary}
-
-This section has talked about the procedure we followed during our thesis work. It described our exploratory model and the prototyping we did, as well as the design phase that led up to the implementation.
-
-
 
 \section{Apache Hadoop}
 
 Hadoop is a free software implementation of Google's MapReduce-framework; it is
-written in Java and is part of the Apache Software Foundation. Hadoop is a
+written in Java, and is part of the Apache Software Foundation. Hadoop is a
 fairly mature piece of software and is used in production at numerous companies,
-among them Last.fm.
-\cite{hadoop}
-
-
-\subsection{MapReduce}
-
-MapReduce is a framework for running jobs in parallel across multiple
-machines. As the name implies, MapReduce is made up of two parts or
-phases: map and reduce. The map phase consumes one piece of input at a
-time (a piece of input can be a line from a log file, for example), and
-emits an intermediate key and value. These keys and values are then
-processed by the reduce phase, which emits the final key-value pairs.
-
-MapReduce works by splitting the input, which commonly is in the size
-range of many gigabytes, into \textit{n} parts and lets each node of the
-computing cluster work on one or more parts. The mapper on each node emits
-key-value pairs which are fed into the reduce phase. The final output is
-collated, usually on a distributed file system.
+among them Last.fm. \cite{hadoop}
 
 
 \subsection*{Hadoop Distributed File System}
 
-HDFS is a free software implementation of the GFS \cite{gfs}.
+HDFS is a free software implementation of the GFS\footnote{Google File System}.
+\cite{gfs}
 
 The goal of HDFS is to store large data sets while being able to handle
 hardware failure and being deployed in heterogenous hardware and software
@@ -677,62 +775,6 @@ is a sub-project of Hadoop, written in Java and a part of the Apache Software
 Foundation. HBase is still in its infancy and few organizations use it for
 mission-critical applications. \cite{hbase}
 
-
-\subsection{BigTable}
-
-BigTable is a data store designed for traversal of very large data sets.
-Time-stamped cells inside column-families in rows. The row has a key and any
-number of cells attached to it. The rows in a table are sorted by the key.
-The typical use-case of BigTable is to scan a range of rows. It is therefor
-important to set up the row keys so that related data is close to each other.
-For example, if it makes sense to traverse the data in chronological order, the
-key might contain a representation of the data's timestamp. The classic example
-is to have the reversed domain name (i.e. com.google.www) as the row key, which
-means that all sub-domains of any domain are next to each other.
-
-
-\subsection{Data model}
-
-The data model is a simple one: Rows of data are stored in labeled tables. Each
-row is indexed with a row key, a column key, and a timestamp.  The columns are
-of the form "column-family:qualifier", where the column-family is one of a
-number of fixed column-families defined by the table, and the qualifier is an
-arbitrary string specified by the application. In effect, column families are
-pre-announced when creating the table while qualifiers are not. The contents of
-each column family are stored together, so the user will want to store items
-that have similar characteristics in the same column family.  Each data point is
-called a cell. A cell is an uninterpreted array of bytes, there are no data
-types, and it is up to the application to interpret the data correctly. The
-table can store any number of timestamped versions of each cell, allowing
-versioning of data.
-
-\begin{table}[h]
-    \begin{center}
-        \begin{tabular}{|l|l|l|l|l|}
-        \hline
-        \small \bf Row Key & \small \bf Time & \small \bf Column &
-        \multicolumn{2}{|c|}{\small \bf Column} \\
-         & \small \bf Stamp & \small "contents:" &
-        \multicolumn{2}{|c|}{\small "anchor:"} \\
-        \hline
-         & t9 & & \small "anchor:cnnsi.com" & "CNN" \\
-         & t8 & & \small "anchor:my.lok.ca" & "CNN.com" \\
-        "com.cnn.www" & t6 & \small "{\textless}html\textgreater..." & & \\
-         & t5 & \small "{\textless}html\textgreater..." & & \\
-         & t3 & \small "{\textless}html\textgreater..." & & \\
-        \hline
-        \end{tabular}
-        \caption{Example HBase table.}
-    \end{center}
-\end{table}
-
-\vspace{-12pt}
-
-The model above can indeed be thought of as a sparse distributed
-multidimensional sorted map. In concept, this multidimensional map is identical
-to a nested hash table. The dimensions of this multidimensional map is mapped
-out on the row key, the column family and the column qualifier, and possibly
-also of the version timestamp.
 
 % TODO> why is this Tool & BigTable-subsection called Dimensions?
 % Disambiguation needed. -fredrik
@@ -813,28 +855,14 @@ memory; thus they scale poorly.
 % TODO: [citation needed]
 
 
-
-\section{Python}
-
-Python is a general-purpose high-level multi-paradigm---amongst others:
-object-oriented, imperative and functional---scripting language.
-\cite{python}
-
-Because there existed a Python module for writing MapReduce programs (Dumbo),
-Python was a natural choice during the design and exploration phases. The main
-reason was the rapid development of Python programs, several times shorter than
-their Java counter parts made them faster to develop.
-
-
 \section*{Summary}
 
-Summarize the method chapter.
+The first section of this chapter talked about the procedure during the thesis
+work. It described the exploratory model and the prototyping performed, as well
+as the design phase that led up to the implementation.
 
-Working methods.
-
-Tools.
-
-Something else-or-another.
+The following sections presented and discussed the selected tools; they also
+discussed the impact on design and implementation choices.
 
 
 
@@ -925,7 +953,7 @@ might look something like this:
 
 \vspace{12pt}
 
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}[language=Python,caption=An example map function.,captionpos=b]
    def map(key, value):
       log = parse_apache_log(value)
       dimensions = {'useragent' : log.useragent,
@@ -968,6 +996,8 @@ to all logs that it can find in the directory
 \texttt{/data/weblogs/2009/05/10} on HDFS. The emitted output is duly
 collected and projections are carefully stored in the data store.
 
+
+% TODO: analysis.
 - Something about cardinality -
 
 TODO?: When reasoning about dimensions, the issue of cardinality will come
@@ -992,12 +1022,15 @@ interesting: storing aggregates for the slices of the cube that is
 interesting is both a time and space save, and in many cases the only
 feasible solution.
 
+% TODO: method.
 -- Limits on cardinality --
 
 [What are the limits of our system? How high cardinality do we support? (This
 is closely tied to hbase and the qualifier-limit.) If Martin is going to have
 \textit{normalized\_path} as one of his dimensions, we might run into trouble.]
 
+
+% TODO: implementation.
 -- The implementation of all that --
 
 Since the wish is to store projections rather than all combinations of all
@@ -1036,6 +1069,8 @@ of the reducer will not be stored on disk as is usually the case, but will
 instead be interpreted by a custom OutputReader that persists the data to
 HBase.
 
+
+% TODO: data interchange.
 The reducer needs to communicate to the OutputReader under what rowkey,
 column-family and qualifier to store the computed sum. It does this by
 emitting the row key as the key and a JSON-serialized map of the form
@@ -1091,7 +1126,7 @@ which is widely used in web development.
 
 The data export server is built with Python Paste---a middleware
 framework---the data server dispatches to the requested application
-depending on the URI it was fed. \cite{python_paste}
+depending on the URL it was fed. \cite{python_paste}
 
 WSGI applications receive a WSGI request and returns a response with the
 built-in web server.
@@ -1099,27 +1134,38 @@ built-in web server.
 
 \subsubsection{URLParser}
 
-Middleware which dispatches to applications based on the URI. The URLParser
-removes the first part of the URI and tries to find a matching application
-to relay the request to. For instance, consider the URI
-\texttt{/client/file.html}. The first part---\texttt{client}---will be
-removed and the request \texttt{/file.html} will be sent to the application
-named \texttt{client.py}.
+The URLParser class is middleware that comes with Python Paste; its purpose is
+to dispatch to applications based on the URL. The URLParser removes the first
+part of the URL and tries to find a matching application to relay the request
+to. For instance, consider the URL \texttt{/client/file.html}. The first
+part---\texttt{client}---will be removed and the request \texttt{/file.html}
+will be sent to the application named \texttt{client.py}.
 
 
 \subsubsection{Clients}
 
-Dispatches request to serve static files from the project's
-\texttt{clients} directory. Custom clients---which interact with Zohmg---can
-be built with HTML and JavaScript, see the examples.
+This is a custom application built for Zohmg. It dispatches request to serve
+static files from the project's \texttt{clients} directory. Custom
+clients---which interact with Zohmg---can be built with HTML and JavaScript, see
+the examples.
 
 
 \subsubsection{Data}
 
-% ?
-Fetches data from HBase via its Thrift interface. The data is served to the
-user as JSONP\footnote{JSON with padding: JSON extension which adds name of
-callback function as an argument to the function itself.}.
+The data serving part of Zohmg fetches data from HBase via its Thrift interface.
+The user submits a scan query with row range, unit, and dimensions, and all the
+wanted values associated with these variables.
+
+\begin{verbatim}
+   http://localhost:8086/data/?t0=20090101
+   &t1=20090420&unit=pageviews
+   &d0=country&d0v=SE
+\end{verbatim}
+
+The above query would return the pageviews for SE between 1 January
+2009 and 4 April 2009. The results from the scan is served to the user as
+JSONP\footnote{JSON with padding: JSON extension which adds name of callback
+function as an argument to the function itself.}.
 
 
 \subsubsection{Transformers}
@@ -1168,6 +1214,8 @@ user's map.
 
 
 \subsection{Multiple data sets}
+
+Proper support for multiple data sets in a Zohmg project.
 
 
 \subsection{Metadata}
@@ -1218,7 +1266,7 @@ unthinkable: They read the manual.}{Unknown}
 Project deployment and data import and export will be described briefly.
 
 
-\section{Installation}
+\section*{Installation}
 
 During the installation phase superuser (root) privileges are required.
 
@@ -1249,7 +1297,7 @@ packages.
 Zohmg files copied, scripts, documentation, library files (other's software).
 
 
-\section{Deployment}
+\section*{Deployment}
 
 The Zohmg manage script is used to create a project directory
 
@@ -1268,7 +1316,7 @@ the project.
 \end{verbatim}
 
 
-\section{Import}
+\section*{Import}
 
 In order to import log-like data to the data store, the map part of the
 MapReduce program needs to be created. The reduce step is taken care of by
@@ -1288,7 +1336,7 @@ The resulting dictionary will be interpreted by Zohmg and stored accordingly.
 \end{verbatim}
 
 
-\section{Export}
+\section*{Export}
 
 It is possible to query Zohmg about metadata it has on each of the imported
 data sets.
@@ -1323,7 +1371,7 @@ submitted to the data server via HTTP, a query could look like
    &d0=country&d0v=SE
 \end{verbatim}
 
-\noindent The above query would return the pageviews for SE between 1 January
+The above query would return the pageviews for SE between 1 January
 2009 and 4 April 2009.
 
 
@@ -1370,6 +1418,13 @@ JavaScript Object Notation, a lightweight text-based human-readable data
 interchange format. It is used for representing simple data structures and
 associative arrays (called objects). JSON is often used for serializing
 structured data and transmitting it over network connection.
+
+ \\
+
+\textbf{OLAP} &
+An acronym for On-Line Analytical Processing. It is a subdivision of the broader
+category \textit{business logic}. OLAP is an approach to quickly find answer to
+user queries.
 
  \\
 
