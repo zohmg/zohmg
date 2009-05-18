@@ -48,6 +48,12 @@ benefits of such databases.
 
 \chapter{Introduction}
 
+% TODO: placeholder quote.
+\chapterquote{One day some of the kids from my neighbourhood carried my mother's
+groceries all the way home---you know why? It was out of respect!}{Travis
+Bickle}
+
+
 \section*{Background}
 
 % TODO: introduce time-series, data warehousing, mapreduce, bigtable
@@ -157,7 +163,6 @@ The web site, radio streaming and submissions (scrobbling) generates gigabytes
 of data every day.
 
 
-
 \section*{Problem description}
 % Problemsbeskrivning.
 
@@ -209,7 +214,6 @@ queries must be answered expediently to allow for analysts to explore data in
 real time.
 
 
-
 \section*{Scope}
 % Avgransning.
 
@@ -225,7 +229,6 @@ data store does not support reach-like data (i.e. number of unique visitors)
 since it is not summable.
 
 There is no functionality for plotting data sets, etc.
-
 
 
 \section*{Related work}
@@ -368,7 +371,7 @@ unfeasible amount of data, while pre-computing too few aggregates results in
 longer access times for those aggregates that were not pre-computed.
 
 
-\section{New techniques}
+\section{New Techniques}
 
 Classic data warehouses use relational databases as storage. A star or snowflake
 schema would be used to modell the dimensions.
@@ -381,23 +384,38 @@ distributed processing is Google's MapReduce.
 \subsection{BigTable}
 
 BigTable is a data store designed for traversal of very large data sets.
-Time-stamped cells inside column-families in rows. The row has a key and any
-number of cells attached to it. The rows in a table are sorted by the key.
-The typical use-case of BigTable is to scan a range of rows. It is therefor
-important to set up the row keys so that related data is close to each other.
-For example, if it makes sense to traverse the data in chronological order, the
-key might contain a representation of the data's timestamp. The classic example
-is to have the reversed domain name (i.e. com.google.www) as the row key, which
-means that all sub-domains of any domain are next to each other.
+BigTable's cells are basically indexed by row key, column key, and a time-stamp.
+Each row has a key and any number of cells attached to it. The rows in a table
+are sorted by their keys. The typical use-case of BigTable is to scan a range of
+rows. It is therefor important to set up the row keys so that related data is
+close to each other. For example, if it makes sense to traverse the data in
+chronological order, the key might contain a representation of the data's
+timestamp. The classic example is to have the reversed domain name (i.e.
+com.google.www) as the row key, which means that all sub-domains of any domain
+are next to each other (see table 2.1).
 
 
-\subsubsection{Data model}
+\subsubsection{Data Model}
+
+BigTable's data model can indeed be thought of as a sparse distributed
+multidimensional sorted map. In concept, this multidimensional map is identical
+to a nested hash table. The dimensions of this multidimensional map is mapped
+out on the row key, the column family and the column qualifier, and possibly
+also of the version timestamp.
+
+\vspace{12pt}
+
+\begin{lstlisting}[caption=BigTable data model illustration.,captionpos=b]
+   (row key,column key,timestamp) -> value
+\end{lstlisting}
+
+\vspace{12pt}
 
 The data model is a simple one: Rows of data are stored in labeled tables. Each
-row is indexed with a row key, a column key, and a timestamp. The columns are
-of the form "column-family:qualifier", where the column-family is one of a
-number of fixed column-families defined by the table, and the qualifier is an
-arbitrary string specified by the application. In effect, column families are
+row is indexed with a row key, a column key, and a timestamp. The columns have
+the form "column-family:qualifier", where the column-family is one of a number
+of fixed column-families defined by the table's schema, and the qualifier is an
+arbitrary string specified by the application. In effect, column-families are
 pre-announced when creating the table while qualifiers are not. The contents of
 each column family are stored together, so the user will want to store items
 that have similar characteristics in the same column family.  Each data point is
@@ -426,20 +444,6 @@ versioning of data.
         \caption{Example HBase table.}
     \end{center}
 \end{table}
-
-\vspace{-12pt}
-
-The model above can indeed be thought of as a sparse distributed
-multidimensional sorted map. In concept, this multidimensional map is identical
-to a nested hash table. The dimensions of this multidimensional map is mapped
-out on the row key, the column family and the column qualifier, and possibly
-also of the version timestamp.
-
-\vspace{12pt}
-
-\begin{lstlisting}[caption=BigTable data model illustration.,captionpos=b]
-   (row key,column key,timestamp) -> value
-\end{lstlisting}
 
 
 \subsection{MapReduce}
@@ -490,7 +494,7 @@ the application, and the user: who uses the product which the developer
 creates. Although, in reality, they might be the same person.
 
 
-\section{System function}
+\section{System Function}
 
 Last.fm has a central statistics and metrics tool built on a relational
 database. It is possible to import analyzed data to this tool; the data is
@@ -544,7 +548,31 @@ There are several different ways of modelling multidimensional data.
 TODO: How to discuss modelling of data in a general sense, without mentioning
 MapReduce and BigTable?
 % thinking in simple data structures,
-% ..
+
+% TODO: analysis.
+- Something about cardinality -
+
+TODO?: When reasoning about dimensions, the issue of cardinality will come
+up sooner or later.
+
+The cardinality of a dimension is the number of distinct values of the
+dimension, see it as number of members in a set where the dimension is
+viewed as a set. For example, the dimension of \textit{logged in} has a
+cardinality of two since \textit{logged in} is a boolean variable; the user
+is either logged in or not. The \textit{country} dimension has a much
+higher cardinality: there are some 300 countries in the world. Certainly,
+there could be dimensions whose cardinality is infinite: the \textit{path}
+dimension in the web log example, for example, could in theory have a
+limitless number of values.
+
+The number of possible combinations of dimensions of the data---the number
+of points in n-space---is directly related to the cardinality of each
+dimension. It is likely that the user's data is of such a nature that it is
+physically impossible to store information about all dimension
+combinations.  This is why the user is asked to define what projections are
+interesting: storing aggregates for the slices of the cube that is
+interesting is both a time and space save, and in many cases the only
+feasible solution.
 
 % export.
 Due to the several different data sources, there exist several
@@ -553,7 +581,7 @@ interface other than the REST API\footnote{The REST API is detailed in appendix
 X}. Making sense of the data is left for the developer.
 
 
-\section{System requirements}
+\section{System Requirements}
 
 
 The four key requirements of the Zohmg system are: ease of use, speed,
@@ -645,6 +673,7 @@ The design phase, which we entered once our understanding of the problem scope
 and its theoretical solution was satisfactory, and the following implementation
 are described, followed by a summary of our literature studies.
 
+
 \subsection*{Beginning}
 
 % not so sure I like this section much..
@@ -659,7 +688,47 @@ presented with literature in the area, namely OLAP Solutions and Whatever in
 Data Warehousing.
 
 
-\subsection*{Exploration by prototyping}
+\subsection*{Exploration}
+
+The possible tools were explored by testing and benchmarking them.
+
+The problem area was explored by prototyping solutions to a given subproblem.
+
+
+\subsubsection*{Software}
+
+% TODO: renskriv.
+MapReduce frameworks: Hadoop, disco.
+
+Hadoop is used in production at Last.fm, it made sense to use it because the
+work done would integrate with the Last.fm's infrastructure easily.
+
+There exists a few databases which inspired by BigTable; they aim to be
+distributed and have column-oriented properties: HBase, Cassandra, MonetDB,
+MongoDB, Hypertable. CouchDB is an document-oriented database.
+
+These databases were explored and tried out. Sadly most of these BigTable-like
+databases were in a very early phase of development and hard to even install.
+The experience was that HBase was the most mature of them. Maturity was the
+compound experience with the software: community, codebase, documentation,
+stability etc. HBase is also tightly coupled with Hadoop which is used in
+production at Last.fm.
+
+CouchDB was experienced to be mature as well but lacked integration with
+MapReduce, all database communication would be necessary to do over HTTP.
+Setting up CouchDB with replication required some hands-on, it lacks sorting of
+documents which BigTable-like databases utilize.
+
+\subsubsection*{Benchmarks}
+
+Only HBase made it this far, the other databases in the roster was hard or
+impossible to either compile, install, setup, or all of them.
+
+HBase was benchmarked (the benchmarks was similar to the ones found in the
+BigTable paper?).
+
+
+\subsubsection*{Prototyping}
 
 The problem domain was explored by asking, the system to be built and the
 requirements upon it.
@@ -681,7 +750,7 @@ TODO: answer questions such as Is it at all possible to.. ? and What is the most
 efficient way to..?
 
 
-\subsubsection*{Literature studies}
+\subsection*{Literature studies}
 % vet inte riktigt vad jag vill saga om det har.
 
 Studying previous work in related fields brought OLAP systems to our attention.
@@ -689,16 +758,15 @@ It was to become very influential in our theoretical understanding of the
 subject.
 
 
-\subsubsection*{Python}
+\subsection*{Python}
 
 Python is a general-purpose high-level multi-paradigm---amongst others:
 object-oriented, imperative and functional---scripting language. \cite{python}
 
-Because there existed a Python module for writing MapReduce programs (Dumbo,
-further later in this chapter), Python was a natural choice during the design
-and exploration phases. The main reason was the rapid development of Python
-programs, several times shorter than their Java counter parts made them faster
-to develop.
+Because there existed a Python module for writing MapReduce programs (Dumbo for
+Hadoop, both further later in this chapter), Python was a natural choice during
+the design and exploration phases. Python was also a good choice because of the
+rapid prototype development it enables.
 
 
 \subsection*{Design Phase}
@@ -713,6 +781,13 @@ large data store but one can do without them.
 
 In the end, we much simplified our initial design and ended up with a design
 that was simpler and more to-the-point.
+
+% TODO: method.
+TODO: -- Limits on cardinality --
+
+[What are the limits of our system? How high cardinality do we support? (This
+is closely tied to hbase and the qualifier-limit.) If Martin is going to have
+\textit{normalized\_path} as one of his dimensions, we might run into trouble.]
 
 
 \subsection*{Implementation}
@@ -741,9 +816,10 @@ eco systems. Additionally, the Hadoop and HDFS interaction is designed with
 the notion that it is cheaper to move the computation, MapReduce programs,
 to the data than the other way around.
 
-Every Hadoop node can be formatted with HDFS, this reserves disk space on
-the node to be used for HDFS. The HDFS container resides on the nodes
-general purpose file system. It is also possible to use HDFS as a
+Every Hadoop node can be formatted with HDFS, this reserves disk space on the
+node to be used for HDFS. The HDFS partition\footnote{The HDFS partition is a
+directory containing HDFS files on a general-purpose file system.} resides on
+the node's general purpose file system. It is also possible to use HDFS as a
 stand-alone general purpose distributed file system, without Hadoop.
 
 The default block size on HDFS 64 MB, significantly larger than
@@ -776,12 +852,10 @@ Foundation. HBase is still in its infancy and few organizations use it for
 mission-critical applications. \cite{hbase}
 
 
-% TODO> why is this Tool & BigTable-subsection called Dimensions?
-% Disambiguation needed. -fredrik
 \subsection*{Physical storage}
 
 Each column-family is stored as a single file in HBase; it is then subdivided
-into column-qualifiers within the same file. This is important to consider when
+into column-qualifiers within this file. This is important to consider when
 designing application and schemas, since reading from several column-families
 will open several files.
 
@@ -799,12 +873,12 @@ associated with a great storage cost.
 
 Depending on how the row keys are formatted different, hierarchies are created.
 The order in which the data is stored is important, it defines how effective
-scanning data will be. Sparsity also comes into play concerning effective
-scanning. In the case of having thousand rows and requesting ten out of these,
-then only one por cent of the data is interesting. If a scan would be required
-to visit all the thousand rows a lot of rows are skipped. Skipping rows is
-expensive in that sense that they are but the result is thrown away. The goal is
-to push this cost to a bare minimum, using as many of the rows as possible.
+scanning data will be. Sparsity also comes into play during effective scanning.
+In the case of having thousand rows and requesting ten out of these, then only
+one per cent of the data is interesting. If a scan would be required to visit
+all the thousand rows a lot of rows are skipped. Skipping rows is expensive in
+that sense that they are visited but the result is thrown away. The goal is to
+push this cost to a bare minimum, using as many of the rows as possible.
 
 The minimum cost of scanning data is achieved by ordering the data so that
 a scan uses every visited row. In the case with thousand rows of which ten
@@ -820,10 +894,10 @@ Java---for instance Python.
 Thrift is a remote procedure call framework for building scalable cross-language
 services. Thrift combines a software stack with a code generation engine to
 build services that work seamlessly between a wide range of programming and
-scripting languages.
+scripting languages. \cite{thrift}
 
 Thrift was originally developed at Facebook and in April 2007 it was released as
-free software. It entered the Apache Incubator in May 2008. \cite{thrift}
+free software. It entered the Apache Incubator in May 2008.
 
 
 \section{Dependability}
@@ -849,7 +923,7 @@ Regarding scalability Hadoop and HBase scales close to linearly when nodes are
 added to the cluster.
 
 While relational databases can be made highly available and reliable with load
-balancing and so called \textit{Sharding}, the setup is non-trivial. Regarding
+balancing and so called \textit{sharding}, the setup is non-trivial. Regarding
 scalability, relational databases are highly dependent on having data in working
 memory; thus they scale poorly.
 % TODO: [citation needed]
@@ -887,7 +961,7 @@ system. The fourth, and final, section presents the implementation details of
 the Zohmg system's exporting compontent.
 
 
-\section{Project management}
+\section{Project Management}
 
 A Zohmg project is necessary for using Zohmg; they are created with a management
 script, which is also used for interacting with the Zohmg system. When the user
@@ -928,7 +1002,7 @@ PyYAML was used to implement the YAML configuration reading part. \cite{pyyaml}
 \subsubsection*{Environment}
 
 The environment is a Python script which defines run-time variables, required by
-Hadoop and Dumbo. Using a Python scripts for run-time variables leaves the
+Hadoop and Dumbo. Using a Python script for run-time variables leaves the
 problem of validation to Python. The environment configuration file resides in
 the project's \texttt{config} directory.
 
@@ -948,8 +1022,30 @@ values, and a list of measurements. In effect, the dimensions and the timestamp
 specify a point in n-space and the measurements represent the observations made
 at that point.
 
-Going back to the running example of apache access logs, a usermap function
-might look something like this:
+% TODO: move apache logs to introduction perhaps.
+An example data source is the Apache HTTP Server access logs. The Apache HTTP
+Server Combined Log Format is commonly used to log requests. The log format is
+configurable, an example log line might have the following format
+
+\vspace{12pt}
+
+\begin{lstlisting}[caption=Example log line entry for the Apache HTTP Server's
+Combined Log Format.,captionpos=b]
+   127.0.0.1 - emma [20/Apr/2009:13:37:00 +0100]
+   "GET /music HTTP/1.0" 200 2326 "http://last.fm/"
+   "Mozilla/5.0 (X11; U; Linux i686)"
+\end{lstlisting}
+
+\vspace{12pt}
+
+The above example log entry is line-broken due to space constraints, normally
+the entry would be on one line. The example log line contains access info for a
+specific request; it contains the key entries: the client's IP address,
+timestamp, requested resource, HTTP status code for the request, the client's
+user agent etc.
+
+Revisiting the running example of Apache access logs, a usermap function might
+look something like this:
 
 \vspace{12pt}
 
@@ -967,24 +1063,23 @@ might look something like this:
 
 \vspace{12pt}
 
-The actual parsing of the log is abstracted; in the above example the
-emitting of dimensionality is showcased. It is assumed that
-\texttt{parse\_apache\_log()} accepts a single line from the log file and
-returns an object with the appropriate fields, such as useragent and
-statuscode.
+The above example showcases the emitting of dimensionality. In the example the
+actual parsing of the log is abstracted out by the function
+\texttt{parse\_apache\_log()}; it is assumed that this function accepts a single
+line from an Apache HTTP Server log file and returns an object with the
+appropriate fields, such as useragent and statuscode.
 
 For every line of the log file, a point in n-space (the dimensions and the
 timestamp) is emitted together with a count of pageviews and bytes; one
 pageview per request and the number of bytes served in the request. It is
 possible to add business logic here, perhaps only counting requests from
-useragents that are not web spiders and that resulted in a HTTP 200 status
-code.
+useragents that are not web spiders which resulted in a HTTP 200 status code.
 
-The last line \textit{yields} the tuple. This is a Python construct called a
-\textit{generator} that lets the map function emit any number of tuples (or
-none!) for a single invocation.
+The last line \textit{yields} the tuple. This is a Python construct, similar to
+an iterator, called a \textit{generator} that lets the map function emit any
+number of tuples for a single invocation.
 
-The user will import a day worth of logs like so:
+The user will import a day worth of logs by invoking
 
 \begin{verbatim}
    zohmg import mappers/apache.py \
@@ -995,40 +1090,6 @@ This will instruct zohmg to apply the map function found in \texttt{apache.py}
 to all logs that it can find in the directory
 \texttt{/data/weblogs/2009/05/10} on HDFS. The emitted output is duly
 collected and projections are carefully stored in the data store.
-
-
-% TODO: analysis.
-- Something about cardinality -
-
-TODO?: When reasoning about dimensions, the issue of cardinality will come
-up sooner or later.
-
-The cardinality of a dimension is the number of distinct values of the
-dimension, see it as number of members in a set where the dimension is
-viewed as a set. For example, the dimension of \textit{logged in} has a
-cardinality of two since \textit{logged in} is a boolean variable; the user
-is either logged in or not. The \textit{country} dimension has a much
-higher cardinality: there are some 300 countries in the world. Certainly,
-there could be dimensions whose cardinality is infinite: the \textit{path}
-dimension in the web log example, for example, could in theory have a
-limitless number of values.
-
-The number of possible combinations of dimensions of the data---the number
-of points in n-space---is directly related to the cardinality of each
-dimension. It is likely that the user's data is of such a nature that it is
-physically impossible to store information about all dimension
-combinations.  This is why the user is asked to define what projections are
-interesting: storing aggregates for the slices of the cube that is
-interesting is both a time and space save, and in many cases the only
-feasible solution.
-
-% TODO: method.
--- Limits on cardinality --
-
-[What are the limits of our system? How high cardinality do we support? (This
-is closely tied to hbase and the qualifier-limit.) If Martin is going to have
-\textit{normalized\_path} as one of his dimensions, we might run into trouble.]
-
 
 % TODO: implementation.
 -- The implementation of all that --
@@ -1070,6 +1131,8 @@ instead be interpreted by a custom OutputReader that persists the data to
 HBase.
 
 
+\section{Data Interchange}
+
 % TODO: data interchange.
 The reducer needs to communicate to the OutputReader under what rowkey,
 column-family and qualifier to store the computed sum. It does this by
@@ -1079,28 +1142,38 @@ emitting the row key as the key and a JSON-serialized map of the form
 The OutputReader interprets the JSON and persists the data. Et voila!
 
 
-\section{Data interchange}
+\subsection*{Internal}
 
-\subsection{Internal}
+Using JSON for data interchange between map and reduce parts in Zohmg import
+jobs.
 
-Typed bytes
+For better performance typed bytes may be used. This is what Dumbo uses
+internally.
 
 
-\subsubsection{Input formats}
+\subsubsection{Input Formats}
+
+An input format is a Java class which Hadoop uses for interpreting the input
+data.
+
+TableInputFormat
 
 TextInputFormat
 
 LzoInputFormat
 
 
-\subsubsection{Output formats}
+\subsubsection{Output Formats}
 
 % TODO: not truly correct
-The Darling output format for HBase. Between Zohmg and Hadoop JSON is used
-for serializing data.
+The Darling output format for HBase. Between Dumbo, which Zohmg uses for data
+import, and Hadoop JSON is used for serializing data.
+
+The Darling output format increased import speed by a factor ten, compared to
+using Thrift.
 
 
-\section{Exporting data}
+\section{Exporting Data}
 
 In order to join together all the different abilities wanted from the data
 server, it was designed as a middleware application. Middleware is software
@@ -1110,19 +1183,18 @@ The data export server is built with a WSGI\footnote{Web Server Gateway
 Interface, a HTTP extension where a CGI-like environment is passed around.}
 framework, which includes both middleware and application parts. The middleware
 applications are responsible for dispatching requests to the corresponding
-application or file.
-WSGI middleware receives a
-WSGI request and then performs logic upon this request, before passing the
-request to a WSGI application. \cite{definitive_guide_to_pylons,paste}
-Since the main goal was not
-to build a middleware framework from scratch, an existing such was used.
-
+application or file. WSGI middleware receives a WSGI request and then performs
+logic upon this request, before passing the request to a WSGI application.
+\cite{definitive_guide_to_pylons,paste} Since the main goal was not to build a
+middleware framework from scratch, an existing such was used.
 
 When a user queries the data server, JSON\footnote{JavaScript Object Notation}
 is returned. JSON was chosen because it is i simple text serialization format
-which is widely used in web development.
+which is widely used in web development. The Python module simplejson was
+selected for the this implementation detail. \cite{simplejson}
 
-\subsection{External}
+
+\subsection*{External}
 
 The data export server is built with Python Paste---a middleware
 framework---the data server dispatches to the requested application
@@ -1134,12 +1206,12 @@ built-in web server.
 
 \subsubsection{URLParser}
 
-The URLParser class is middleware that comes with Python Paste; its purpose is
-to dispatch to applications based on the URL. The URLParser removes the first
-part of the URL and tries to find a matching application to relay the request
-to. For instance, consider the URL \texttt{/client/file.html}. The first
-part---\texttt{client}---will be removed and the request \texttt{/file.html}
-will be sent to the application named \texttt{client.py}.
+The URLParser class is a middleware application that comes with Python Paste;
+its purpose is to dispatch to applications based on the URL. The URLParser
+removes the first part of the URL and tries to find a matching application to
+relay the request to. For instance, consider the URL \texttt{/client/file.html}.
+The first part---\texttt{client}---will be removed and the request
+\texttt{/file.html} will be sent to the application named \texttt{client.py}.
 
 
 \subsubsection{Clients}
@@ -1170,9 +1242,10 @@ function as an argument to the function itself.}.
 
 \subsubsection{Transformers}
 
-Fetches data from HBase and transforms it with the requested transform
-program from the project's transformers directory, output is
-dumped as JSONP.
+The transformers application fetches data from HBase with the same mechanism as
+the raw data application. The data is transformed with a transformer---a Python
+program in the project's \texttt{transformers} directory---requested by the
+user. Similar to the raw data serving, the output is served as JSONP.
 
 
 \section*{Summary}
@@ -1191,7 +1264,7 @@ Summary here.
 Discussion here.
 
 
-\section{Future work}
+\section{Future Work}
 
 Says Wikipedia: "Organizations generally start off with relatively simple use
 of data warehousing. Over time, more sophisticated use of data warehousing
@@ -1213,12 +1286,12 @@ create column-families on the fly based on the dimensions output from the
 user's map.
 
 
-\subsection{Multiple data sets}
+\subsection*{Multiple Data Sets}
 
 Proper support for multiple data sets in a Zohmg project.
 
 
-\subsection{Metadata}
+\subsection*{Metadata}
 
 data set introspection
 
@@ -1227,12 +1300,12 @@ roll-up and drill-down
 good when creating apps
 
 
-\subsection{Updating data set files}
+\subsection*{Updating Data Set Files}
 
 Update tables on changes in configuration---data set files.
 
 
-\subsection{Importing without MapReduce}
+\subsection*{Importing Without MapReduce}
 
 Importing content without firing of a MapReduce job, e.g. via a Thrift
 service.
@@ -1270,7 +1343,12 @@ Project deployment and data import and export will be described briefly.
 
 During the installation phase superuser (root) privileges are required.
 
-Install Hadoop and HBase.
+Hadoop and HBase is required to run Zohmg, they form the foundation of data
+processing and storage which Zohmg builds upon. Zohmg is built with Python and
+also requires a few Python modules, on a Debian based system these are installed
+by the install script (see below).
+
+To install Hadoop and HBase automatically a script is provided.
 
 \begin{verbatim}
    sh scripts/install_hadoop_hbase.sh
@@ -1283,6 +1361,9 @@ Hadoop and HBase on a cluster requires additional attention, for
 instance passphraseless SSH\footnote{Secure Shell, an encrypted data transport
 protocol; it is commonly used for remote access.} keys and additional program
 configuration.
+
+The Zohmg installation depends on Python Setuptools \cite{setuptools}, which
+needs to be installed prior to the installation.
 
 When Hadoop and HBase is installed install Zohmg by invoking the following
 command in the root of the source tree
