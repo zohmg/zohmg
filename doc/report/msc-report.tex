@@ -26,8 +26,8 @@ data. [DRAFT]}
 
 % TODO: use less buzzwords; focus on the problem.
 
-Making sense of data at a massive scale is one of the biggest challenges we face
-at Last.fm. Interpreting patterns in user behaviour becomes a challenge when
+Analyzing data at a massive scale is one of the biggest challenges we face at
+Last.fm. Interpreting patterns in user behaviour becomes a challenge when
 millions of users interact in billions of combinations; the data sets must be
 analyzed, summarized and presented visually in order to convey their meaning.
 
@@ -65,8 +65,8 @@ theme park; the analysis might include characteristics such as the number of
 visitors per day, or the average time a theme park guest spends queueing for a
 particular ride.
 
-Inevitably, the services and operations will generate a log for later
-analysis. As the services grow in size, so will the data sets they generate.
+Generally, the services and operations will generate a log for later analysis.
+As the services grow in size, so will the data sets they generate.
 
 An important property of these data sets is that they generally have a regular
 structure and are broken down into records that are independent of each other.
@@ -84,7 +84,7 @@ called aggregates. To aggregate data, for example to compute the sum of
 visitors for all European countries, is a common technique for speeding up
 data lookup in data stores.
 
-The size of the data sets at last.fm is in the range of several gigabytes per
+The size of the data sets at Last.fm is in the range of several gigabytes per
 day. Some data sets are many times larger. It is our belief that this is
 typical.
 
@@ -114,7 +114,7 @@ a dimension in this thesis.
 
 The International Aerodyne Corporation, a leading exporter of woodworking
 nails, uses a spreadsheet to keep track of the number of nails exported to
-each country every month (see figure). 
+each country every month (see table 1.1).
 
 \begin{table}[h]
     \begin{center}
@@ -153,11 +153,11 @@ specialized tools to analyze and visualize their data.
 % TODO: renskriv these thoughts.
 
 Last.fm is an internet radio station focusing on content, being a musical
-encyclopedia. The web site.
-
-Last.fm lets users submit what music they listen to, called \textit{scrobbling}.
-
-Radio streams to users.
+encyclopedia. Last.fm lets users submit what music they listen to, called
+\textit{scrobbling}, this user submitted data is analyzed and Last.fm offer
+their users personalized charts, music and event recommendations, based ther
+listening. Last.fm also streams content, via internet, to users. The Last.fm web
+site ties together all these areas and presents it to the users.
 
 The web site, radio streaming and submissions (scrobbling) generates gigabytes
 of data every day.
@@ -235,31 +235,38 @@ There is no functionality for plotting data sets, etc.
 
 % TODO: this section.
 
-OLAP is something. It's drawbacks are unknown.
+OLAP\footnote{On-Line Analytical Processing} is a broad category of techniques
+for processing data, and visualizing the analysis. It is called online because
+the data store will be queried, and the user user expects a, at least close to,
+direct response.
 
 HDW is a system whose goal is to create a high performance large scale data
 warehouse based on MapReduce and Bigtable. \cite{hdw}
 
-Omniture is used at Last.fm etc.
+Omniture is a data warehouse used at Last.fm. Criticism against Omniture is
+that it is cumbersome and slow to use. \cite{omniture}
 
 
 \section*{Overview}
 
 This thesis describes the Zohmg system and how to use it.
 
-% TODO: make correct.
-The following overview is entirely incorrect:
+In chapter 2 general data warehous concepts are introduced; it also introduces
+new techniques that the reader might not know.
 
-Chapter 2 establish the theoretical base of the problem statement.
+Chapter 3 establish the theoretical base of the problem statement, and the
+expected system's function and requirements.
 
-In chapter 3, the tools used for the implementation are declared, moving
-over to chapter 4 where the details of the implementation are presented.
+Chapter 4 presents the work method during the thesis. It also presents tools
+possible to use for solving the problem statement.
 
-How to use the Zohmg system is presented in chapter~5, while chapter 6
-shows an example work flow.
+In chapter 5, the implementation choices and details of the Zohmg system are
+presented.
 
-Chapters 7 and 8 discuss the results, related, and future work, and
-presents the conclusion, respectively.
+Chapters 6 discuss the results, related, future work, and presents the
+conclusion.
+
+In appendix A an example work flow is presented. Appendix B contains a glossary.
 
 
 
@@ -276,8 +283,8 @@ This chapters first section presents data warehouses and the concept of data
 cubes. It then introduces common operations on data cubes: projections, slicing
 and dicing, and aggregation.
 
-Secondly, this chapter features new techniques in distributed storage and
-computing; these techniques are Google's BigTable and MapReduce.
+The last section features new techniques in distributed storage and computing;
+these techniques are Google's BigTable and MapReduce.
 
 
 \section{Data Warehouses}
@@ -289,9 +296,8 @@ core actions of a data warehouse are to load, transform and extract data.
 
 \subsection*{OLAP}
 
-OLAP\footnote{On-Line Analytical Processing} is an umbrella term for systems
-built in a certain manner and that are optimized quickly answer
-multi-dimensional analytical queries.
+OLAP is an umbrella term for systems built in a certain manner and that are
+optimized quickly answer multi-dimensional analytical queries.
 
 At the core of any OLAP system is the OLAP cube (also known as a
 multi-dimensional cube or a hypercube). The cube consists of numeric
@@ -435,7 +441,7 @@ versioning of data.
         \multicolumn{2}{|c|}{\small "anchor:"} \\
         \hline
          & t9 & & \small "anchor:cnnsi.com" & "CNN" \\
-         & t8 & & \small "anchor:my.lok.ca" & "CNN.com" \\
+         & t8 & & \small "anchor:my.look.ca" & "CNN.com" \\
         "com.cnn.www" & t6 & \small "{\textless}html\textgreater..." & & \\
          & t5 & \small "{\textless}html\textgreater..." & & \\
          & t3 & \small "{\textless}html\textgreater..." & & \\
@@ -705,7 +711,7 @@ work done would integrate with the Last.fm's infrastructure easily.
 
 There exists a few databases which inspired by BigTable; they aim to be
 distributed and have column-oriented properties: HBase, Cassandra, MonetDB,
-MongoDB, Hypertable. CouchDB is an document-oriented database.
+MongoDB, Hypertable. CouchDB is a document-oriented database.
 
 These databases were explored and tried out. Sadly most of these BigTable-like
 databases were in a very early phase of development and hard to even install.
@@ -1033,7 +1039,7 @@ configurable, an example log line might have the following format
 \begin{lstlisting}[caption=Example log line entry for the Apache HTTP Server's
 Combined Log Format.,captionpos=b]
    127.0.0.1 - emma [20/Apr/2009:13:37:00 +0100]
-   "GET /music HTTP/1.0" 200 2326 "http://last.fm/"
+   "GET /music HTTP/1.0" 200 2324 "http://last.fm/"
    "Mozilla/5.0 (X11; U; Linux i686)"
 \end{lstlisting}
 
@@ -1051,7 +1057,8 @@ map function might look something like
 
 \vspace{12pt}
 
-\begin{lstlisting}[language=Python,caption=An example map function.,captionpos=b]
+\begin{lstlisting}[language=Python,caption={An example map function, parsing
+Apache access logs.},captionpos=b]
    def map(key, value):
       log = parse_apache_log(value)
       dimensions = {'useragent' : log.useragent,
@@ -1082,7 +1089,7 @@ The last line \textit{yields} the tuple. This is a Python construct, similar to
 an iterator, called a \textit{generator} that lets the map function emit any
 number of tuples for a single invocation.
 
-Since the wish is to store projections rather than all combinations of all
+Since the goal is to store projections rather than all combinations of all
 dimensions, the data needs to be mangled slightly before sending it down
 the pipe to the underlying data store. Dumbo expects a key-value pair from the
 mapper. Hadoop will collect all keys and give the reducer a key and an iterator
@@ -1096,9 +1103,9 @@ of values.
 %By doing this it is possible to use a simple SumReducer to sum the values
 %for each unit at any point in n-space.
 
-Remember, the usermapper gives us a point in n-space and a list of
-measurements. We need to break out the measurements and sum over each such
-measurement. Zohmg solves this by wrapping the user map function.
+Remember, the user map function gives a point in n-space and a list of
+measurements. The measurements needs to be extracted and each such measurement
+is summed over. Zohmg solves this by wrapping the user map function.
 
 The wrapper takes each tuple emitted by the user map function and performs a
 dimensionality reduction, ending up with the projections requested by the user.
@@ -1128,6 +1135,19 @@ This will instruct zohmg to apply the map function found in \texttt{apache.py}
 to all logs that it can find in the directory \texttt{/data/weblogs/2009/04/20}
 on HDFS. The emitted output is duly collected and projections are carefully
 stored in the data store.
+
+
+\section{Storage / Data Model}
+
+% TODO: renskriv.
+The typical use case for Zohmg is to read one or more column-qualifiers,
+which correspond to one or more points in n-space, over a range of time.
+Therefor, the keys are made up of the time and unit of the measurement,
+and the qualifier queried for represents the point in n-space. More on
+this in the data model section.
+
+Explain our data model, the relation between column-families, column-qualifiers
+and projections and dimensions.
 
 
 \section{Data Interchange}
@@ -1192,7 +1212,7 @@ framework, which includes both middleware and application parts. The middleware
 applications are responsible for dispatching requests to the corresponding
 application or file. WSGI middleware receives a WSGI request and then performs
 logic upon this request, before passing the request to a WSGI application.
-\cite{definitive_guide_to_pylons,paste} Since the main goal was not to build a
+\cite{paste,definitive_guide_to_pylons} Since the main goal was not to build a
 middleware framework from scratch, an existing such was used.
 
 When a user queries the data server, JSON\footnote{JavaScript Object Notation}
@@ -1205,7 +1225,7 @@ selected for the this implementation detail. \cite{simplejson}
 
 The data export server is built with Python Paste---a middleware
 framework---the data server dispatches to the requested application
-depending on the URL it was fed. \cite{python_paste}
+depending on the URL it was fed. \cite{paste}
 
 WSGI applications receive a WSGI request and returns a response with the
 built-in web server.
@@ -1532,11 +1552,21 @@ user queries.
 
  \\
 
+\textbf{Replication} &
+.
+
+ \\
+
 \textbf{Serializing} &
 Serializing data is the task of converting an object into a sequence of bits,
 making it possible to store on a storage medium or transmitted over a network
 link. Rereading the sequence of bits should restore the original state of the
 object it was in before the serialization. \\
+
+ \\
+
+\textbf{Sharding} &
+.
 \end{tabular}
 
 
@@ -1590,15 +1620,6 @@ over the data set. The user's map function is called \textit{usermap function}
 from here on. In order to let Zohmg know what output to expect from the mapper,
 the user also defines the dimensions and units of his data. After all, the user
 most likely knows his own data better than anyone else.
-
-
-\section{Typical use case}
-
-The typical use case for Zohmg is to read one or more column-qualifiers,
-which correspond to one or more points in n-space, over a range of time.
-Therefor, the keys are made up of the time and unit of the measurement,
-and the qualifier queried for represents the point in n-space. More on
-this in the data model section.
 
 
 
