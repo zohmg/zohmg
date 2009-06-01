@@ -15,7 +15,7 @@ CLASSPATH = (
   # be sure to set these correctly!
   '/opt/hadoop-0.19.1/build/hadoop-0.19.2-dev-core.jar',
   '/opt/hadoop-0.19.1/build/contrib/streaming/hadoop-0.19.2-dev-streaming.jar',
-  '/opt/hbase-0.19.2/build/hbase-0.19.2.jar'
+  '/opt/hbase-0.19.3/build/hbase-0.19.3.jar'
 )
 """
 
