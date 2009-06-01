@@ -23,25 +23,48 @@ class Config(object):
 
     def __read_config(self):
         import yaml
+
+        config_loaded    = False
         possible_configs = [self.config_file, "config/"+self.config_file]
-        config_loaded = False
-        for config_file in possible_configs:
-            if config_loaded:
-                continue
+
+        # two error conditions can occur:
+        #  A) all files missing/can't be opened. => try next file, report later.
+        #  B) a file opens, but can't be parsed. => report imm.
+
+        while (not config_loaded and len(possible_configs) > 0):
+            config_file = possible_configs.pop()
+
             try:
                 f = open(config_file, "r")
+            except IOError, e:
+                continue # try to open the next file.
+
+            # we managed to open the file; will not try and open any more.
+            # now, load yaml.
+            try:
                 self.config = yaml.load(f)
+            except yaml.scanner.ScannerError, e:
+                # condition B.
+                # report error immediately.
+                sys.stderr.write("Configuration error: could not parse %s.\n")
+                sys.stderr.write("%s\n", e)
                 f.close()
-                config_loaded = True
-            except:
-                pass # TODO: be more specific about what error occured.
+                sys.exit(1)
+
+            # ok, good!
+            f.close()
+            config_loaded = True
+
 
         if not config_loaded:
-            msg = "[%s] Error: Could not read configuration: %s" % (time.asctime(), self.config_file)
-            fail(msg)
+            # condition A.
+            sys.stderr.write("Configuration error: Could not read dataset configuration " \
+                              "from any of these files:\n" \
+                              "\n".join(a) + "\n")
+            sys.exit(1)
 
         if not self.sanity_check():
-            msg = "[%s] Error: Could not parse configuration." % time.asctime()
+            msg = "[%s] Configuration error: Could not parse configuration." % time.asctime()
             fail(msg) # TODO: should maybe not use fail as it raises SystemExit.
 
         return self.config
