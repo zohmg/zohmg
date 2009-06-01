@@ -24,7 +24,7 @@ def setup_transport(host):
 
 
 def create_or_bust(c, t, cfs=['fam']):
-    from hbase.ttypes import *
+    from hbase.ttypes import AlreadyExists, IOError, IllegalArgument
     print "creating hbase table %s." % t
     try:
         cds = []
