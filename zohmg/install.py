@@ -117,6 +117,13 @@ def install_pythonmodules():
         print 'please make sure you install the following packages or their equivalents:'
         for p in packages: print "* " + p
         print
+        # pause.
+        print "press ENTER to continue the installation or CTRL-C to break."
+        try: sys.stdin.readline()
+        except KeyboardInterrupt:
+            print "ok."
+            sys.exit(1)
+
 
 # copies bundle (file) to target, printing msg.
 def copy_bundle(msg,file,target):
