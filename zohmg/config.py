@@ -26,6 +26,7 @@ class Config(object):
 
         config_loaded    = False
         possible_configs = [self.config_file, "config/"+self.config_file]
+        file_loaded = None
 
         # two error conditions can occur:
         #  A) all files missing/can't be opened. => try next file, report later.
@@ -43,10 +44,11 @@ class Config(object):
             # now, load yaml.
             try:
                 self.config = yaml.load(f)
+                file_loaded = config_file
             except yaml.scanner.ScannerError, e:
                 # condition B.
                 # report error immediately.
-                sys.stderr.write("Configuration error: could not parse %s.\n")
+                sys.stderr.write("Configuration error: could not parse %s.\n" % config_file)
                 sys.stderr.write("%s\n", e)
                 f.close()
                 sys.exit(1)
@@ -63,8 +65,9 @@ class Config(object):
                               "\n".join(a) + "\n")
             sys.exit(1)
 
+        # check contents.
         if not self.sanity_check():
-            msg = "[%s] Configuration error: Could not parse configuration." % time.asctime()
+            msg = "[%s] Configuration error: Could not parse configuration from %s." % (time.asctime(), file_loaded)
             fail(msg) # TODO: should maybe not use fail as it raises SystemExit.
 
         return self.config
