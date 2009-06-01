@@ -2,9 +2,9 @@
 INTRODUCING: ZOHMG.
 -------------------
 
-Zohmg is a data store for aggregation of multi-dimensional time-series-based
-data. It is built on top of HBase and provides tools for data aggregation using
-Hadoop.
+Zohmg is a data store for aggregation of multi-dimensional time series data. It
+is built on top of Hadoop, Dumbo and HBase. The core idea is to pre-compute
+aggregates – Zohmg is wasteful with storage in order to answer queries faster.
 
 This README assumes a working installation of zohmg. Please see INSTALL for
 installation instructions.
