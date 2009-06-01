@@ -18,7 +18,7 @@ hadoop_version="hadoop-0.19.1"
 hadoop_tar="$hadoop_version.tar.gz"
 patch_1722="HADOOP-1722-branch-0.19.patch"
 patch_5450="HADOOP-5450.patch"
-hbase_version="hbase-0.19.2"
+hbase_version="hbase-0.19.3"
 hbase_tar="$hbase_version.tar.gz"
 #hadoop_release="http://mirrors.ukfast.co.uk/sites/ftp.apache.org/hadoop/core/$hadoop_version/$hadoop_tar"
 hadoop_release="http://apache.mirror.infiniteconflict.com/hadoop//core/$hadoop_version/$hadoop_tar"
@@ -458,7 +458,7 @@ $hadoop/bin/hadoop namenode -format  # look twice!
 $hadoop/bin/start-all.sh
 
 # hbase
-$hbase/bin/start-all.sh
+$hbase/bin/start-hbase.sh
 $hbase/bin/hbase thrift start
 
 
