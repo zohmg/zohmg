@@ -71,14 +71,14 @@ class Config(object):
             ps = self.projections()
         except:
             # might as well return straight away; nothing else will work.
-            print >>sys.stderr, "[%s] Error: Data set: Missing definition of dataset, dimensions, units, projections." \
+            print >>sys.stderr, "[%s] Configuration error: Missing definition of dataset, dimensions, units, projections." \
                                 % time.asctime()
             return False
 
         # dimensions, projections and units must be non-empty.
         if ds == None or us == None or ps == None or \
             len(ds) == 0 or len(us) == 0 or len(ps) == 0:
-                print >>sys.stderr, "[%s] Error: Data set: dimensions, projections and units must be non-empty." \
+                print >>sys.stderr, "[%s] Configuration error: dimensions, projections and units must be non-empty." \
                                     % time.asctime()
                 return False
 
@@ -86,17 +86,17 @@ class Config(object):
         for p in ps:
             for d in p:
                 if d not in ds:
-                    print >>sys.stderr, "[%s] Error: Data set: %s is a reference to an unkown dimension." \
+                    print >>sys.stderr, "[%s] Configuration error: %s is a reference to an unkown dimension." \
                         % (time.asctime(),d)
                     sane = False
 
-        # also, there must be no funny characters in
-        # the name of the dataset, the dimensions or units.
-        for xs in [[dataset], ds, us]:
-            for x in xs:
-                m = re.match('^[a-zA-Z0-9]+$', x)
+        # also, there must be no funny characters in the name of the dataset, the dimensions or units.
+        for (type, data) in [('dataset', [dataset]), ('dimension', ds), ('unit', us)]:
+            for d in data:
+                m = re.match('^[a-zA-Z0-9]+$', d)
                 if m == None:
-                    print >>sys.stderr, "[%s] Error: Data set: '%s' is an invalid name." % (time.asctime(),x)
+                    print >>sys.stderr, "[%s] Configuration error: '%s' is an invalid %s name." \
+                                        % (time.asctime(), d, type)
                     sane = False
 
         return sane
