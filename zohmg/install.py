@@ -42,7 +42,7 @@ def copy_files():
             os.mkdir(dir)
 
     # copy docs.
-    docs = ['README','TODO','QUICKSTART']
+    docs = ['README','TODO']
     for doc in docs:
         copy_bundle(doc,doc,doc_target)
 
