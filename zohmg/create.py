@@ -29,6 +29,22 @@ and run it with 'zohmg import'.
 Take a look in /usr/local/share/zohmg for further documentation.
 """
 
+DATASET= """
+dataset:
+  %s
+
+dimensions:
+  - d0
+  - d1
+
+projections:
+  - d0
+  - d0-d1
+
+units:
+  -u0
+""" % (self.basename)
+
 CLIENT = """<html>
 <body>
 Static files here will be served from the url http://host:port/client/filename.
@@ -71,13 +87,7 @@ class Create(object):
         self.__write_to_file('config/environment.py', ENV_SCRIPT)
         self.__write_to_file('mappers/identity_mapper.py', MAPPER)
         self.__write_to_file("transformers/identity_transformer.py",TRANSFORMER)
-
-        # Create skeleton config/dataset.yaml
-        datasetconfig = "dataset: %s\n" % self.basename \
-                      + "dimensions:\n  - d0\n  - d1\n" \
-                      + "projections:\n  p0:\n    - d0\n    - d1\n" \
-                      + "units:\n  - u0\n"
-        self.__write_to_file("config/dataset.yaml", datasetconfig)
+        self.__write_to_file("config/dataset.yaml", DATASET)
         # TODO: consider using Config.config_file instead of hardcoded path.
 
         print "ok."

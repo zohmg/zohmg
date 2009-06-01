@@ -5,10 +5,8 @@ class TestConfig(unittest.TestCase):
     def test_sanity_check(self):
         # a few broken configurations,
         for x in ['a','b', 'c']:
-            print x
             dataset = 'tests/fixtures/dataset-broken-%s.yaml' % x
-            c = Config(dataset)
-            self.assertEqual(c.sanity_check(), False)
+            self.assertRaises(SystemExit, Config, dataset)
         # and a good one.
         dataset = 'tests/fixtures/dataset-ok.yaml'
         c = Config(dataset)

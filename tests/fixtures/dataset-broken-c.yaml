@@ -11,14 +11,8 @@ dimensions:
 # the problem with this configuration is that is references
 # dimensions that aren't defined.
 projections:
-    country-useragent:
-      - country
-      - useragent
-    country-weirdness:
-      - country
-      - madeupdimension
-      - whatwhatwhat
-    empty: # and has a funnay name, but that's ok.
+    - country-useragent
+    - country-weirdness-madeupdimension
 
 units:
  - a

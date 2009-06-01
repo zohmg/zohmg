@@ -9,13 +9,13 @@ class Mapper(object):
     def __call__(self, key, value):
         # from the usermapper: a timestamp, a point in n-space, units and their values.
         for (ts, point, units) in self.usermapper(key, value):
-            for pjs in self.projections.values():
+            for p in self.projections:
                 # perform dimensionality reduction,
                 reduced = {}
-                for d in pjs:
+                for d in p:
                     reduced[d] = point[d]
                 # yield for each requested projection.
                 # include the projections list to get the order right.
                 for u in units:
                     value = units[u]
-                    yield (ts, pjs, reduced, u), value
+                    yield (ts, p, reduced, u), value

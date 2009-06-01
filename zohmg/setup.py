@@ -8,9 +8,10 @@ class Setup(object):
         dataset = c.config['dataset']
 
         cfs = []
+        # each projection becomes a column-family,
+        # i.e. "user-country-agent".
         for p in c.config['projections']:
-            projection = '-'.join(c.config['projections'][p])
-            cfs.append(projection)
+            cfs.append(p)
 
         print "creating table '%s'" % dataset
         print " column families:"
