@@ -2,12 +2,14 @@
 INTRODUCING: ZOHMG.
 -------------------
 
-Zohmg is a data store for aggregated multi-dimensional time-series-based data. It is built on top of HBase and provides tools for data aggregation using Hadoop.
+Zohmg is a data store for aggregation of multi-dimensional time-series-based
+data. It is built on top of HBase and provides tools for data aggregation using
+Hadoop.
+
+This README assumes a working installation of zohmg. Please see INSTALL for
+installation instructions.
 
 Zohmg is alpha software. Be gentle.
-
-This README assumes a working installation of zohmg. Please see INSTALL for installation instructions.
-
 
 
 RUN THE ZOHMG
@@ -41,12 +43,16 @@ The next step is to configure environment.py and dataset.yaml.
 
 config/environment.py:
 
-Define HADOOP_HOME and paths to all three jars (hadoop, hadoop-streaming, hbase). You might need to run 'ant package' in $HADOOP_HOME to have all jars built for you.
+Define HADOOP_HOME and paths to all three jars (hadoop, hadoop-streaming,
+hbase). You might need to run 'ant package' in $HADOOP_HOME to have all jars
+built for you.
 
 
 config/dataset.yaml:
 
-Define your data set. This means setting up the dimensions and projectionswill be used. The dimensions lets Zohmg know what your data might look like while the projections list hints at what queries you will ask the data store.
+Define your data set. This means setting up the dimensions and projectionswill
+be used. The dimensions lets Zohmg know what your data might look like while the
+projections list hints at what queries you will ask the data store.
 
 Example config/dataset.yaml:
 
@@ -125,14 +131,16 @@ Secondly, run the mapper
 
 	$> zohmg import mappers/mapper.py /data/weblogs/2009/05/11
 
-The first argument to import is the path to the python file containing the map function, the second is a path on HDFS.
+The first argument to import is the path to the python file containing the map
+function, the second is a path on HDFS.
 
 
 
 SERVE DATA
 ----------
 
-Assuming the mapper finished successfully there will now be some data in the HBase table.
+Assuming the mapper finished successfully there will now be some data in the
+HBase table.
 
 The data server uses a Thrift interface to HBase so make sure the thrift
 server is on (i.e. 'hbase thrift start').
