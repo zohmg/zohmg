@@ -65,7 +65,6 @@ Example config/dataset.yaml:
      - user
      - status
 
-	# TODO: this style is not implemented yet(!)
     projections:
      - user
      - status

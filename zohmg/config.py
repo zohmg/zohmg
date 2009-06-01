@@ -1,5 +1,13 @@
-from zohmg.utils import fail
+from zohmg.utils import fail # heh.
 import os, re, sys, time
+
+
+# the configuration file has four parts:
+#   'dataset' - string
+#   'dimensions' - list of strings
+#   'units' - list of strings
+#   'projections' - list of lists
+
 
 # TODO: multiple dataset files
 class Config(object):
@@ -26,15 +34,15 @@ class Config(object):
                 f.close()
                 config_loaded = True
             except:
-                pass
+                pass # TODO: be more specific about what error occured.
 
         if not config_loaded:
-            msg = "[%s] Error: Could not read configuration." % time.asctime()
+            msg = "[%s] Error: Could not read configuration: %s" % (time.asctime(), self.config_file)
             fail(msg)
 
         if not self.sanity_check():
             msg = "[%s] Error: Could not parse configuration." % time.asctime()
-            fail(msg)
+            fail(msg) # TODO: should maybe not use fail as it raises SystemExit.
 
         return self.config
 
@@ -46,7 +54,10 @@ class Config(object):
     def units(self):
         return self.config['units']
     def projections(self):
-        return self.config['projections']
+        # turn list of strings into list of list of strings.
+        # ['country', 'country-domain-useragent-usertype']
+        # => [['country'], ['country', 'domain', 'useragent', 'usertype']]
+        return map(lambda s : s.split('-'), self.config['projections'])
 
     # returns True if configuration is sane,
     # False otherwise.
@@ -73,14 +84,11 @@ class Config(object):
 
         # also, the configuration may not reference unknown dimensions.
         for p in ps:
-            if ps[p] == None or len(ps[p]) == 0:
-                print >>sys.stderr, "[%s] Error: Data set: Empty projections are not allowed." % time.asctime()
-                return False
-            for d in ps[p]:
+            for d in p:
                 if d not in ds:
                     print >>sys.stderr, "[%s] Error: Data set: %s is a reference to an unkown dimension." \
-                                    % (time.asctime(),d)
-                    sane = False # TODO: return False ?
+                        % (time.asctime(),d)
+                    sane = False
 
         # also, there must be no funny characters in
         # the name of the dataset, the dimensions or units.
@@ -89,7 +97,7 @@ class Config(object):
                 m = re.match('^[a-zA-Z0-9]+$', x)
                 if m == None:
                     print >>sys.stderr, "[%s] Error: Data set: '%s' is an invalid name." % (time.asctime(),x)
-                    sane = False # TODO: return False ?
+                    sane = False
 
         return sane
 

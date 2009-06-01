@@ -16,6 +16,9 @@ priority zero:
 + make data export simpler - why is this not a thrift interface anyways?
 + integrate js example. [paste.fileapp]
 
+errors:
++ cp: cannot stat `QUICKSTART': No such file or directory
+
 docs:
 + add description of what zohmg is and what its long term goals are
 + verify webberface url in README
