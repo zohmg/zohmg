@@ -21,12 +21,12 @@ CLASSPATH = (
 
 README = """This is your zohmg application!
 
-Configure dataset.yaml to match your data,
+Configure config/dataset.yaml to match your data,
 run 'zohmg setup' to create an hbase table,
-write a mapper that maps each line of data to n-space (what?),
-and run it with 'zohmg import'.
+write a mapper and run with 'zohmg import'.
 
-Take a look in /usr/local/share/zohmg for further documentation.
+Take a look in /usr/local/share/zohmg/doc for further documentation
+and /usr/local/share/zohmg/examples for, yes, examples.
 """
 
 CLIENT = """<html>
