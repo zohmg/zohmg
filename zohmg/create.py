@@ -29,22 +29,6 @@ and run it with 'zohmg import'.
 Take a look in /usr/local/share/zohmg for further documentation.
 """
 
-DATASET= """
-dataset:
-  %s
-
-dimensions:
-  - d0
-  - d1
-
-projections:
-  - d0
-  - d0-d1
-
-units:
-  -u0
-""" % (self.basename)
-
 CLIENT = """<html>
 <body>
 Static files here will be served from the url http://host:port/client/filename.
@@ -67,6 +51,23 @@ class Create(object):
     def __init__(self, path):
         self.basename = os.path.basename(path)
         self.abspath  = os.path.abspath(path)
+
+        
+        DATASET= """
+dataset:
+  %s
+
+dimensions:
+  - d0
+  - d1
+
+projections:
+  - d0
+  - d0-d1
+
+units:
+  -u0
+""" % (self.basename)
 
         sys.stdout.write("Creating %s... " % self.basename)
 
