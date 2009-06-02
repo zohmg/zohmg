@@ -78,6 +78,9 @@ def copy_files():
     # data server middleware.
     shutil.copytree("zohmg/middleware",lib_target+"/middleware")
 
+    # static skeleton.
+    shutil.copytree("static-skeleton", lib_target+"/static-skeleton")
+
     # usermapper sucker importer.
     copy_bundle("dumbo mapper import script","lib/import.py",lib_target)
 

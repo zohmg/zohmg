@@ -1,0 +1,28 @@
+body, p, td {
+    font-size: 1em;
+    font-family: Verdana, Helvetica, Arial, sans-serif;
+}
+#nav {
+    margin-bottom: 2em;
+    font-size: 0.8em;
+}
+td {
+    padding-top: 1em;
+}
+a, a.visited {
+    color:#00ff00;
+}
+#undergraph {
+    font-size: 0.75em;
+    color:#33ff33;
+    background-color:#fff;
+    margin-top: 0;
+    padding-top: 1em;
+    margin-right: 0;
+    padding-right: 1em;
+    margin-bottom: 0;
+    padding-bottom: 1em;
+    margin-left: 0;
+    padding-left: 1em;
+    width: 80em;
+}

@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+  <title>exciting graphs from the department of unmediated statistics</title>
+
+  <link rel="stylesheet" href="style.css" type="text/css" />
+
+  <script type="text/javascript" src="js/jquery-1.3.2.min.js"></script>
+  <script type="text/javascript" src="js/jquery.getUrlParam.js"></script>
+  <script type="text/javascript" src="js/zohmg.js"></script>
+
+</head>
+
+<body onload="updateForm(); updateGraph();">
+
+Here's plotting stuff.<br \>
+
+<form id="graphNav">
+
+<table id="nav">
+<tr>
+  <td>From: <br />
+    <input type="text" id='t0' name="t0" size="8" /></td>
+  <td>To: <br />      
+    <input type="text" id='t1' name="t1" size="8" /></td>
+</tr>
+
+<tr>
+  <td colspan="2">Unit: <br />
+    <input type="text" id='unit' name="unit" value="bytes" /> - one of 'pageviews', 'bytes'
+  </td>
+</tr>
+
+<tr>
+  <td colspan="2">Base dimension:<br/>
+    <!-- TODO: populate dimension automagically. -->
+    <input type="text" id='d0' name="d0" size="8"/>
+    <input type="text" id='d0v' name="d0v" size="12"/><br />
+    leave list of countries empty to select all.
+  </td>
+</tr>
+
+<tr>
+  <td>Filter:<br/>
+    <!-- TODO: populate the dimensions automagically. -->
+    <input type="text" id='d1' name="d1" size=10 />
+    <input type="text" id='d1v' name="d1v" size=10 /><br />
+
+    <input type="text" id='d2' name="d2" size=10 />
+    <input type="text" id='d2v' name="d2v" size=10 /><br />
+
+    <input type="text" name="d3" size=10 />
+    <input type="text" name="d3v" size=10 /><br />
+
+    <input type="text" name="d4"  size=10 />
+    <input type="text" name="d4v" size=10 /><br />
+  </td>
+  <td colspan="3" align="right">
+    <input type="submit" value="Update" /></td>
+</tr>
+</table>
+</form>
+
+<div id="graph"></div>
+<div id="undergraph"></div>
+
+</body>
+</html>

@@ -16,10 +16,10 @@
 #under the License.
 
 from zohmg.utils import fail
-import os, sys
+import os, sys, shutil
 
 # FIXME: temporarily disabled 'clients'
-DIRS = ["config","lib","mappers","transformers"]
+DIRS = ["config", "lib", "mappers", "transformers"]
 
 # config/environment.py
 ENV_SCRIPT = """# Please define the following environment variables.
@@ -86,7 +86,7 @@ units:
   -u0
 """ % (self.basename)
 
-        sys.stdout.write("Creating %s... " % self.basename)
+        print ("Creating %s " % self.abspath)
 
         # Create project directories with 0755.
         try:
@@ -95,7 +95,7 @@ units:
                 os.mkdir(self.abspath+"/"+dir)
         # Something went wrong, act accordingly.
         except OSError, ose:
-            msg = "Error: Could not create project directories. %s" % ose.strerror
+            msg = "Error: Could not create project directory. %s" % ose.strerror
             fail(msg, ose.errno)
 
         # Create .zohmg, README, client, environment, mapper and transformer.
@@ -107,6 +107,10 @@ units:
         self.__write_to_file("transformers/identity_transformer.py",TRANSFORMER)
         self.__write_to_file("config/dataset.yaml", DATASET)
         # TODO: consider using Config.config_file instead of hardcoded path.
+
+        # static: cp -r from skel.
+        hardcoded_path = "/usr/local/lib/zohmg/static-skeleton"
+        shutil.copytree(hardcoded_path, self.abspath+'/static')
 
         print "ok."
 
