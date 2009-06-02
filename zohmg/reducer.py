@@ -24,4 +24,3 @@ class Reducer(object):
 
         # remember, we'll pass the output of this reducer to HBaseOutputReader.
         yield rk, json.dumps({cf+":"+q : {'value':value}})
-
