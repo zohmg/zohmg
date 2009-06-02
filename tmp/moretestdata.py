@@ -50,7 +50,7 @@ for c in countries: hashes[c] = hash(c) % 255
 
 client, transport = setup_transport('localhost')
 
-for year in range(2009, 2020):
+for year in range(2009, 2010):
     year = str(year)
     for month in range(1,13):
         month = "%02d" % month
