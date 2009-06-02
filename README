@@ -125,9 +125,9 @@ request are requested and passed along to the data store.
         yield time,dimensions,values
 
 
-The output of the mapper goes into a reducir that, for each
+The output of the mapper goes into a reducer that, for each
 dimension-tuple, sums the values of each unit and passes them along to the
-actual underlying data stare.
+actual underlying data stare. Make sure the values are of type int.
 
 Secondly, run the mapper
 
