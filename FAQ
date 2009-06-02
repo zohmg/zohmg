@@ -3,6 +3,27 @@
 Make sure you put the eggs for all non-standard python modules
 that your mapper use in the lib directory of your application.
 
+
 + Are you getting this error: 'TypeError: sequence item 0: expected string, int found'?
 Make sure your mapper sets the value of all dimensions to strings, not integers.
+
+
++ What does this exception mean and how do I fix it?
+java.lang.NullPointerException
+  at org.apache.hadoop.io.BytesWritable.(BytesWritable.java:50)
+  at org.apache.hadoop.typedbytes.TypedBytesWritable.(TypedBytesWritable.java:41)
+  at org.apache.hadoop.streaming.io.TypedBytesOutputReader.getLastOutput(TypedBytesOutputReader.java:73)
+<snip>
+
+Check the stdout and stderr in the Hadoop webui for more information. It could be:
+* That your mapper outputs all the dimensions you have specified in your dataset.yaml file.
+* That there's a python library missing, check the DEPENDENCIES file for more information.
+
+
++ What does this error mean?
+TypeError: unsupported operand type(s) for +: 'int' and 'str'
+
+The units you output have to be of type int. In this case it's a string instead,
+you can typecast it like so: int(variable)
+
 
