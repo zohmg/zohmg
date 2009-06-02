@@ -2,19 +2,24 @@
 DEPENDENCIES
 ------------
 
+Zohmg depends on a number of software packages and Python modules.
+
+The installation procedure described in INSTALL will take care of
+these dependencies for you, except for patched versions of 
+Hadoop and HBase. Please see install_hadoop_hbase.sh in the scripts
+directory for an automated installation of those.
+
+
 The following software is required:
-
-- Apache Hadoop 0.19.1 with patches HADOOP-1722 and HADOOP-5450.
-- Apache HBase 0.19.2
-
-There's a script to help you installed a patched version of hadoop and hbase:  scripts/install_hadoop_hbase.sh
+ - Apache Hadoop 0.19.x with patches HADOOP-1722 and HADOOP-5450.
+ - Apache HBase 0.19.x
+ - Dumbo 0.21.x
 
 Python modules:
-- Dumbo 0.21.x
-- Python Paste
-- Python Setup Tools
-- Python simplejson
-- PyYAML
+ - Python Paste
+ - Python Setup Tools
+ - Python simplejson
+ - PyYAML
 
 
 
