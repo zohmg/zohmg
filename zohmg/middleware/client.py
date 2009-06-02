@@ -17,6 +17,7 @@
 
 import time
 
+# TODO: rename => 'static'
 class client(object):
     """
     Application that serves static files from the 'static' directory in the
@@ -26,6 +27,7 @@ class client(object):
         from paste.urlparser import make_static
         project_dir = environ["zohmg_project_dir"]
         file = environ["PATH_INFO"]
-        client = make_static({},project_dir+"/static")
-        print "[%s] Client, serving static file %s%s." % (time.asctime(),project_dir,file)
-        return client(environ,start_response)
+        # TODO: file == '' => 'index.html'
+        client = make_static({}, project_dir+"/static")
+        print "[%s] Client, serving static file %s%s." % (time.asctime(), project_dir, file)
+        return client(environ, start_response)
