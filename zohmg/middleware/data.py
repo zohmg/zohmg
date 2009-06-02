@@ -40,8 +40,13 @@ class data(object):
         try: data = data_utils.hbase_get(self.table, self.projections, environ) # query is in environ.
         except ValueError:
             print >>sys.stderr, "Error: Could not parse query."
-            start_response('200 OK', [('content-type', 'text/html')])
+            start_response('200 OK', [('content-type', 'text/html')]) # TODO: not 200.
             return "could not parse query." # TODO: nicer.
+        except:
+            print >>sys.stderr, "Error: unknown error :-("
+            start_response('500 OK', [('content-type', 'text/html')])
+            return "egads!" # TODO: nicer.
+
         elapsed = (time.time() - start)
         sys.stderr.write("hbase query+prep time: %s\n" % elapsed)
 
