@@ -444,7 +444,7 @@ hadoop and hbase are installed in $prefix
 
 I'll leave it to you to start hadoop and hbase.
 
-you'll find help at http://hadoop.apache.org/core/docs/current/quickstart.html
+you'll find help at http://hadoop.apache.org/core/docs/r0.19.1/quickstart.html
 and http://wiki.apache.org/hadoop/Hbase/10Minutes
 
 it boils down to this:

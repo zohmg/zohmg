@@ -5,7 +5,7 @@ DEPENDENCIES
 The following software is required:
 
 - Apache Hadoop 0.19.1 with patches HADOOP-1722 and HADOOP-5450.
-- Apache HBase 0.19.1
+- Apache HBase 0.19.2
 
 There's a script to help you installed a patched version of hadoop and hbase:  scripts/install_hadoop_hbase.sh
 
@@ -28,7 +28,7 @@ Python modules:
     For more information see http://hadoop.org/.
 
 
-- Apache HBase (0.19.1)
+- Apache HBase (0.19.2)
 
     BigTable inspired database implemented in Java.
 
