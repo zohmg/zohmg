@@ -1,35 +1,27 @@
-report:
-+ graphs! images! examples!
-+ abstract: non-buzzword; focus on problem
-+ introduction: introduce time-series, data warehousing, mapreduce, bigtable
-+ introduction: why is time important? we query for time, etc.
-+ method:
-+ implementation:
-+ discussion:
-+ write about related work.
 
 priority zero:
 + make sure it's easy to get zohmg up and running.
 + verify that zohmg works with hbase-0.19.3
 + example firstapp: zohmg create zohmg-apps/firstapp ; cd zohmg-apps/firstapp
 + make data export simpler - why is this not a thrift interface anyways?
-+ integrate js example. [paste.fileapp]
+DONE integrate js example.
 
 docs:
 + add description of what zohmg is and what its long term goals are
-+ verify webberface url in README
-+ mention that values are always ints, dimensions points always strings
-+ describe the data model of hbase in README
++ in README, verify webberface url
++ in README, mention that values are always ints, dimensions points always strings
++ in README, describe the data model of hbase
 + in README, describe how to set jobconf flags
 + in README, talk about the json format and jsonp.
++ in README, show js example page etc.
++ nice-up export section of wiki page and docs.
 
 priority uno:
-+ nice-up export section of wiki page and docs.
 DONE use combiner
-+ support for mapper class.
 DONE change projections syntax to list of dimensions. (I know what I mean)
-+ add support for many data sets.
-+ zohmg/create.py: do not try and create project if directory exists.
++ support for mapper class.
++ (later) add support for many data sets.
+DONE zohmg/create.py: do not try and create project if directory exists.
 + zohmg/create.py: make default dataset.yaml follow apache example.
 + zohmg/create.py: add apache.py to mapper examples.
 + zohmg/create.py: remove identity_mapper.py, instead bundle examples.
@@ -41,10 +33,10 @@ also:
 
 data server:
 + proper root page.
-+ http://127.0.0.1:8086/data => internal server error.
+DONE http://127.0.0.1:8086/data => internal server error.
 
 optimizations:
-DONE compress map output - mapred.compress.map.output=true => no difference.
+DONE compress map output - mapred.compress.map.output=true
 + (maybe) in usermapper, add timestamp to map of dimensions.
 + cache JSON and CHARTS.
 

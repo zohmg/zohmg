@@ -1,0 +1,9 @@
+report:
++ graphs! images! examples!
++ abstract: non-buzzword; focus on problem
++ introduction: introduce time-series, data warehousing, mapreduce, bigtable
++ introduction: why is time important? we query for time, etc.
++ method:
++ implementation:
++ discussion:
++ write about related work.
