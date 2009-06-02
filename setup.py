@@ -22,7 +22,7 @@ setup(
     version = '0.0.1',
     author = 'Fredrik Mollerstrand, Per Andersson',
     author_email = '{fredrik,per}@last.fm',
-    license = 'GNU Fearsome Dude License',
+    license = 'Apache v2',
     packages = ['zohmg'],
     zip_safe = True,
     entry_points = {
