@@ -3,7 +3,7 @@ report:
 + abstract: non-buzzword; focus on problem
 + introduction: introduce time-series, data warehousing, mapreduce, bigtable
 + introduction: why is time important? we query for time, etc.
-DONE + analysis: write intro, contents, summary.
+DONE analysis: write intro, contents, summary.
 + method:
 + implementation:
 + discussion:
@@ -11,13 +11,14 @@ DONE + analysis: write intro, contents, summary.
 
 priority zero:
 + make sure it's easy to get zohmg up and running.
-+ verify that zohmg works with hbase-0.19.2
++ verify that zohmg works with hbase-0.19.3
 + example firstapp: zohmg create zohmg-apps/firstapp ; cd zohmg-apps/firstapp
 + make data export simpler - why is this not a thrift interface anyways?
 + integrate js example. [paste.fileapp]
 
 errors:
-+ cp: cannot stat `QUICKSTART': No such file or directory
+DONE cp: cannot stat `QUICKSTART': No such file or directory
+
 
 docs:
 + add description of what zohmg is and what its long term goals are
@@ -27,12 +28,15 @@ priority uno:
 + nice-up export section of wiki page and docs.
 + use combiner
 + support for mapper class.
-+ change projections syntax to list of dimensions. (I know what I mean)
-+ add support for data sets.
+DONE change projections syntax to list of dimensions. (I know what I mean)
++ add support many for data sets.
 + zohmg/create.py: do not try and create project if directory exists.
 + zohmg/create.py: make default dataset.yaml follow apache example.
 + zohmg/create.py: add apache.py to mapper examples.
 + zohmg/create.py: remove identity_mapper.py, instead bundle examples.
+
+also:
++ would be nice to run zohmg mappers locally, to debug and what not.
 
 optimizations:
 + compress map output - mapred.compress.map.output=true

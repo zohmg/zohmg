@@ -87,7 +87,7 @@ Verify that the table was created:
     weblogs
     1 row(s) in 0.1337 seconds
 
-	# ok!
+    # ok!
 
 
 
