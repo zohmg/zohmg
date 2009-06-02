@@ -3,7 +3,6 @@ report:
 + abstract: non-buzzword; focus on problem
 + introduction: introduce time-series, data warehousing, mapreduce, bigtable
 + introduction: why is time important? we query for time, etc.
-DONE analysis: write intro, contents, summary.
 + method:
 + implementation:
 + discussion:
@@ -16,20 +15,18 @@ priority zero:
 + make data export simpler - why is this not a thrift interface anyways?
 + integrate js example. [paste.fileapp]
 
-errors:
-DONE cp: cannot stat `QUICKSTART': No such file or directory
-
-
 docs:
 + add description of what zohmg is and what its long term goals are
 + verify webberface url in README
++ mention that values are always ints, dimensions points always strings
++ describe the data model of hbase in README
 
 priority uno:
 + nice-up export section of wiki page and docs.
-+ use combiner
+DONE use combiner
 + support for mapper class.
 DONE change projections syntax to list of dimensions. (I know what I mean)
-+ add support many for data sets.
++ add support for many data sets.
 + zohmg/create.py: do not try and create project if directory exists.
 + zohmg/create.py: make default dataset.yaml follow apache example.
 + zohmg/create.py: add apache.py to mapper examples.
@@ -37,11 +34,20 @@ DONE change projections syntax to list of dimensions. (I know what I mean)
 
 also:
 + would be nice to run zohmg mappers locally, to debug and what not.
++ clean darling prints ("HBaseIdentifierResolver", "cfq", "payload", etc)
++ generally do less work in __init__
+
+data server:
++ proper root page.
++ http://127.0.0.1:8086/data => internal server error.
 
 optimizations:
-+ compress map output - mapred.compress.map.output=true
-+ in usermapper, add timestamp to map of dimensions.
+DONE compress map output - mapred.compress.map.output=true => no difference.
++ (maybe) in usermapper, add timestamp to map of dimensions.
 + cache JSON and CHARTS.
+
+performance:
++ how many column families can we use?
 
 showstoppers:
 + recreate error, fix: npe on empty mapper output
@@ -50,10 +56,10 @@ showstoppers:
 
 priority due:
 + think a bit more about serving static files.
-+ source dist, would distribute source and depend on thrift etc to build.
-+ binary dist, ready to use eggs.
-+ some update step for post-setup alterations to dataset.yaml
-+ put address and ports for servers and software in config (hbase REST et al)
++ (some day/maybe) source dist, would distribute source and depend on thrift etc to build.
++ (some day/maybe) binary dist, ready to use eggs.
++ (some day/maybe) some update step for post-setup alterations to dataset.yaml
++ (some day/maybe) put address and ports for servers and software in config (hbase REST et al)
 + (some day/maybe) build HBase thrift interface
 + (some day/maybe) ask user for path to Hbase.thrift and build hbase-*.egg
 + (some day/maybe) warn user when config is missing (what does this mean?)
