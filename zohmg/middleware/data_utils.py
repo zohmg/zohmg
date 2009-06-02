@@ -51,7 +51,7 @@ def enumerate_cells(dimensions, values, target=[]):
 
 # fetches data from hbase,
 # returns sorted list of dictionaries suitable for json dumping.
-def hbase_get(table,projections,environ):
+def hbase_get(table, projections, environ):
     params = parse_formvars(environ)
     try:
         t0 = params['t0']
@@ -101,7 +101,7 @@ def hbase_get(table,projections,environ):
     #    and p must be the shortest of the fitting candidates.
     ps = [] # projection candidates.
     wanted = set([d0] + filters.keys())
-    for p in projections.values():
+    for p in projections:
         if set(p).issuperset(wanted):
             ps.append((len(p), p.index(d0), p))
     # sort by length, then index; pick the first one.
@@ -153,4 +153,8 @@ def hbase_get(table,projections,environ):
             data[ymd] = t
 
     # returns a list of dicts sorted by ymd.
-    return [ (ymd,data[ymd]) for ymd in sorted(data) ]
+    pers_way = [ (ymd,data[ymd]) for ymd in sorted(data) ]
+    correct  = [ {ymd:data[ymd]} for ymd in sorted(data) ]
+    return correct
+
+
