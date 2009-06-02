@@ -27,9 +27,9 @@ Zohmg is installed as a command line script. Try it out:
 CREATE YOUR FIRST 'PROJECT'
 ---------------------------
 
-    $> zohmg create crazydata
+    $> zohmg create weblogs
 
-This command creates a project directory named "crazydata". Its contents are:
+This command creates a project directory named "weblogs". Its contents are:
 
 config       - environment and dataset configuration.
 lib          - eggs or jars that will be automatically included in job jar.
@@ -53,7 +53,7 @@ built for you.
 
 config/dataset.yaml:
 
-Define your data set. This means setting up the dimensions and projectionswill
+Define your data set. This means setting up the dimensions and projections that will
 be used. The dimensions lets Zohmg know what your data might look like while the
 projections list hints at what queries you will ask the data store.
 
