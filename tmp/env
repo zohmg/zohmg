@@ -1,3 +1,0 @@
-# you need to source this.
-echo "hah, im in yr env, hardcoding yr paths"
-export PYTHONPATH=$HOME/zohmg/lib:$HOME/whoop/lib
