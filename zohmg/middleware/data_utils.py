@@ -156,5 +156,3 @@ def hbase_get(table, projections, environ):
     pers_way = [ (ymd,data[ymd]) for ymd in sorted(data) ]
     correct  = [ {ymd:data[ymd]} for ymd in sorted(data) ]
     return correct
-
-

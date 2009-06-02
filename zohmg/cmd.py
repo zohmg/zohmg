@@ -104,7 +104,7 @@ def serve():
     project_dir = os.path.abspath("")
 
     # fire off data/transformer/client server.
-    zohmg.serve.start(project_dir,host="localhost",port=port)
+    zohmg.serve.start(project_dir, host="localhost", port=port)
 
 
 # exits if 'zohmg' was run in a directory without the special .zohmg-file.

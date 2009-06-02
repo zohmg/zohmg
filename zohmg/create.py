@@ -18,7 +18,7 @@
 from zohmg.utils import fail
 import os, sys, shutil
 
-# FIXME: temporarily disabled 'clients'
+
 DIRS = ["config", "lib", "mappers", "transformers"]
 
 # config/environment.py
@@ -46,14 +46,7 @@ Take a look in /usr/local/share/zohmg/doc for further documentation
 and /usr/local/share/zohmg/examples for, yes, examples.
 """
 
-CLIENT = """<html>
-<body>
-Static files here will be served from the url http://host:port/client/filename.
-</body>
-</html>
-"""
-
-MAPPER = """# identity mapper.
+MAPPER = """
 def map(key, value):
     # egads!
 """
@@ -69,7 +62,6 @@ class Create(object):
         self.basename = os.path.basename(path)
         self.abspath  = os.path.abspath(path)
 
-        
         DATASET= """
 dataset:
   %s
@@ -101,14 +93,13 @@ units:
         # Create .zohmg, README, client, environment, mapper and transformer.
         self.__write_to_file('.zohmg')
         self.__write_to_file('README', README)
-        #self.__write_to_file("clients/client.html",CLIENT)
         self.__write_to_file('config/environment.py', ENV_SCRIPT)
-        self.__write_to_file('mappers/identity_mapper.py', MAPPER)
+        self.__write_to_file('mappers/empty_mapper.py', MAPPER)
         self.__write_to_file("transformers/identity_transformer.py",TRANSFORMER)
         self.__write_to_file("config/dataset.yaml", DATASET)
-        # TODO: consider using Config.config_file instead of hardcoded path.
 
         # static: cp -r from skel.
+        # TODO: hardcoded path; will break eventually.
         hardcoded_path = "/usr/local/lib/zohmg/static-skeleton"
         shutil.copytree(hardcoded_path, self.abspath+'/static')
 

@@ -37,13 +37,16 @@ class data(object):
 
         # fetch data.
         start = time.time()
-        try: data = data_utils.hbase_get(self.table,self.projections,environ) # query is in environ.
+        try: data = data_utils.hbase_get(self.table, self.projections, environ) # query is in environ.
         except ValueError:
             print >>sys.stderr, "Error: Could not parse query."
+            start_response('200 OK', [('content-type', 'text/html')])
+            return "could not parse query." # TODO: nicer.
         elapsed = (time.time() - start)
         sys.stderr.write("hbase query+prep time: %s\n" % elapsed)
 
         # serve output.
+        # TODO: it's hardly html, now is it?
         start_response('200 OK', [('content-type', 'text/html')])
         return data_utils.dump_jsonp(data)
         #"jsonZohmgFeed(" + json.dumps(data) + ")" # jsonp.
