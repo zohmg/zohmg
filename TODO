@@ -20,6 +20,8 @@ docs:
 + verify webberface url in README
 + mention that values are always ints, dimensions points always strings
 + describe the data model of hbase in README
++ in README, describe how to set jobconf flags
++ in README, talk about the json format and jsonp.
 
 priority uno:
 + nice-up export section of wiki page and docs.
