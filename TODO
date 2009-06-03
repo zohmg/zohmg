@@ -1,4 +1,3 @@
-
 priority zero:
 + make sure it's easy to get zohmg up and running.
 + verify that zohmg works with hbase-0.19.3
@@ -15,6 +14,7 @@ docs:
 + in README, talk about the json format and jsonp.
 + in README, show js example page etc.
 + nice-up export section of wiki page and docs.
++ FAQ on heap size and other tweaks
 
 priority uno:
 DONE use combiner
@@ -32,7 +32,7 @@ also:
 + generally do less work in __init__
 
 data server:
-+ proper root page.
+DONE proper root page.
 DONE http://127.0.0.1:8086/data => internal server error.
 
 optimizations:

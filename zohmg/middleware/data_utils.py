@@ -23,6 +23,7 @@ from zohmg.scanner import HBaseScanner
 
 # returns jsonp which can be used in clients.
 def dump_jsonp(payload):
+    # TODO: read jsonp callback variable, use instead of jsonZohmgFeed.
     return "jsonZohmgFeed(" + json.dumps(payload) + ")"
 
 

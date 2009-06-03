@@ -17,8 +17,7 @@
 
 import time
 
-# TODO: rename => 'static'
-class client(object):
+class static(object):
     """
     Application that serves static files from the 'static' directory in the
     project directory.
@@ -28,6 +27,6 @@ class client(object):
         project_dir = environ["zohmg_project_dir"]
         file = environ["PATH_INFO"]
         # TODO: file == '' => 'index.html'
-        client = make_static({}, project_dir+"/static")
-        print "[%s] Client, serving static file %s%s." % (time.asctime(), project_dir, file)
-        return client(environ, start_response)
+        static = make_static({}, project_dir+"/static")
+        print "[%s] Static: serving %s/static/%s." % (time.asctime(), project_dir, file)
+        return static(environ, start_response)
