@@ -12,10 +12,13 @@ installation instructions.
 Zohmg is alpha software. Be gentle.
 
 
-Website: http://github.com/zohmg/zohmg
-IRC: #zohmg @ irc.freenode.net
-Mailing list: http://groups.google.com/group/zohmg-user & http://groups.google.com/group/zohmg-dev/members
+CONTACT
+-------
 
+IRC: #zohmg at freenode
+Web: http://last.fm/zohmg
+Code: http://github.com/zohmg/zohmg/tree/master
+Mailing list: http://groups.google.com/group/zohmg-user
 
 
 RUN THE ZOHMG
@@ -98,8 +101,8 @@ Verify that the table was created:
 
 
 
-RUN YOUR MAPPER
----------------
+WRITE A  MAPPER
+----------------
 
 After the project is created and setup correctly it is time to import some
 data. This is done in two steps: Write a map function and then run that
@@ -136,6 +139,11 @@ The output of the mapper goes into a reducer that, for each
 dimension-tuple, sums the values of each unit and passes them along to the
 actual underlying data stare. Make sure the values are of type int.
 
+
+
+RUN THE MAPPER
+--------------
+
 Secondly, run the mapper:
 
     $> zohmg import mappers/mapper.py /data/weblogs/2009/05/11
@@ -147,6 +155,7 @@ function, the second is a path on HDFS.
 You can enable lzo compression by giving --lzo as the third argument:
 
     $> zohmg import mappers/mapper.py /data/weblogs/2009/05/11 --lzo
+
 
 
 SERVE DATA
@@ -174,7 +183,7 @@ on (i.e. 'hbase thrift start').
 
 
 
-The API
+THE API
 -------
 
 Zohmg's data server exposes the data store through an HTTP API. Every
@@ -219,7 +228,7 @@ parameter, the returned JSON is wrapped in a function call.
 
 
 
-Plotting the data
+PLOTTING THE DATA
 -----------------
 
 There is a graphing tool bundled with Zohmg. It is served statically
@@ -227,4 +236,3 @@ by the Zohmg server at http://localhost:8086/static/index.html
 
 The graphing tool uses Javascript to query the data server, and plots
 graphs with the help of Google Charts.
-
