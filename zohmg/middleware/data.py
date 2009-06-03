@@ -38,9 +38,9 @@ class data(object):
         start = time.time()
         try: data = data_utils.hbase_get(self.table, self.projections, environ) # query is in environ.
         except ValueError:
-            print >>sys.stderr, "Error: Could not parse query."
-            start_response('200 OK', [('content-type', 'text/html')]) # TODO: not 200.
-            return "could not parse query." # TODO: nicer.
+            print >>sys.stderr, "400 Bad Request: missing arguments."
+            start_response('400 Bad Request', [('content-type', 'text/html')])
+            return "Query is missing arguments."
         except Exception, e:
             print >>sys.stderr, "Error: ", e
             start_response('500 OK', [('content-type', 'text/html')])
@@ -50,6 +50,5 @@ class data(object):
         sys.stderr.write("hbase query+prep time: %s\n" % elapsed)
 
         # serve output.
-        # TODO: the contenty-type is hardly html, now is it?
-        start_response('200 OK', [('content-type', 'text/html')])
+        start_response('200 OK', [('content-type', 'text/x-json')])
         return data_utils.dump_jsonp(data)
