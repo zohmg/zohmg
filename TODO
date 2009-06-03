@@ -6,7 +6,6 @@ priority zero:
 DONE integrate js example.
 
 docs:
-+ add description of what zohmg is and what its long term goals are
 + in README, verify webberface url
 + in README, mention that values are always ints, dimensions points always strings
 + in README, describe the data model of hbase
@@ -17,11 +16,8 @@ docs:
 + FAQ on heap size and other tweaks
 
 priority uno:
-DONE use combiner
-DONE change projections syntax to list of dimensions. (I know what I mean)
 + support for mapper class.
 + (later) add support for many data sets.
-DONE zohmg/create.py: do not try and create project if directory exists.
 + zohmg/create.py: make default dataset.yaml follow apache example.
 + zohmg/create.py: add apache.py to mapper examples.
 + zohmg/create.py: remove identity_mapper.py, instead bundle examples.
@@ -36,9 +32,11 @@ DONE proper root page.
 DONE http://127.0.0.1:8086/data => internal server error.
 
 optimizations:
-DONE compress map output - mapred.compress.map.output=true
-+ (maybe) in usermapper, add timestamp to map of dimensions.
+DONT compress map output - make mapred.compress.map.output=true default
 + cache JSON and CHARTS.
+
+gui:
++ connect metadata to select-dropdowns.
 
 performance:
 + how many column families can we use?
@@ -49,7 +47,7 @@ showstoppers:
 + in mapper, warn user if she supplies int as dimensional value - or fix!
 
 priority due:
-+ think a bit more about serving static files.
++ (maybe) in usermapper, add timestamp to map of dimensions.
 + (some day/maybe) source dist, would distribute source and depend on thrift etc to build.
 + (some day/maybe) binary dist, ready to use eggs.
 + (some day/maybe) some update step for post-setup alterations to dataset.yaml
@@ -61,8 +59,7 @@ priority due:
 + (some day/maybe) verify dimensions and units outputted by mapper.
 + (maybe never) support auto-installation on non-debian system.
 + (maybe never) support for installing in user-home
-+ document how user contributed code is shipped to dumbo/hadoop.
-+ connect metadata to select-dropdowns.
++ document how user contributed code is shipped to dumbo/hadoop (?)
 
 per check these:
 + sanity check for files shipped off to dumbo/hadoop.
@@ -74,6 +71,9 @@ per check these:
   naturally). set PYTHONPATH locally is the requirement.)
   or "more careful" way of importing usermapper (think Mapper constructor).
 
+DONE use combiner
+DONE change projections syntax to list of dimensions. (I know what I mean)
+DONE zohmg/create.py: do not try and create project if directory exists.
 DONE perfect docs.
 DONE add running example - aerodyne
 DONE concepts in data warehousing: write intro, summary.

@@ -4,10 +4,6 @@ Make sure you put the eggs for all non-standard python modules
 that your mapper use in the lib directory of your application.
 
 
-+ Are you getting this error: 'TypeError: sequence item 0: expected string, int found'?
-Make sure your mapper sets the value of all dimensions to strings, not integers.
-
-
 + What does this exception mean and how do I fix it?
 java.lang.NullPointerException
   at org.apache.hadoop.io.BytesWritable.(BytesWritable.java:50)
@@ -26,4 +22,16 @@ TypeError: unsupported operand type(s) for +: 'int' and 'str'
 The units you output have to be of type int. In this case it's a string instead,
 you can typecast it like so: int(variable)
 
+
++ What does this error mean?
+TypeError: sequence item 0: expected string, int found
+
+The dimension points you output have to be of type str. In this case it's an int.
+Typecast it like so: str(variable).
+
+
++ How can I speed up my mapper?
+
+If you have the native libs built, enabling compression of map output may speed things up.
+Set the flag like so: zohmg import <mapper> <input> -jobconf mapred.compress.map.output=true
 
