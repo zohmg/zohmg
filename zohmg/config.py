@@ -114,33 +114,34 @@ class Config(object):
             ps = self.projections()
         except:
             # might as well return straight away; nothing else will work.
-            print >>sys.stderr, "[%s] Configuration error: Missing definition of dataset, dimensions, units, projections." \
-                                % time.asctime()
+            print >>sys.stderr, "Configuration error: Missing definition of dataset, dimensions, units, projections."
             return False
 
         # dimensions, projections and units must be non-empty.
         if ds == None or us == None or ps == None or \
             len(ds) == 0 or len(us) == 0 or len(ps) == 0:
-                print >>sys.stderr, "[%s] Configuration error: dimensions, projections and units must be non-empty." \
-                                    % time.asctime()
+                print >>sys.stderr, "Configuration error: dimensions, projections and units must be non-empty."
                 return False
 
         # also, the configuration may not reference unknown dimensions.
         for p in ps:
             for d in p:
                 if d not in ds:
-                    print >>sys.stderr, "[%s] Configuration error: %s is a reference to an unkown dimension." \
-                        % (time.asctime(),d)
+                    print >>sys.stderr, "Configuration error: %s is a reference to an unkown dimension." % d
                     sane = False
 
-        # also, there must be no funny characters in the name of the dataset, the dimensions or units.
-        for (type, data) in [('dataset', [dataset]), ('dimension', ds), ('unit', us)]:
+        # also, there must be no funny characters in the name of dimensions or units.
+        # dimensions and units will feature in the columnfamily name and rowkey respectively.
+        for (type, data) in [('dimension', ds), ('unit', us)]:
             for d in data:
-                m = re.match('^[a-zA-Z0-9]+$', d)
-                if m == None:
-                    print >>sys.stderr, "[%s] Configuration error: '%s' is an invalid %s name." \
-                                        % (time.asctime(), d, type)
+                if re.match('^[a-zA-Z0-9]+$', d) == None:
+                    print >>sys.stderr, "Configuration error: '%s' is an invalid %s name." % (d, type)
                     sane = False
+
+        # we can be a litte less strict with dataset names since they become the table names.
+        if re.match('^[a-zA-Z0-9]+[a-zA-Z0-9-_]*[a-zA-Z0-9]+$', dataset) == None:
+            print >>sys.stderr, "Configuration error: '%s' is an invalid dataset name." % dataset
+            sane = False
 
         return sane
 
