@@ -26,6 +26,9 @@ also:
 + would be nice to run zohmg mappers locally, to debug and what not.
 + clean darling prints ("HBaseIdentifierResolver", "cfq", "payload", etc)
 + generally do less work in __init__
++ list shortcomings, both to avoid premature hype and to give the hbase devs incentive to work harder.
+ : slow to import (waiting for two optimizations that might alleviate the problem).
+ : can not store *that* many qualifiers.
 
 data server:
 DONE proper root page.
@@ -39,7 +42,8 @@ gui:
 + connect metadata to select-dropdowns.
 
 performance:
-+ how many column families can we use?
++ how many column families can we use? (<500k for sure)
+
 
 showstoppers:
 + recreate error, fix: npe on empty mapper output
