@@ -25,6 +25,7 @@ class Process(object):
         table = Config().dataset()
         resolver = 'fm.last.darling.HBaseIdentifierResolver'
         outputformat = 'org.apache.hadoop.hbase.mapred.TableOutputFormat'
+        jobname = "%s %s" % (table, input) # overrides any name specified on cli.
 
         opts = [('jobconf',"hbase.mapred.outputtable=" + table),
                 ('jobconf','stream.io.identifier.resolver.class=' + resolver),
@@ -35,7 +36,8 @@ class Process(object):
                 # Push zohmg egg and darling jar.
                 ('libegg',[z for z in sys.path if "zohmg" in z][0]),
                 ('libjar','/usr/local/lib/zohmg/darling-0.0.3.jar'),
-                ('file','lib/usermapper.py') # TODO: handle this more betterer.
+                ('file','lib/usermapper.py'), # TODO: handle this more betterer.
+                ('name', jobname)
                ]
 
         # check for '--lzo' as first extra argument.
