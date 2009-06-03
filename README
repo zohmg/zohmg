@@ -150,8 +150,9 @@ Verify this by firing up the HBase shell:
 
        $> hbase shell
        hbase(main):001:0> scan 'weblogs'
+       [..]
 
-Lots of data scrolling by? Good!
+Lots of data scrolling by? Good! (Interrupt with CTRL-C at your leisure.)
 
 
 Start the Zohmg server:
