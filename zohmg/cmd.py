@@ -18,7 +18,7 @@
 # this is the command line interface.
 
 from zohmg.utils import fail
-import sys, os
+import sys, os, getopt
 
 def usage(reason = None):
     zohmg = os.path.basename(sys.argv[0])
@@ -28,7 +28,7 @@ def usage(reason = None):
     print zohmg + " create <dir>"
     print zohmg + " setup"
     print zohmg + " import <mapper> <hdfs-input-dir>"
-    print zohmg + " serve [--port <port>]"
+    print zohmg + " serve [--host=<host>] [--port=<port>]"
     print zohmg + " help"
 
 def print_version():
@@ -96,15 +96,29 @@ def serve():
     refuse_to_act_in_nonzohmg_directory()
     import zohmg.serve
 
-    # check for optional argument.
-    try:    port = sys.argv[2]
-    except: port = 8086 # that's ok.
+    host = "localhost"
+    port = 8086
+
+    try:
+        opts, args = getopt.getopt(sys.argv[2:], "h:p:", ["host=", "port="])
+    except getopt.GetoptError, err:
+        print str(err)
+        usage()
+        sys.exit(2)
+    
+    for o, a in opts:
+        if o in ("-h", "--host"):
+            host=a
+        elif o in ("-p", "--port"):
+            port=a
+        else:
+            assert False, "unhandled option"
 
     # get cwd.
     project_dir = os.path.abspath("")
 
     # fire off data/transformer/client server.
-    zohmg.serve.start(project_dir, host="localhost", port=port)
+    zohmg.serve.start(project_dir, host=host, port=port)
 
 
 # exits if 'zohmg' was run in a directory without the special .zohmg-file.
