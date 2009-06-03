@@ -14,6 +14,7 @@ docs:
 + in README, show js example page etc.
 + nice-up export section of wiki page and docs.
 + FAQ on heap size and other tweaks
++ migrate staff wiki to github
 
 priority uno:
 + support for mapper class.
@@ -21,6 +22,7 @@ priority uno:
 + zohmg/create.py: make default dataset.yaml follow apache example.
 + zohmg/create.py: add apache.py to mapper examples.
 + zohmg/create.py: remove identity_mapper.py, instead bundle examples.
++ last.fm/zohmg => pages.github.com
 
 also:
 + would be nice to run zohmg mappers locally, to debug and what not.
@@ -29,6 +31,9 @@ also:
 + list shortcomings, both to avoid premature hype and to give the hbase devs incentive to work harder.
  : slow to import (waiting for two optimizations that might alleviate the problem).
  : can not store *that* many qualifiers.
+
+eggs:
++ bundle eggs: easy_install -zmaxd . simplejson
 
 data server:
 DONE proper root page.
