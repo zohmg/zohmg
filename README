@@ -11,8 +11,10 @@ installation instructions.
 
 Zohmg is alpha software. Be gentle.
 
+
 Website: http://github.com/zohmg/zohmg
 IRC: #zohmg @ irc.freenode.net
+
 
 
 RUN THE ZOHMG
@@ -141,26 +143,74 @@ function, the second is a path on HDFS.
 SERVE DATA
 ----------
 
-Assuming the mapper finished successfully there will now be some data in the
-HBase table.
+Assuming the mapper finished successfully there is now some data in
+the HBase table.
 
-The data server uses a Thrift interface to HBase so make sure the thrift
-server is on (i.e. 'hbase thrift start').
+Verify this by firing up the HBase shell:
 
-Start the data server with
+       $> hbase shell
+       hbase(main):001:0> scan 'weblogs'
+
+Lots of data scrolling by? Good!
+
+
+Start the Zohmg server:
 
 	$> zohmg serve
 
-Visiting the URL for extracting data and supplying query string with what
-data to retrieve:
+The Zohmg server listens on port 8086 at localhost by default. It uses
+a Thrift interface for HBase queries, so make sure the thrift server is
+on (i.e. 'hbase thrift start').
 
-    http://127.0.0.1:8086/?t0=20090420&t1=20090423&unit=pageviews&d0=user&d0v=goldman,kropotkin
 
-The result returned is a JSON feed of the data with the pageviews done by
-users goldman and kropotkin.
+
+The API
+-------
+
+Zohmg's data server exposes the data store through an HTTP API. Every
+request returns a JSON string.
+
+The API is extremely simple: it supports a single type of GET request,
+and there is no authentication.
+
+
+There are four required parameters: t0, t1, unit and d0.
+
+The parameters t0 and t1 define the time span. They are strings of the
+format "yyyymmdd", i.e. "20090603".
+
+The unit parameter defines the one unit for which you query, for
+example 'pageviews'.
+
+The parameter d0 defines the base dimension, for example 'country'.
+
+Values for d0 can be defined by setting the parameter d0v to a
+comma-separated string of values, for example "US,SE,DE". If d0v is
+empty, all values of the base dimension will be returned.
+
+
+A typical query string looks like this:
+
+ http://localhost:8086/?t0=20090501&t1=20090531&unit=pageviews&d0=country&d0v=DE,SE,US
+
+This example query would return pageview data for the time span between the
+first and last of May broken down by the countries Sweden, Germany and
+the United States.
+
+The returned JSON is a list of dictionaries, like so:
+
+[{"20090101": {"DE": 270, "US": 21, "SE": 5547}}, {"20090102": {"DE":
+9020, "US": 109, "SE": 11497}}, {"20090103": {"DE": 10091, "US": 186,
+"SE": 8863}}]
+
 
 
 Plotting the data
 -----------------
 
-[Using html+js, plot with google charts.]
+There is a graphing tool bundled with Zohmg. It is served statically
+by the Zohmg server at http://localhost:8086/static/index.html
+
+The graphing tool uses Javascript to query the data server, and plots
+graphs with the help of Google Charts.
+
