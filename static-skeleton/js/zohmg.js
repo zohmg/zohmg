@@ -49,10 +49,10 @@ var missingValue = '_';
 // falling back on the defaults.
 function updateForm() {
     var fields = ["t0", "t1", "unit", "d0", "d0v", "d1", "d1v", "d2", "d2v", "d3", "d3v", "d4", "d4v"];
-    var defaults = {'t0':'20090101', 't1':'20090331', 'unit':'pageviews', 'd0':'country', 'd0v':'US,DE,SE'}
+    var defaults = {'t0':'20090101', 't1':'20091231', 'unit':'pageviews', 'd0':'country', 'd0v':'US,DE,SE'}
     $.each(fields, function(i, item) {
-	    $("input#"+item).val(urldecode($(document).getUrlParam(item, defaults[item])))
-		});
+        $("input#"+item).val(urldecode($(document).getUrlParam(item, defaults[item])))
+    });
 }
 
 // draws the graph.
@@ -63,7 +63,8 @@ function updateGraph() {
 	     $('#graphNav input[name=unit]')[0].value,
 	     $('#graphNav input[name=d0]')[0].value,
 	     $('#graphNav input[name=d0v]')[0].value,
-	     dictToString(loadFilters()));
+	     dictToString(loadFilters())
+    );
 }
 
 // create query string from dictionary of values.
@@ -97,7 +98,7 @@ function loadFilters() {
 
 
 // callback for the json data.
-function jsonZohmgFeed(data) {
+function jsonCallback(data) {
     graph = pivot(data);
     var imgUrl = chartImgUrl(graph);
     $('#graph').html('<img src="' + imgUrl + '" />');
@@ -112,11 +113,11 @@ function loadData(t0, t1, unit, d0, d0v, filters) {
 	'&d0=' + encodeURIComponent(d0) +
 	'&d0v=' + encodeURIComponent(d0v) +
 	'&' + filters +
-	'&jsoncallback=?';
+	'&jsonp=jsonCallback'
 
     $('#undergraph').html('<a href="' +dataUrl +'">raw data</a>');
 
-    $.getJSON(dataUrl); // magically calls jsonZohmgFeed() as callback.
+    $.getJSON(dataUrl);
 }
 
 // construct a google charts url.

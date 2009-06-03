@@ -18,25 +18,35 @@
 import os, sys, time
 import simplejson as json
 from zohmg.config import Config
+from paste.request import parse_formvars
 
-# add middleware dir and import data_utils.
+# add middleware directory to path.
 sys.path.append(os.path.dirname(__file__))
 import data_utils
 
+# this is the application responsible for serving data.
 class data(object):
     def __init__(self):
         self.config = Config()
         self.table = self.config.dataset()
         self.projections = self.config.projections()
 
-    # example query:
-    # ?t0=20090120&t1=20090121&unit=pageviews&d0=country&d0v=US,DE
+    # answer query.
     def __call__(self, environ, start_response):
         print "[%s] Data, serving from table: %s." % (time.asctime(),self.table)
 
-        # fetch data.
-        start = time.time()
-        try: data = data_utils.hbase_get(self.table, self.projections, environ) # query is in environ.
+        params = parse_formvars(environ)
+        # jsonp.
+        try:    jsonp_method = params["jsonp"]
+        except: jsonp_method = ""
+
+        data  = {}
+        try:
+            # fetch.
+            start = time.time()
+            data = data_utils.hbase_get(self.table, self.projections, params)
+            elapsed = (time.time() - start)
+            sys.stderr.write("hbase query+prep time: %s\n" % elapsed)
         except ValueError:
             print >>sys.stderr, "400 Bad Request: missing arguments."
             start_response('400 Bad Request', [('content-type', 'text/html')])
@@ -44,11 +54,8 @@ class data(object):
         except Exception, e:
             print >>sys.stderr, "Error: ", e
             start_response('500 OK', [('content-type', 'text/html')])
-            return "egads!" # TODO: nicer.
-
-        elapsed = (time.time() - start)
-        sys.stderr.write("hbase query+prep time: %s\n" % elapsed)
+            return "Sorry, I failed in serving you: " + str(e)
 
         # serve output.
         start_response('200 OK', [('content-type', 'text/x-json')])
-        return data_utils.dump_jsonp(data)
+        return data_utils.dump_jsonp(data, jsonp_method)

@@ -46,6 +46,9 @@ showstoppers:
 + in mapper, warn user if she supplies string as measurements value - or fix!
 + in mapper, warn user if she supplies int as dimensional value - or fix!
 
+potential problems:
++ wsurl is hardcoded to localhost in zohmg.js
+
 priority due:
 + (maybe) in usermapper, add timestamp to map of dimensions.
 + (some day/maybe) source dist, would distribute source and depend on thrift etc to build.

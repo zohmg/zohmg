@@ -16,15 +16,18 @@
 # under the License.
 
 import simplejson as json
-from paste.request import parse_formvars
 from zohmg.utils import compare_triples, strip
 from zohmg.scanner import HBaseScanner
 
 
 # returns jsonp which can be used in clients.
-def dump_jsonp(payload):
-    # TODO: read jsonp callback variable, use instead of jsonZohmgFeed.
-    return "jsonZohmgFeed(" + json.dumps(payload) + ")"
+def dump_jsonp(data, jsonp_method=""):
+    jsondata = json.dumps(data)
+
+    if jsonp_method == "": 
+        return jsondata
+    else:
+        return jsonp_method + "(" + jsondata + ")"
 
 
 # dimensions is a list of dimensions: ['country', 'usertype', 'useragent']
@@ -52,8 +55,7 @@ def enumerate_cells(dimensions, values, target=[]):
 
 # fetches data from hbase,
 # returns sorted list of dictionaries suitable for json dumping.
-def hbase_get(table, projections, environ):
-    params = parse_formvars(environ)
+def hbase_get(table, projections, params):
     try:
         t0 = params['t0']
         t1 = params['t1']
@@ -72,6 +74,7 @@ def hbase_get(table, projections, environ):
             filters[dim] = val
         except:
             continue
+
 
     print ""
     print "--- hbase_get ---"

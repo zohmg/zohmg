@@ -205,6 +205,10 @@ The returned JSON is a list of dictionaries, like so:
 "SE": 8863}}]
 
 
+The API supports JSONP via the jsonp parameter. By setting this
+parameter, the returned JSON is wrapped in a function call.
+
+
 
 Plotting the data
 -----------------
