@@ -17,7 +17,27 @@
 
 def root(environ, start_response):
     start_response('200 OK', [('content-type', 'text/html')])
-    return "ZOHMG!"
+    html = """<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+    <title>Zohmg</title>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <meta http-equiv="Content-Type" content="text/html" />
+</head>
+
+<body>
+<div><h1>Zohmg!</h1></div>
+<div>
+<p>Zohmg is serving data from <a href="/data">/data</a>. You query it by HTTP GET requests.</p>
+<p>There is an example consumer at <a href="/static">/static</a>.</p>
+</div>
+</body>
+</html>
+"""
+    return html
 
 # used if no application is found (i.e. a 404).
 def not_found_hook(environ, start_response):
