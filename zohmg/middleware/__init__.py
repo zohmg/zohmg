@@ -21,8 +21,6 @@ def root(environ, start_response):
 
 # used if no application is found (i.e. a 404).
 def not_found_hook(environ, start_response):
-    print "NOT FOUND HOOK IS ON!"
-    print str(environ)
 
     if environ['PATH_INFO'] == '/':
         # well, let's serve the root.
