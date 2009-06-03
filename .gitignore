@@ -1,9 +1,3 @@
-zohmg-install.log
+dist
 *.pyc
 *~
-dist
-*.bbl
-*.blg
-*.dvi
-*.pdf
-*.toc
