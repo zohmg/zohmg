@@ -1,33 +1,61 @@
 #!/bin/bash
-# install hadoop (patched) and hhbase in /opt
+# Automagically install Hadoop and HBase in /opt or --prefix=PREFIX.
+# Also, patch Hadoop with HADOOP-1722 and HADOOP-5450.
+
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+# TODO: use automatic mirror selection of ${hadoop,hbase}_url
+# potential problem: apache seems to mirror only the very latest point release :-(
+
 
 if [ $EUID -ne 0 ]; then
     echo "you need to be root. please sudo."
     exit 1
 fi
 
-
-
-# TODO:
-#  use mirrors for ${hadoop,hbase}_tar
-#  also, apache seems to mirror only the very latest point release :-(
-
 # set default variables.
 prefix="/opt"
 hadoop_version="hadoop-0.19.1"
-hadoop_tar="$hadoop_version.tar.gz"
-patch_1722="HADOOP-1722-branch-0.19.patch"
-patch_5450="HADOOP-5450.patch"
 hbase_version="hbase-0.19.3"
+
+hadoop_tar="$hadoop_version.tar.gz"
+hadoop_url="http://apache.mirror.infiniteconflict.com/hadoop/core/$hadoop_version/$hadoop_tar"
+# or from http://www.apache.org/dyn/closer.cgi/hadoop/core/
+
 hbase_tar="$hbase_version.tar.gz"
-#hadoop_release="http://mirrors.ukfast.co.uk/sites/ftp.apache.org/hadoop/core/$hadoop_version/$hadoop_tar"
-hadoop_release="http://apache.mirror.infiniteconflict.com/hadoop//core/$hadoop_version/$hadoop_tar"
-hadoop_1722="http://issues.apache.org/jira/secure/attachment/12401426/$patch_1722"
-hadoop_5450="http://issues.apache.org/jira/secure/attachment/12401846/$patch_5450"
-#hbase_release="http://mirrors.ukfast.co.uk/sites/ftp.apache.org/hadoop/hbase/$hbase_version/$hbase_tar"
-hbase_release="http://apache.mirror.infiniteconflict.com/hadoop/hbase/$hbase_version/$hbase_tar"
-install_log="$(pwd)/install_hadoop_hbase.log"
-install_tmplog=$(mktemp /tmp/zohmg-log.XXXXXXXX)
+hbase_url="http://apache.mirror.infiniteconflict.com/hadoop/hbase/$hbase_version/$hbase_tar"
+# or from http://www.apache.org/dyn/closer.cgi/hadoop/hbase
+
+# Dumbo (http://github.com/klbostee/dumbo) needs 1722 and 5450.
+# (disable patching with --no-patches)
+
+# HADOOP-1722  Make streaming to handle non-utf8 byte array - ASF JIRA
+# https://issues.apache.org/jira/browse/HADOOP-1722
+patch_1722="HADOOP-1722-branch-0.19.patch"
+patch_1722_url="http://issues.apache.org/jira/secure/attachment/12401426/$patch_1722"
+
+# Add support for application-specific typecodes to typed bytes
+# https://issues.apache.org/jira/browse/HADOOP-5450
+patch_5450="HADOOP-5450.patch"
+patch_5450_url="http://issues.apache.org/jira/secure/attachment/12401846/$patch_5450"
+
+install_log="/tmp/hadoop-hbase-install.log"
+install_tmplog=$(mktemp /tmp/hadoop-hbase-install.tmp.log.XXXXXXXX)
 
 
 # helpers.
@@ -65,14 +93,12 @@ function usage() {
     echo "Options:"
     echo "    --download-only      Only download software, do not build."
     echo "    --files=FILES        Directory with already downloaded files."
-    echo "                         Files are downloaded to /tmp/zohmg-deps.XXXXXX."
-    echo "    --hadoop-only        Installs only Apache Hadoop."
-    echo "                         Cannot be used with --hbase-only."
-    echo "    --hbase-only         Installs only Apache HBase."
-    echo "                         Cannot be used with --hadoop-only."
-    echo "    --help               Prints this help and exits."
     echo "    --keep-files         Keeps downloaded files."
-    echo "    --no-config          Do not configure Hadoop or HBase."
+    echo "    --hadoop-only        Installs only Apache Hadoop."
+    echo "    --hbase-only         Installs only Apache HBase."
+    echo "    --help               Prints this help and exits."
+    echo "    --no-config          Do not auto-configure Hadoop or HBase."
+	echo "    --no-patches         Do not apply patches."
     echo "    --prefix=PREFIX      Changes installation prefix to PREFIX."
     echo "                         Defaults to /opt."
 }
@@ -116,6 +142,9 @@ while [ $1 ]; do
         "--no-config")
             no_config="true"
             ;;
+		"--no-patches")
+			no_patches="true"
+			;;
         "--prefix")
             prefix="$arg"
             ;;
@@ -131,6 +160,11 @@ while [ $1 ]; do
 done
 
 
+if [ "x" == "x$JAVA_HOME" ]; then
+	echo "WARNING: \$JAVA_HOME is not set. This might cause trouble later on."
+	echo
+fi
+
 # make sure the user knows what's up.
 echo "this script will download, patch and install hadoop & hbase in $prefix"
 echo "any key to continue, CTRL-C to abort."
@@ -141,120 +175,148 @@ if [ -f $prefix ]; then
     exit 1
 fi
 
+# create target directory.
+if [ ! -d $prefix ]; then
+	mkdir -p $prefix
+	if [ $? != 0 ]; then
+		echo "could not create directory $prefix"
+		exit 1
+	fi
+fi
+
 # truncate logs.
 >"$install_log"
 >"$install_log.new"
 
 
 # check for necessary programs.
-echo "Checking for necessary programs..."
+echo "Checking for necessary programs: ant and wget."
 for command in "ant -version" "patch --version" "wget --version"; do
     program=$(echo $command | sed 's/ .*//')
-    echo "Checking for $program... "
-    exec_and_log "$command" "Error: Missing program: $program not found."
-    echo "ok."
+	$command > /dev/null
+    if [ $? -ne 0 ]; then
+        echo "error: could not find $program"
+        exit 1
+    fi
 done
 
 
-# download or use already existing files.
+# keep track of what tars we have.
+tars=""
+
 if [ "x" = "x$files" ]; then
-    # create temporary directories for downloads.
-    echo "Creating temporary directory............... "
-    files=$(mktemp -d /tmp/zohmg-deps.XXXXXX)
-    mkdir -p $files/patches
-    echo "done."
-    echo "Downloading files... "
+	# download to some temporary directory.
+	
+    echo "Creating temporary directory."
+    files=$(mktemp -d /tmp/hadoop-hbase-install.XXXXXX)
+    mkdir -vp $files/patches
+
+
+	cd $files
+    echo "Downloading files."
     # printing progress to screen, without logging.
-    # empty hadoop
+    # empty hadoop (?)
     if [ ! "x" = "x$hbase_only" ]; then
-        echo "Skipping download of Apache Hadoop..."
+        echo "Skipping download of Apache Hadoop."
     else
-        cd $files
-        # hadoop release file.
-        exec_and_log "wget $hadoop_release" "Error: Could not download $hadoop_release" "true"
-        # download patches.
-        cd patches
-        exec_and_log "wget $hadoop_1722" "Error: Could not download $hadoop_1722" "true"
-        exec_and_log "wget $hadoop_5450" "Error: Could not download $hadoop_5450" "true"
+        # hadoop tar
+        exec_and_log "wget $hadoop_url" "Error: Could not download $hadoop_url" "true"
+		tars="$tars $hadoop_tar"
+        # patches.
+		if [ ! "x" = "x$no_patches" ]; then
+			echo "Will not patch Hadoop."
+		else
+	        cd patches
+			exec_and_log "wget $patch_1722_url" "Error: Could not download $patch_1722_url" "true"
+			exec_and_log "wget $patch_5450_url" "Error: Could not download $patch_5450_url" "true"
+			tars="$tars patches/$patch_1722 patches/$patch_5450"
+		fi
     fi
     if [ ! "x" = "x$hadoop_only" ]; then
-        echo "Skipping download of Apache HBase..."
+        echo "Skipping download of HBase."
     else
-        cd $files
-        # hbase release file.
-        exec_and_log "wget $hbase_release" "Error: Could not download $hbase_release" "true"
+		cd $files
+        # hbase tar
+        exec_and_log "wget $hbase_url" "Error: Could not download $hbase_url" "true"
+		tars="$tars $hbase_tar"
     fi
-    echo "Done downloading files."
+    echo "Done downloading. You will find the files in $files."
 else
-    echo "Using previously downloaded files in $files... "
-    for file in "patches/$patch_1722" "patches/$patch_5450" "$hadoop_tar" "$hbase_tar"; do
+    for file in $tars; do
         exec_and_log "ls $files/$file" "Error: Could not find file $files/$file."
     done
-    echo "ok."
+    echo "Using previously downloaded files in $files"
 fi
 
 
 # stop if --download-only was supplied.
 if [ "$download_only" = "true" ]; then
-    echo "Files downloaded to $files ."
+    echo "Download only: files were downloaded to $files."
     exit 0
 fi
 
 # install.
-mkdir $prefix
-echo "Installing..."
+echo; echo "Installing."
+
+# TODO: we *need* $JAVA_HOME to be correct.
 
 # set default paths.
-hadoop="$prefix/$hadoop_version"
-hbase="$prefix/$hbase_version"
-hadoop_conf=$hadoop/conf
-hbase_conf=$hbase/conf
+hadoop_home="$prefix/$hadoop_version"
+hbase_home="$prefix/$hbase_version"
+hadoop_conf=$hadoop_home/conf
+hbase_conf=$hbase_home/conf
 
 # hadoop
 if [ ! "x" = "x$hbase_only" ]; then
-    echo "Skipping installation of Apache Hadoop..."
+    echo "Skipping installation of Apache Hadoop."
 else
-    echo "Extracting Apache Hadoop... "
+    echo "Extracting Hadoop to $prefix"
     exec_and_log "tar zxf $files/$hadoop_tar -C $prefix"
     echo "done."
-    exec_and_log "echo ... Patching Apache Hadoop ..."
-    for patch in "$patch_1722" "$patch_5450"; do
-        num=$(echo $patch | sed 's/.patch$//')
-        echo "Applying patch $num... "
-        cd $hadoop
-        # inlined exec_and_log because of sh -c "command".
-        # execute and log to intermediate.
-        sh -c "patch -p0 <$files/patches/$patch | tee '$install_tmplog' | cat"
-        ret=$?
 
-        # log.
-        cat "$install_log" "$install_tmplog" >"$install_log.new"
-        mv "$install_log.new" "$install_log"
+    cd $hadoop_home
 
-        # check exit code.
-        if [ $ret -ne 0 ]; then
-            echo
-            echo "Error: Could not apply patch $num."
-            exit 1
-        fi
-        echo "done."
-    done
-    exec_and_log "echo ok"
-    echo "Compiling Apache Hadoop... "
-    cd $hadoop
-    exec_and_log "ant package" "Error: Could not compile Apache Hadoop."
-    echo "done."
+	if [ ! "x" = "x$no_patches" ]; then
+		echo "Not patching Hadoop."
+	else
+    	echo "Patching Hadoop."
+    	for patch in "$patch_1722" "$patch_5450"; do
+        	echo "Applying patch $patch"
+
+        	# inlined exec_and_log because of sh -c "command".
+        	# execute and log to intermediate.
+        	sh -c "patch -p0 <$files/patches/$patch | tee '$install_tmplog' | cat"
+        	ret=$?
+
+        	# log.
+        	cat "$install_log" "$install_tmplog" >"$install_log.new"
+        	mv "$install_log.new" "$install_log"
+ 
+        	# check exit code.
+        	if [ $ret -ne 0 ]; then
+            	echo
+            	echo "Error: Could not apply patch $patch."
+            	exit 1
+        	fi
+    	done
+    	echo "done."
+		
+    	echo "Compiling Hadoop (logging to $install_log)."
+    	exec_and_log "ant package" "Error: Could not compile Hadoop."
+    	echo "done."
+	fi
 fi
 
 # hbase.
 if [ ! "x" = "x$hadoop_only" ]; then
-    echo "Skipping installation of Apache HBase..."
+    echo "Skipping installation of HBase."
 else
-    echo "Extracting Apache HBase... "
+    echo "Extracting HBase to $prefix."
     exec_and_log "tar zxf $files/$hbase_tar -C $prefix"
     echo "done."
-    echo "Compiling Apache HBase... "
-    cd $hbase
+
+    cd $hbase_home
+    echo "Compiling HBase (logging to $install_log)."
     exec_and_log "ant package" "Error: Could not compile Apache HBase."
     echo "done."
 fi
@@ -263,7 +325,7 @@ fi
 # configuration?
 if [ "x" = "x$no_config" ]; then
     if [ "x" = "x$hbase_only" ]; then
-        echo "Configuring Apache Hadoop... "
+        echo "Configuring Hadoop."
         # backup template configurations.
         exec_and_log "cp -v $hadoop_conf/hadoop-env.sh $hadoop_conf/hadoop-env.sh.dist"
         exec_and_log "cp -v $hadoop_conf/hadoop-site.xml $hadoop_conf/hadoop-site.xml.dist"
@@ -327,6 +389,7 @@ export HADOOP_JOBTRACKER_OPTS="-Dcom.sun.management.jmxremote \$HADOOP_JOBTRACKE
 # The scheduling priority for daemon processes.  See 'man nice'.
 # export HADOOP_NICENESS=10
 EOHADOOPENV
+
         cat <<EOHADOOPSITE >$hadoop_conf/hadoop-site.xml
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
@@ -351,13 +414,15 @@ EOHADOOPSITE
         echo "done."
     fi
     if [ "x" = "x$hadoop_only" ]; then
-        echo "Configuring Apache HBase... "
+        echo "Configuring HBase."
         # backup template configuration.
         exec_and_log "cp -v $hbase_conf/hbase-env.sh $hbase_conf/hbase-env.sh.dist"
 
         # emit configuration.
         cat <<EOHBASEENV >$hbase_conf/hbase-env.sh
 #
+# lifted from hbase release 0.x and trixed up for debian based systems.
+# 
 #/**
 # * Copyright 2007 The Apache Software Foundation
 # *
@@ -420,55 +485,59 @@ EOHBASEENV
         echo "done."
     fi
 else
+	echo "Auto-configuration disabled."
     echo "Edit the following files to configure Hadoop and HBase:"
     echo "* $hadoop_conf/hadoop-env.sh"
     echo "* $hadoop_conf/hadoop-site.xml"
     echo "* $hbase_conf/hbase-env.sh"
 fi
 
-
-
 # change ownership of installation directories.
 if [ "empty" != "empty$SUDO_UID" ]; then 
     # we're sudoing. let's go!
-    echo "chowning $hadoop and $hbase to user id $SUDO_UID"
-    chown -R $SUDO_UID $hadoop $hbase
+    echo "chowning $hadoop_home and $hbase_home to user id $SUDO_UID"
+    chown -R $SUDO_UID $hadoop_home $hbase_home
 fi
 
-# print further instructions.
-echo "
-
-ok, friend!
-
-hadoop and hbase are installed in $prefix
-
-I'll leave it to you to start hadoop and hbase.
-
-you'll find help at http://hadoop.apache.org/core/docs/r0.19.1/quickstart.html
-and http://wiki.apache.org/hadoop/Hbase/10Minutes
-
-it boils down to this:
-copy+paste the default configuration,
-setup passphraseless ssh,
-format namenode & start hadoop + hbase + thrift (as per below)
-
-
-# hadoop
-$hadoop/bin/hadoop namenode -format  # look twice!
-$hadoop/bin/start-all.sh
-
-# hbase
-$hbase/bin/start-hbase.sh
-$hbase/bin/hbase thrift start
-
-
-thank you for today, it's been fun!
-"
-
 # clean up.
-rm $install_tmplog
 if [ "x" = "x$keep_files" ]; then
+	echo "removing $files"
     rm -rf $files # not using exec_and_log for a reason.
 else
     echo "(keeping files in $files)"
 fi
+
+echo "removing $install_tmplog."
+rm $install_tmplog
+
+
+# print further instructions.
+echo "
+
+Congratulations!
+
+Hadoop and HBase are installed in $prefix
+I'll leave it to you to start hadoop and hbase.
+
+You need to perform these steps:
+
+ (setup passphraseless ssh)
+ format namenode
+ start hadoop & hbase & thrift
+
+Which is something like this in pseudo-bash:
+
+  # format namenode.
+  $hadoop_home/bin/hadoop namenode -format  # look twice!
+  # start hadoop.
+  $hadoop_home/bin/start-all.sh
+  # start hbase.
+  $hbase_home/bin/start-hbase.sh
+  # start hbase's thrift server.
+  $hbase_home/bin/hbase thrift start
+
+You will find help at http://hadoop.apache.org/core/docs/current/quickstart.html
+and http://wiki.apache.org/hadoop/Hbase/10Minutes
+
+Thank you, it's been fun automating things for you!
+"
