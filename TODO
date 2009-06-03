@@ -33,7 +33,10 @@ also:
  : can not store *that* many qualifiers.
 
 eggs:
-+ bundle eggs: easy_install -zmaxd . simplejson
++ bundle eggs instead of apt-getting (we still need setuptools, tho).
+   eggs: ['python-paste', 'python-simplejson', 'python-yaml']
+   command: easy_install -zmaxd . module
+
 
 data server:
 DONE proper root page.

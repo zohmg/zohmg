@@ -1,4 +1,9 @@
 
+0) Get Zohmg:
+
+   $> git clone git://github.com/zohmg/zohmg.git zohmg
+
+
 1) Install Zohmg:
 
 	$> sudo python install.py
@@ -22,5 +27,4 @@
 
 
 4) Please see README for getting started with Zohmg.
-
 

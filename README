@@ -14,6 +14,7 @@ Zohmg is alpha software. Be gentle.
 
 Website: http://github.com/zohmg/zohmg
 IRC: #zohmg @ irc.freenode.net
+Mailing list: http://groups.google.com/group/zohmg-user & http://groups.google.com/group/zohmg-dev/members
 
 
 
@@ -31,8 +32,9 @@ CREATE YOUR FIRST 'PROJECT'
 
     $> zohmg create weblogs
 
-This command creates a project directory named "weblogs". Its contents are:
+This command creates a project directory named "weblogs".
 
+Its contents are:
 config       - environment and dataset configuration.
 lib          - eggs or jars that will be automatically included in job jar.
 mappers      - user defined MapReduce maps.
@@ -48,20 +50,23 @@ The next step is to configure environment.py and dataset.yaml.
 
 config/environment.py:
 
-Define HADOOP_HOME and paths to all three jars (hadoop, hadoop-streaming,
-hbase). You might need to run 'ant package' in $HADOOP_HOME to have all jars
-built for you.
+Define HADOOP_HOME and set the paths for all three jars (hadoop, hadoop-streaming,
+hbase). You might need to run 'ant package' in $HADOOP_HOME to have
+the streaming jar built for you.
 
 
 config/dataset.yaml:
 
-Define your data set. This means setting up the dimensions and projections that will
-be used. The dimensions lets Zohmg know what your data might look like while the
-projections list hints at what queries you will ask the data store.
+Define your data set. This means setting up the dimensions and
+projections that will be used. The dimensions lets Zohmg know what
+your data looks like while the projections list hints at what queries
+you will ask the data store.
+
 
 Example config/dataset.yaml:
 
-    dataset: weblogs
+    dataset:
+      weblogs
 
     dimensions:
      - user
@@ -131,13 +136,17 @@ The output of the mapper goes into a reducer that, for each
 dimension-tuple, sums the values of each unit and passes them along to the
 actual underlying data stare. Make sure the values are of type int.
 
-Secondly, run the mapper
+Secondly, run the mapper:
 
-	$> zohmg import mappers/mapper.py /data/weblogs/2009/05/11
+    $> zohmg import mappers/mapper.py /data/weblogs/2009/05/11
 
 The first argument to import is the path to the python file containing the map
 function, the second is a path on HDFS.
 
+
+You can enable lzo compression by giving --lzo as the third argument:
+
+    $> zohmg import mappers/mapper.py /data/weblogs/2009/05/11 --lzo
 
 
 SERVE DATA
