@@ -42,8 +42,8 @@ class data(object):
             print >>sys.stderr, "Error: Could not parse query."
             start_response('200 OK', [('content-type', 'text/html')]) # TODO: not 200.
             return "could not parse query." # TODO: nicer.
-        except:
-            print >>sys.stderr, "Error: unknown error :-("
+        except Exception, e:
+            print >>sys.stderr, "Error: ", e
             start_response('500 OK', [('content-type', 'text/html')])
             return "egads!" # TODO: nicer.
 
