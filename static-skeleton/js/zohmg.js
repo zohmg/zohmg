@@ -113,6 +113,7 @@ function loadData(t0, t1, unit, d0, d0v, filters) {
 	'&d0=' + encodeURIComponent(d0) +
 	'&d0v=' + encodeURIComponent(d0v) +
 	'&' + filters +
+	'&jsoncallback=?' +
 	'&jsonp=jsonCallback'
 
     $('#undergraph').html('<a href="' +dataUrl +'">raw data</a>');
