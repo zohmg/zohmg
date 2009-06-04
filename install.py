@@ -58,8 +58,6 @@ def copy_files():
     print
     print "populating zohmg directories"
 
-    build_darling = False
-
     # create directories.
     for dir in [target, doc_target, lib_target]:
         if not os.path.isdir(dir):
@@ -84,11 +82,8 @@ def copy_files():
 
     # TODO: copy all of lib to lib_target.
 
-    # darling.
-    if build_darling:
-        build_darling(target)
-    else:
-        copy_bundle("pre-built darling jar","lib/darling-*.jar", lib_target)
+    # darling
+    copy_bundle("pre-built darling jar","lib/darling-*.jar", lib_target)
 
     # usermapper sucker importer.
     copy_bundle("dumbo mapper import script","lib/import.py", lib_target)
@@ -120,21 +115,6 @@ def test():
     else:
         print 'ok!'
 
-
-
-# not used atm; user would have to specify classpath == jobbigt.
-def build_darling(target):
-    print
-    print 'building java hook-ups'
-
-    r = os.system('cd java/darling; ant')
-    if r != 0:
-        # fail!
-        print 'problems building darling!'
-        print 'hey, I need to know where to find jars for hbase, hadoop and hadoop streaming.'
-        print 'please add them to $CLASSPATH and try again.'
-        sys.exit(r)
-    os.system("cp -v java/darling/build/darling-.jar " + target)
 
 # don't do this.
 def install_pythonmodules():
