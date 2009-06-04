@@ -35,7 +35,7 @@ class Process(object):
                 ('output','/tmp/does-not-matter'),
                 # Push zohmg egg and darling jar.
                 ('libegg',[z for z in sys.path if "zohmg" in z][0]),
-                ('libjar','/usr/local/lib/zohmg/darling-0.0.3.jar'),
+                ('libjar','/usr/local/lib/zohmg/darling-0.0.4.jar'),
                 ('file','lib/usermapper.py'), # TODO: handle this more betterer.
                 ('name', jobname)
                ]
