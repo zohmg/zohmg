@@ -41,6 +41,7 @@ def usage(reason = None):
     print zohmg + " setup"
     print zohmg + " import <mapper> <hdfs-input-dir>"
     print zohmg + " serve [--host=<host>] [--port=<port>]"
+    print zohmg + " reset"
     print zohmg + " help"
 
 def print_version():
@@ -53,24 +54,24 @@ def print_help():
     print "and there's an IRC channel -- #zohmg on freenode -- where you can ask questions."
 
 
-# cli entry-point.
+# command line entry-point.
 def zohmg():
     try:
         # read the first argument.
         cmd = sys.argv[1]
     except:
+        # there was no first argument.
         usage()
         sys.exit(0)
 
-    if   cmd == 'create':  create()
-    elif cmd == 'setup':   setup()
-    elif cmd == 'import':  process()
-    elif cmd == 'serve':   serve()
-    elif cmd == 'version' or cmd == '--version': print_version()
-    elif cmd == 'help'    or cmd == '--help':    print_help()
-    else:
-        usage()
-
+    if   cmd == 'create' : create()
+    elif cmd == 'setup'  : setup()
+    elif cmd == 'import' : process()
+    elif cmd == 'serve'  : serve()
+    elif cmd == 'reset'  : reset()
+    elif cmd in ['version', '--version']: print_version()
+    elif cmd in ['help',    '--help']:    print_help()
+    else: usage()
 
 def create():
     from zohmg.create import Create
@@ -133,6 +134,11 @@ def serve():
 
     # fire off data/transformer/client server.
     zohmg.serve.start(project_dir, host=host, port=port)
+
+def reset():
+    refuse_to_act_in_nonzohmg_directory()
+    from zohmg.reset import Reset
+    Reset().please()
 
 
 # exits if 'zohmg' was run in a directory without the special .zohmg-file.
