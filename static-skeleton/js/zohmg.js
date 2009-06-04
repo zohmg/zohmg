@@ -221,6 +221,7 @@ function pivot(data) {
     return graph;
 }
 
+
 // modified from http://code.google.com/apis/chart/formats.html
 var simpleEncoding = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 function simpleEncode(valueArray,maxValue) {
@@ -238,19 +239,37 @@ function simpleEncode(valueArray,maxValue) {
 }
 
 
-// snatched from http://kevin.vanzonneveld.net/techblog/article/javascript_equivalent_for_phps_urldecode/
+// snatched from php.js (http://phpjs.org)
+// which is released under the MIT license.
 function urldecode( str ) {
-    // http://kevin.vanzonneveld.net
+    // Decodes URL-encoded string
+    //
+    // version: 904.317
+    // discuss at: http://phpjs.org/functions/urldecode
+    // +   original by: Philip Peterson
+    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // +      input by: AJ
+    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // +   improved by: Brett Zamir (http://brettz9.blogspot.com)
+    // +      input by: travc
+    // +      input by: Brett Zamir (http://brettz9.blogspot.com)
+    // +   bugfixed by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // %          note 1: info on what encoding functions to use from: http://xkr.us/articles/javascript/encode-compare/
+    // *     example 1: urldecode('Kevin+van+Zonneveld%21');
+    // *     returns 1: 'Kevin van Zonneveld!'
+    // *     example 2: urldecode('http%3A%2F%2Fkevin.vanzonneveld.net%2F');
+    // *     returns 2: 'http://kevin.vanzonneveld.net/'
+    // *     example 3: urldecode('http%3A%2F%2Fwww.google.nl%2Fsearch%3Fq%3Dphp.js%26ie%3Dutf-8%26oe%3Dutf-8%26aq%3Dt%26rls%3Dcom.ubuntu%3Aen-US%3Aunofficial%26client%3Dfirefox-a');
+    // *     returns 3: 'http://www.google.nl/search?q=php.js&ie=utf-8&oe=utf-8&aq=t&rls=com.ubuntu:en-US:unofficial&client=firefox-a'
 
-    if (str === undefined || str == null) { return undefined; }
 
     var histogram = {};
     var ret = str.toString();
 
     var replacer = function(search, replace, str) {
-        var tmp_arr = [];
-        tmp_arr = str.split(search);
-        return tmp_arr.join(replace);
+	var tmp_arr = [];
+	tmp_arr = str.split(search);
+	return tmp_arr.join(replace);
     };
 
     // The histogram is identical to the one in urlencode.
@@ -295,8 +314,8 @@ function urldecode( str ) {
     histogram['\u0178'] = '%9F';
 
     for (replace in histogram) {
-        search = histogram[replace]; // Switch order when decoding
-        ret = replacer(search, replace, ret) // Custom replace. No regexing
+	search = histogram[replace]; // Switch order when decoding
+	ret = replacer(search, replace, ret) // Custom replace. No regexing
     }
 
     // End with decodeURIComponent, which most resembles PHP's encoding functions
@@ -304,3 +323,6 @@ function urldecode( str ) {
 
     return ret;
 }
+
+
+

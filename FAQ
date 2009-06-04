@@ -53,3 +53,20 @@ It could be that you do not have write permissions to
 'lib/usermapper.py'. Make sure the user you're running the job as has
 sufficient permissions.
 
+
++ I get this error when installing:
+build/temp.linux-i686-2.5/check_libyaml.c:2:18: error: yaml.h: No such file or directory
+etc. Should I worry?
+
+There's likely no reason to worry. PyYaml emits this error when it
+tries (and fails) to build a C version of the yaml code. If you can
+'import yaml' at the python interpreter you're golden.
+
+
++ I get this error when installing:
+zipimport.ZipImportError: bad local file header in/usr/lib/python2.5/site-packages/zohmg-0.0.1-py2.5.egg
+What's wrong?
+
+That happens for no good reason when re-installing zohmg. Running the
+installation again always seems to fix it (in fact, install.py already
+tried a second time and is likely to have suceeded).

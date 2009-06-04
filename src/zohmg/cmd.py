@@ -17,13 +17,25 @@
 
 # this is the command line interface.
 
-from zohmg.utils import fail
 import sys, os, getopt
+from zohmg.utils import fail
+
+# add all bundled eggs to sys.path
+libpath='/usr/local/lib/zohmg'
+for (dir, dirnames, files) in os.walk(libpath):
+    for file in files:
+        suffix = file.split(".")[-1]
+        if suffix == "egg":
+            sys.path.append(dir+"/"+file)
+
+
+version = '0.1.0'
 
 def usage(reason = None):
     zohmg = os.path.basename(sys.argv[0])
     if reason:
         print "Error: " + reason
+    print "zohmg version " + version
     print "usage:"
     print zohmg + " create <dir>"
     print zohmg + " setup"
@@ -32,12 +44,14 @@ def usage(reason = None):
     print zohmg + " help"
 
 def print_version():
-    v = '0.0.30.4204-0'
-    print "zohmg version " + v
+    print "zohmg version " + version
 
 def print_help():
-    # TODO: offer help.
-    usage()
+    print "Need help?"
+    print
+    print "There are a few documents in /usr/local/share/zohmg/doc that might be of some help,"
+    print "and there's an IRC channel -- #zohmg on freenode -- where you can ask questions."
+
 
 # cli entry-point.
 def zohmg():
