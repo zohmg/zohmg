@@ -45,7 +45,7 @@ def copy_files():
             os.mkdir(dir)
 
     # copy docs.
-    docs = ['README']
+    docs = ['AUTHORS', 'CONTRIBUTE', 'DEPENDENCIES', 'FAQ', 'INSTALL', 'README']
     for doc in docs:
         copy_file(doc, doc, doc_target)
 
