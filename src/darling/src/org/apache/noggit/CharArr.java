@@ -17,7 +17,6 @@
 
 package org.apache.noggit;
 
-
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -30,10 +29,8 @@ import java.nio.CharBuffer;
 // V1.3 11/26/06 // Make safe for Java 1.4, work into Noggit
 // @author yonik
 
-
 // Java5 version could look like the following:
 // public class CharArr implements CharSequence, Appendable, Readable, Closeable {
-
 
 /**
  * @author yonik
@@ -53,40 +50,63 @@ public class CharArr implements CharSequence, Appendable {
   }
 
   public CharArr(char[] arr, int start, int end) {
-    set(arr,start,end);
+    set(arr, start, end);
   }
 
-  public void setStart(int start) { this.start = start; }
-  public void setEnd(int end) { this.end = end; }
+  public void setStart(int start) {
+    this.start = start;
+  }
+
+  public void setEnd(int end) {
+    this.end = end;
+  }
+
   public void set(char[] arr, int start, int end) {
     this.buf = arr;
     this.start = start;
     this.end = end;
   }
 
-  public char[] getArray() { return buf; }
-  public int getStart() { return start; }
-  public int getEnd() { return end; }
-  public int size() { return end-start; }
-  public int length() { return size(); }
-  public int capacity() { return buf.length; }
+  public char[] getArray() {
+    return buf;
+  }
 
+  public int getStart() {
+    return start;
+  }
+
+  public int getEnd() {
+    return end;
+  }
+
+  public int size() {
+    return end - start;
+  }
+
+  public int length() {
+    return size();
+  }
+
+  public int capacity() {
+    return buf.length;
+  }
 
   public char charAt(int index) {
-    return buf[start+index];
+    return buf[start + index];
   }
 
   public CharArr subSequence(int start, int end) {
-    return new CharArr(buf, this.start+start, this.start+end);
+    return new CharArr(buf, this.start + start, this.start + end);
   }
 
   public int read() throws IOException {
-    if (start>=end) return -1;
+    if (start >= end)
+      return -1;
     return buf[start++];
   }
 
   public int read(char cbuf[], int off, int len) {
-   //TODO
+    // TODO
     return 0;
   }
 
@@ -94,7 +114,9 @@ public class CharArr implements CharSequence, Appendable {
     buf[end++] = b;
   }
 
-  public void unsafeWrite(int b) { unsafeWrite((char)b); }
+  public void unsafeWrite(int b) {
+    unsafeWrite((char) b);
+  }
 
   public void unsafeWrite(char b[], int off, int len) {
     System.arraycopy(b, off, buf, end, len);
@@ -108,20 +130,23 @@ public class CharArr implements CharSequence, Appendable {
   }
 
   public void reserve(int num) {
-    if (end + num > buf.length) resize(end + num);
+    if (end + num > buf.length)
+      resize(end + num);
   }
 
   public void write(char b) {
     if (end >= buf.length) {
-      resize(end+1);
+      resize(end + 1);
     }
     unsafeWrite(b);
   }
 
-  public final void write(int b) { write((char)b); }
+  public final void write(int b) {
+    write((char) b);
+  }
 
   public final void write(char[] b) {
-    write(b,0,b.length);
+    write(b, 0, b.length);
   }
 
   public void write(char b[], int off, int len) {
@@ -130,7 +155,7 @@ public class CharArr implements CharSequence, Appendable {
   }
 
   public final void write(CharArr arr) {
-    write(arr.buf, start, end-start);
+    write(arr.buf, start, end - start);
   }
 
   public final void write(String s) {
@@ -159,39 +184,35 @@ public class CharArr implements CharSequence, Appendable {
     return newbuf;
   }
 
-
   public String toString() {
     return new String(buf, start, size());
   }
 
-
   public int read(CharBuffer cb) throws IOException {
 
     /***
-    int sz = size();
-    if (sz<=0) return -1;
-    if (sz>0) cb.put(buf, start, sz);
-    return -1;
-    ***/
+     * int sz = size(); if (sz<=0) return -1; if (sz>0) cb.put(buf, start, sz); return -1;
+     ***/
 
     int sz = size();
-    if (sz>0) cb.put(buf, start, sz);
-    start=end;
+    if (sz > 0)
+      cb.put(buf, start, sz);
+    start = end;
     while (true) {
       fill();
       int s = size();
-      if (s==0) return sz==0 ? -1 : sz;
+      if (s == 0)
+        return sz == 0 ? -1 : sz;
       sz += s;
       cb.put(buf, start, s);
     }
   }
 
-
   public int fill() throws IOException {
-    return 0;  // or -1?
+    return 0; // or -1?
   }
 
-  //////////////// Appendable methods /////////////
+  // ////////////// Appendable methods /////////////
   public final Appendable append(CharSequence csq) throws IOException {
     return append(csq, 0, csq.length());
   }
@@ -207,24 +228,31 @@ public class CharArr implements CharSequence, Appendable {
   }
 }
 
-
 class NullCharArr extends CharArr {
   public NullCharArr() {
-    super(new char[1],0,0);
+    super(new char[1], 0, 0);
   }
-  public void unsafeWrite(char b) {}
 
-  public void unsafeWrite(char b[], int off, int len) {}
+  public void unsafeWrite(char b) {
+  }
 
-  public void unsafeWrite(int b) {}
+  public void unsafeWrite(char b[], int off, int len) {
+  }
 
-  public void write(char b) {}
+  public void unsafeWrite(int b) {
+  }
 
-  public void write(char b[], int off, int len) {}
+  public void write(char b) {
+  }
 
-  public void reserve(int num) {}
+  public void write(char b[], int off, int len) {
+  }
 
-  protected void resize(int len) {}
+  public void reserve(int num) {
+  }
+
+  protected void resize(int len) {
+  }
 
   public Appendable append(CharSequence csq, int start, int end) throws IOException {
     return this;
@@ -238,8 +266,6 @@ class NullCharArr extends CharArr {
   }
 }
 
-
-
 // IDEA: a subclass that refills the array from a reader?
 class CharArrReader extends CharArr {
   protected final Reader in;
@@ -250,43 +276,42 @@ class CharArrReader extends CharArr {
   }
 
   public int read() throws IOException {
-    if (start>=end) fill();
-    return start>=end ? -1 : buf[start++];
+    if (start >= end)
+      fill();
+    return start >= end ? -1 : buf[start++];
   }
 
   public int read(CharBuffer cb) throws IOException {
     // empty the buffer and then read direct
     int sz = size();
-    if (sz>0) cb.put(buf,start,end);
+    if (sz > 0)
+      cb.put(buf, start, end);
     int sz2 = in.read(cb);
-    if (sz2>=0) return sz+sz2;
-    return sz>0 ? sz : -1;
+    if (sz2 >= 0)
+      return sz + sz2;
+    return sz > 0 ? sz : -1;
   }
 
   public int fill() throws IOException {
-    if (start>=end) {
+    if (start >= end) {
       reset();
-    } else if (start>0) {
+    } else if (start > 0) {
       System.arraycopy(buf, start, buf, 0, size());
-      end=size(); start=0;
+      end = size();
+      start = 0;
     }
     /***
-    // fill fully or not???
-    do {
-      int sz = in.read(buf,end,buf.length-end);
-      if (sz==-1) return;
-      end+=sz;
-    } while (end < buf.length);
-    ***/
+     * // fill fully or not??? do { int sz = in.read(buf,end,buf.length-end); if (sz==-1) return; end+=sz; } while (end
+     * < buf.length);
+     ***/
 
-    int sz = in.read(buf,end,buf.length-end);
-    if (sz>0) end+=sz;
+    int sz = in.read(buf, end, buf.length - end);
+    if (sz > 0)
+      end += sz;
     return sz;
   }
 
 }
-
-
 
 class CharArrWriter extends CharArr {
   protected Writer sink;
@@ -294,7 +319,7 @@ class CharArrWriter extends CharArr {
   @Override
   public void flush() {
     try {
-      sink.write(buf, start, end-start);
+      sink.write(buf, start, end - start);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -303,11 +328,11 @@ class CharArrWriter extends CharArr {
 
   @Override
   public void write(char b) {
-   if (end >= buf.length) {
-     flush();
-   }
-   unsafeWrite(b);
- }
+    if (end >= buf.length) {
+      flush();
+    }
+    unsafeWrite(b);
+  }
 
   @Override
   public void write(char b[], int off, int len) {
@@ -317,7 +342,7 @@ class CharArrWriter extends CharArr {
     } else if (len < buf.length) {
       unsafeWrite(b, off, space);
       flush();
-      unsafeWrite(b, off+space, len-space);
+      unsafeWrite(b, off + space, len - space);
     } else {
       flush();
       try {
@@ -332,14 +357,14 @@ class CharArrWriter extends CharArr {
   public void write(String s, int stringOffset, int len) {
     int space = buf.length - end;
     if (len < space) {
-      s.getChars(stringOffset, stringOffset+len, buf, end);
+      s.getChars(stringOffset, stringOffset + len, buf, end);
       end += len;
     } else if (len < buf.length) {
       // if the data to write is small enough, buffer it.
-      s.getChars(stringOffset, stringOffset+space, buf, end);
+      s.getChars(stringOffset, stringOffset + space, buf, end);
       flush();
-      s.getChars(stringOffset+space, stringOffset+len, buf, 0);
-      end = len-space;
+      s.getChars(stringOffset + space, stringOffset + len, buf, 0);
+      end = len - space;
     } else {
       flush();
       // don't buffer, just write to sink
@@ -352,4 +377,3 @@ class CharArrWriter extends CharArr {
     }
   }
 }
-

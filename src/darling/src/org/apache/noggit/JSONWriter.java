@@ -17,22 +17,17 @@
 
 package org.apache.noggit;
 
-import java.util.HashMap;
 
 /**
  * @author yonik
  * @version $Id: JSONWriter.java 666240 2008-06-10 18:00:38Z yonik $
  */
 
-     
-
 // how to couple with JSONParser to allow streaming large values from input to
 // output?
 // IDEA 1) have JSONParser.getString(JSONWriter out)?
 // IDEA 2) have an output CharArr that acts as a filter to escape data
-
 // IDEA: a subclass of JSONWriter could provide more state and stricter checking
-
 public class JSONWriter extends TextWriter {
   int level;
   boolean doIndent;
@@ -47,11 +42,11 @@ public class JSONWriter extends TextWriter {
   }
 
   public void writeString(CharSequence str) {
-    JSONUtil.writeString(str,0,str.length(),out);
+    JSONUtil.writeString(str, 0, str.length(), out);
   }
 
   public void writeString(CharArr str) {
-    JSONUtil.writeString(str,out);
+    JSONUtil.writeString(str, out);
   }
 
   public void writeStringStart() {
@@ -67,15 +62,15 @@ public class JSONWriter extends TextWriter {
   }
 
   public void write(long number) {
-    JSONUtil.writeNumber(number,out);
+    JSONUtil.writeNumber(number, out);
   }
 
   public void write(double number) {
-    JSONUtil.writeNumber(number,out);
+    JSONUtil.writeNumber(number, out);
   }
 
   public void write(boolean bool) {
-    JSONUtil.writeBoolean(bool,out);
+    JSONUtil.writeBoolean(bool, out);
   }
 
   public void writeNumber(CharArr digits) {
@@ -93,7 +88,7 @@ public class JSONWriter extends TextWriter {
 
   public void endObject() {
     out.write('}');
-    level--;    
+    level--;
   }
 
   public void startArray() {
@@ -111,8 +106,7 @@ public class JSONWriter extends TextWriter {
   }
 
   public void writeNameSeparator() {
-    out.write(':');    
+    out.write(':');
   }
 
 }
-

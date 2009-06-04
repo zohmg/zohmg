@@ -17,7 +17,6 @@
 
 package org.apache.noggit;
 
-import java.util.*;
 
 /**
  * @author yonik
@@ -31,7 +30,9 @@ public abstract class TextWriter {
   public abstract void writeString(CharArr str);
 
   public abstract void writeStringStart();
+
   public abstract void writeStringChars(CharArr partialStr);
+
   public abstract void writeStringEnd();
 
   public abstract void write(long number);
@@ -41,7 +42,7 @@ public abstract class TextWriter {
   public abstract void write(boolean bool);
 
   public abstract void writeNumber(CharArr digits);
-  
+
   public abstract void writePartialNumber(CharArr digits);
 
   public abstract void startObject();
@@ -58,4 +59,3 @@ public abstract class TextWriter {
 
   // void writeNameValue(String name, Object val)?
 }
-

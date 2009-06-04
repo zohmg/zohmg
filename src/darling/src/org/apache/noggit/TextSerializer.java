@@ -17,16 +17,16 @@
 
 package org.apache.noggit;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.Collection;
-import java.util.Arrays;
 
 public class TextSerializer {
   public void serialize(TextWriter writer, Map val) {
     writer.startObject();
     boolean first = true;
-    for (Map.Entry entry : (Set<Map.Entry>)val.entrySet()) {
+    for (Map.Entry entry : (Set<Map.Entry>) val.entrySet()) {
       if (first) {
         first = false;
       } else {
@@ -57,21 +57,21 @@ public class TextSerializer {
     if (o == null) {
       writer.writeNull();
     } else if (o instanceof CharSequence) {
-      writer.writeString((CharSequence)o);
+      writer.writeString((CharSequence) o);
     } else if (o instanceof Number) {
       if (o instanceof Integer || o instanceof Long) {
-        writer.write(((Number)o).longValue());
+        writer.write(((Number) o).longValue());
       } else if (o instanceof Float || o instanceof Double) {
-        writer.write(((Number)o).doubleValue());
+        writer.write(((Number) o).doubleValue());
       } else {
         CharArr arr = new CharArr();
         arr.write(o.toString());
         writer.writeNumber(arr);
       }
     } else if (o instanceof Map) {
-      this.serialize(writer, (Map)o);
+      this.serialize(writer, (Map) o);
     } else if (o instanceof Collection) {
-      this.serialize(writer, (Collection)o);
+      this.serialize(writer, (Collection) o);
     } else if (o instanceof Object[]) {
       this.serialize(writer, Arrays.asList(o));
     } else {

@@ -28,47 +28,45 @@ import java.io.Reader;
 public class JSONParser {
 
   /** Event indicating a JSON string value, including member names of objects */
-  public static final int STRING=1;
+  public static final int STRING = 1;
   /** Event indicating a JSON number value which fits into a signed 64 bit integer */
-  public static final int LONG=2;
-  /** Event indicating a JSON number value which has a fractional part or an exponent
-   * and with string length <= 23 chars not including sign.  This covers
-   * all representations of normal values for Double.toString().
+  public static final int LONG = 2;
+  /**
+   * Event indicating a JSON number value which has a fractional part or an exponent and with string length <= 23 chars
+   * not including sign. This covers all representations of normal values for Double.toString().
    */
-  public static final int NUMBER=3;
-  /** Event indicating a JSON number value that was not produced by toString of any
-   * Java primitive numerics such as Double or Long.  It is either
-   * an integer outside the range of a 64 bit signed integer, or a floating
-   * point value with a string representation of more than 23 chars.
-    */
-  public static final int BIGNUMBER=4;
+  public static final int NUMBER = 3;
+  /**
+   * Event indicating a JSON number value that was not produced by toString of any Java primitive numerics such as
+   * Double or Long. It is either an integer outside the range of a 64 bit signed integer, or a floating point value
+   * with a string representation of more than 23 chars.
+   */
+  public static final int BIGNUMBER = 4;
   /** Event indicating a JSON boolean */
-  public static final int BOOLEAN=5;
+  public static final int BOOLEAN = 5;
   /** Event indicating a JSON null */
-  public static final int NULL=6;
+  public static final int NULL = 6;
   /** Event indicating the start of a JSON object */
-  public static final int OBJECT_START=7;
+  public static final int OBJECT_START = 7;
   /** Event indicating the end of a JSON object */
-  public static final int OBJECT_END=8;
+  public static final int OBJECT_END = 8;
   /** Event indicating the start of a JSON array */
-  public static final int ARRAY_START=9;
+  public static final int ARRAY_START = 9;
   /** Event indicating the end of a JSON array */
-  public static final int ARRAY_END=10;
+  public static final int ARRAY_END = 10;
   /** Event indicating the end of input has been reached */
-  public static final int EOF=11;
-
+  public static final int EOF = 11;
 
   private static final CharArr devNull = new NullCharArr();
 
+  final char[] buf; // input buffer with JSON text in it
+  int start; // current position in the buffer
+  int end; // end position in the buffer (one past last valid index)
+  final Reader in; // optional reader to obtain data from
+  boolean eof = false; // true if the end of the stream was reached.
+  long gpos; // global position = gpos + start
 
-  final char[] buf;  // input buffer with JSON text in it
-  int start;         // current position in the buffer
-  int end;           // end position in the buffer (one past last valid index)
-  final Reader in;   // optional reader to obtain data from
-  boolean eof=false; // true if the end of the stream was reached.
-  long gpos;          // global position = gpos + start
-
-  int event;         // last event read
+  int event; // last event read
 
   public JSONParser(Reader in) {
     this(in, new char[8192]);
@@ -99,8 +97,8 @@ public class JSONParser {
     this.in = null;
     this.start = start;
     this.end = end;
-    this.buf = new char[end-start];
-    data.getChars(start,end,buf,0);
+    this.buf = new char[end - start];
+    data.getChars(start, end, buf, 0);
   }
 
   // temporary output buffer
@@ -109,15 +107,15 @@ public class JSONParser {
   // We need to keep some state in order to (at a minimum) know if
   // we should skip ',' or ':'.
   private byte[] stack = new byte[16];
-  private int ptr=0;     // pointer into the stack of parser states
-  private byte state=0;  // current parser state
+  private int ptr = 0; // pointer into the stack of parser states
+  private byte state = 0; // current parser state
 
   // parser states stored in the stack
-  private static final byte DID_OBJSTART =1;  // '{' just read
-  private static final byte DID_ARRSTART =2;  // '[' just read
-  private static final byte DID_ARRELEM =3;   // array element just read
-  private static final byte DID_MEMNAME =4;   // object member name (map key) just read
-  private static final byte DID_MEMVAL =5;    // object member value (map val) just read
+  private static final byte DID_OBJSTART = 1; // '{' just read
+  private static final byte DID_ARRSTART = 2; // '[' just read
+  private static final byte DID_ARRELEM = 3; // array element just read
+  private static final byte DID_MEMNAME = 4; // object member name (map key) just read
+  private static final byte DID_MEMVAL = 5; // object member value (map val) just read
 
   // info about value that was just read (or is in the middle of being read)
   private int valstate;
@@ -127,16 +125,16 @@ public class JSONParser {
     if (ptr >= stack.length) {
       // doubling here is probably overkill, but anything that needs to double more than
       // once (32 levels deep) is very atypical anyway.
-      byte[] newstack = new byte[stack.length<<1];
-      System.arraycopy(stack,0,newstack,0,stack.length);
+      byte[] newstack = new byte[stack.length << 1];
+      System.arraycopy(stack, 0, newstack, 0, stack.length);
       stack = newstack;
     }
     stack[ptr++] = state;
   }
 
-  // pop  parser state (use at end of container)
+  // pop parser state (use at end of container)
   private final void pop() {
-    if (--ptr<0) {
+    if (--ptr < 0) {
       throw err("Unbalanced container");
     } else {
       state = stack[ptr];
@@ -144,26 +142,28 @@ public class JSONParser {
   }
 
   protected void fill() throws IOException {
-    if (in!=null) {
+    if (in != null) {
       gpos += end;
-      start=0;
-      int num = in.read(buf,0,buf.length);
-      end = num>=0 ? num : 0;
+      start = 0;
+      int num = in.read(buf, 0, buf.length);
+      end = num >= 0 ? num : 0;
     }
-    if (start>=end) eof=true;
+    if (start >= end)
+      eof = true;
   }
 
   private void getMore() throws IOException {
     fill();
-    if (start>=end) {
+    if (start >= end) {
       throw err(null);
     }
   }
 
   protected int getChar() throws IOException {
-    if (start>=end) {
+    if (start >= end) {
       fill();
-      if (start>=end) return -1;
+      if (start >= end)
+        return -1;
     }
     return buf[start++];
   }
@@ -171,15 +171,17 @@ public class JSONParser {
   private int getCharNWS() throws IOException {
     for (;;) {
       int ch = getChar();
-      if (!(ch==' ' || ch=='\t' || ch=='\n' || ch=='\r')) return ch;
+      if (!(ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'))
+        return ch;
     }
   }
 
   private void expect(char[] arr) throws IOException {
-    for (int i=1; i<arr.length; i++) {
+    for (int i = 1; i < arr.length; i++) {
       int ch = getChar();
       if (ch != arr[i]) {
-        if (ch==-1) throw new RuntimeException("Unexpected EOF");
+        if (ch == -1)
+          throw new RuntimeException("Unexpected EOF");
         throw new RuntimeException("Expected " + new String(arr));
       }
     }
@@ -188,130 +190,136 @@ public class JSONParser {
   private RuntimeException err(String msg) {
     // We can't tell if EOF was hit by comparing start<=end
     // because the illegal char could have been the last in the buffer
-    // or in the stream.  To deal with this, the "eof" var was introduced
-    if (!eof && start>0) start--;  // backup one char
-    String chs = "char=" + ((start>=end) ? "(EOF)" : "" + (char)buf[start]);
-    String pos = "position=" + (gpos+start);
+    // or in the stream. To deal with this, the "eof" var was introduced
+    if (!eof && start > 0)
+      start--; // backup one char
+    String chs = "char=" + ((start >= end) ? "(EOF)" : "" + (char) buf[start]);
+    String pos = "position=" + (gpos + start);
     String tot = chs + ',' + pos;
-    if (msg==null) {
-      if (start>=end) msg = "Unexpected EOF";
-      else msg="JSON Parse Error";
+    if (msg == null) {
+      if (start >= end)
+        msg = "Unexpected EOF";
+      else
+        msg = "JSON Parse Error";
     }
     return new RuntimeException(msg + ": " + tot);
   }
 
-
   private boolean bool; // boolean value read
-  private long lval;    // long value read
-  private int nstate;   // current state while reading a number
-  private static final int HAS_FRACTION = 0x01;  // nstate flag, '.' already read
-  private static final int HAS_EXPONENT = 0x02;  // nstate flag, '[eE][+-]?[0-9]' already read
+  private long lval; // long value read
+  private int nstate; // current state while reading a number
+  private static final int HAS_FRACTION = 0x01; // nstate flag, '.' already read
+  private static final int HAS_EXPONENT = 0x02; // nstate flag, '[eE][+-]?[0-9]' already read
 
-  /** Returns the long read... only significant if valstate==LONG after
-   * this call.  firstChar should be the first numeric digit read.
+  /**
+   * Returns the long read... only significant if valstate==LONG after this call. firstChar should be the first numeric
+   * digit read.
    */
   private long readNumber(int firstChar, boolean isNeg) throws IOException {
-    out.unsafeWrite(firstChar);   // unsafe OK since we know output is big enough
+    out.unsafeWrite(firstChar); // unsafe OK since we know output is big enough
     // We build up the number in the negative plane since it's larger (by one) than
     // the positive plane.
     long v = '0' - firstChar;
-    for (int i=0; i<22; i++) {
+    for (int i = 0; i < 22; i++) {
       int ch = getChar();
       // TODO: is this switch faster as an if-then-else?
-      switch(ch) {
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-          v = v *10 - (ch-'0');
-          out.unsafeWrite(ch);
-          continue;
-        case '.':
-          out.unsafeWrite('.');
-          valstate = readFrac(out,22-i);
-          return 0;
-        case 'e':
-        case 'E':
-          out.unsafeWrite(ch);
-          nstate=0;
-          valstate = readExp(out,22-i);
-          return 0;
-        default:
-          // return the number, relying on nextEvent() to return an error
-          // for invalid chars following the number.
-          if (ch!=-1) --start;   // push back last char if not EOF
+      switch (ch) {
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+        v = v * 10 - (ch - '0');
+        out.unsafeWrite(ch);
+        continue;
+      case '.':
+        out.unsafeWrite('.');
+        valstate = readFrac(out, 22 - i);
+        return 0;
+      case 'e':
+      case 'E':
+        out.unsafeWrite(ch);
+        nstate = 0;
+        valstate = readExp(out, 22 - i);
+        return 0;
+      default:
+        // return the number, relying on nextEvent() to return an error
+        // for invalid chars following the number.
+        if (ch != -1)
+          --start; // push back last char if not EOF
 
-          // the max number of digits we are reading only allows for
-          // a long to wrap once, so we can just check if the sign is
-          // what is expected to detect an overflow.
-          if (isNeg) {
-            // -0 is allowed by the spec
-            valstate = v<=0 ? LONG : BIGNUMBER;
-          } else {
-            v=-v;
-            valstate = v>=0 ? LONG : BIGNUMBER;
-          }
-          return v;
+        // the max number of digits we are reading only allows for
+        // a long to wrap once, so we can just check if the sign is
+        // what is expected to detect an overflow.
+        if (isNeg) {
+          // -0 is allowed by the spec
+          valstate = v <= 0 ? LONG : BIGNUMBER;
+        } else {
+          v = -v;
+          valstate = v >= 0 ? LONG : BIGNUMBER;
+        }
+        return v;
       }
     }
-    nstate=0;
+    nstate = 0;
     valstate = BIGNUMBER;
     return 0;
   }
 
-  
   // read digits right of decimal point
   private int readFrac(CharArr arr, int lim) throws IOException {
-    nstate = HAS_FRACTION;  // deliberate set instead of '|'
-    while(--lim>=0) {
+    nstate = HAS_FRACTION; // deliberate set instead of '|'
+    while (--lim >= 0) {
       int ch = getChar();
-      if (ch>='0' && ch<='9') {
+      if (ch >= '0' && ch <= '9') {
         arr.write(ch);
-      } else if (ch=='e' || ch=='E') {
+      } else if (ch == 'e' || ch == 'E') {
         arr.write(ch);
-        return readExp(arr,lim);
+        return readExp(arr, lim);
       } else {
-        if (ch!=-1) start--; // back up
+        if (ch != -1)
+          start--; // back up
         return NUMBER;
       }
     }
     return BIGNUMBER;
   }
 
-
   // call after 'e' or 'E' has been seen to read the rest of the exponent
   private int readExp(CharArr arr, int lim) throws IOException {
     nstate |= HAS_EXPONENT;
-    int ch = getChar(); lim--;
+    int ch = getChar();
+    lim--;
 
-    if (ch=='+' || ch=='-') {
+    if (ch == '+' || ch == '-') {
       arr.write(ch);
-      ch = getChar(); lim--;
+      ch = getChar();
+      lim--;
     }
 
     // make sure at least one digit is read.
-    if (ch<'0' || ch>'9') {
+    if (ch < '0' || ch > '9') {
       throw err("missing exponent number");
     }
     arr.write(ch);
 
-    return readExpDigits(arr,lim);
+    return readExpDigits(arr, lim);
   }
 
   // continuation of readExpStart
   private int readExpDigits(CharArr arr, int lim) throws IOException {
-    while (--lim>=0) {
+    while (--lim >= 0) {
       int ch = getChar();
-      if (ch>='0' && ch<='9') {
+      if (ch >= '0' && ch <= '9') {
         arr.write(ch);
       } else {
-        if (ch!=-1) start--; // back up
+        if (ch != -1)
+          start--; // back up
         return NUMBER;
       }
     }
@@ -319,9 +327,10 @@ public class JSONParser {
   }
 
   private void continueNumber(CharArr arr) throws IOException {
-    if (arr != out) arr.write(out);
+    if (arr != out)
+      arr.write(out);
 
-    if ((nstate & HAS_EXPONENT)!=0){
+    if ((nstate & HAS_EXPONENT) != 0) {
       readExpDigits(arr, Integer.MAX_VALUE);
       return;
     }
@@ -330,33 +339,33 @@ public class JSONParser {
       return;
     }
 
-    for(;;) {
+    for (;;) {
       int ch = getChar();
-      if (ch>='0' && ch <='9') {
+      if (ch >= '0' && ch <= '9') {
         arr.write(ch);
-      } else if (ch=='.') {
+      } else if (ch == '.') {
         arr.write(ch);
-        readFrac(arr,Integer.MAX_VALUE);
+        readFrac(arr, Integer.MAX_VALUE);
         return;
-      } else if (ch=='e' || ch=='E') {
+      } else if (ch == 'e' || ch == 'E') {
         arr.write(ch);
-        readExp(arr,Integer.MAX_VALUE);
+        readExp(arr, Integer.MAX_VALUE);
         return;
       } else {
-        if (ch!=-1) start--;
+        if (ch != -1)
+          start--;
         return;
       }
     }
   }
 
-
   private int hexval(int hexdig) {
-    if (hexdig>='0' && hexdig <='9') {
-      return hexdig-'0';
-    } else if (hexdig>='A' && hexdig <='F') {
-      return hexdig+(10-'A');
-    } else if (hexdig>='a' && hexdig <='f') {
-      return hexdig+(10-'a');
+    if (hexdig >= '0' && hexdig <= '9') {
+      return hexdig - '0';
+    } else if (hexdig >= 'A' && hexdig <= 'F') {
+      return hexdig + (10 - 'A');
+    } else if (hexdig >= 'a' && hexdig <= 'f') {
+      return hexdig + (10 - 'a');
     }
     throw err("invalid hex digit");
   }
@@ -364,37 +373,41 @@ public class JSONParser {
   // backslash has already been read when this is called
   private char readEscapedChar() throws IOException {
     switch (getChar()) {
-      case '"' : return '"';
-      case '\\' : return '\\';
-      case '/' : return '/';
-      case 'n' : return '\n';
-      case 'r' : return '\r';
-      case 't' : return '\t';
-      case 'f' : return '\f';
-      case 'b' : return '\b';
-      case 'u' :
-        return (char)(
-               (hexval(getChar()) << 12)
-             | (hexval(getChar()) << 8)
-             | (hexval(getChar()) << 4)
-             | (hexval(getChar())));
+    case '"':
+      return '"';
+    case '\\':
+      return '\\';
+    case '/':
+      return '/';
+    case 'n':
+      return '\n';
+    case 'r':
+      return '\r';
+    case 't':
+      return '\t';
+    case 'f':
+      return '\f';
+    case 'b':
+      return '\b';
+    case 'u':
+      return (char) ((hexval(getChar()) << 12) | (hexval(getChar()) << 8) | (hexval(getChar()) << 4) | (hexval(getChar())));
     }
     throw err("Invalid character escape in string");
   }
 
   // a dummy buffer we can use to point at other buffers
-  private final CharArr tmp = new CharArr(null,0,0);
+  private final CharArr tmp = new CharArr(null, 0, 0);
 
   private CharArr readStringChars() throws IOException {
-     char c=0;
-     int i;
-     for (i=start; i<end; i++) {
+    char c = 0;
+    int i;
+    for (i = start; i < end; i++) {
       c = buf[i];
-      if (c=='"') {
-        tmp.set(buf,start,i);  // directly use input buffer
-        start=i+1; // advance past last '"'
+      if (c == '"') {
+        tmp.set(buf, start, i); // directly use input buffer
+        start = i + 1; // advance past last '"'
         return tmp;
-      } else if (c=='\\') {
+      } else if (c == '\\') {
         break;
       }
     }
@@ -403,142 +416,125 @@ public class JSONParser {
     return out;
   }
 
-
   // middle is the pointer to the middle of a buffer to start scanning for a non-string
-  // character ('"' or "/").  start<=middle<end
+  // character ('"' or "/"). start<=middle<end
   // this should be faster for strings with fewer escapes, but probably slower for many escapes.
   private void readStringChars2(CharArr arr, int middle) throws IOException {
     for (;;) {
-      if (middle>=end) {
-        arr.write(buf,start,middle-start);
+      if (middle >= end) {
+        arr.write(buf, start, middle - start);
         getMore();
-        middle=start;
+        middle = start;
       }
       int ch = buf[middle++];
-      if (ch=='"') {
-        int len = middle-start-1;        
-        if (len>0) arr.write(buf,start,len);
-        start=middle;
+      if (ch == '"') {
+        int len = middle - start - 1;
+        if (len > 0)
+          arr.write(buf, start, len);
+        start = middle;
         return;
-      } else if (ch=='\\') {
-        int len = middle-start-1;
-        if (len>0) arr.write(buf,start,len);
-        start=middle;
+      } else if (ch == '\\') {
+        int len = middle - start - 1;
+        if (len > 0)
+          arr.write(buf, start, len);
+        start = middle;
         arr.write(readEscapedChar());
-        middle=start;
+        middle = start;
       }
     }
   }
 
-
-  /*** alternate implelentation
-  // middle is the pointer to the middle of a buffer to start scanning for a non-string
-  // character ('"' or "/").  start<=middle<end
-  private void readStringChars2a(CharArr arr, int middle) throws IOException {
-    int ch=0;
-    for(;;) {
-      // find the next non-string char
-      for (; middle<end; middle++) {
-        ch = buf[middle];
-        if (ch=='"' || ch=='\\') break;
-      }
-
-      arr.write(buf,start,middle-start);
-      if (middle>=end) {
-        getMore();
-        middle=start;
-      } else {
-        start = middle+1;   // set buffer pointer to correct spot
-        if (ch=='"') {
-          valstate=0;
-          return;
-        } else if (ch=='\\') {
-          arr.write(readEscapedChar());
-          if (start>=end) getMore();
-          middle=start;
-        }
-      }
-    }
-  }
-  ***/
-
+  /***
+   * alternate implelentation // middle is the pointer to the middle of a buffer to start scanning for a non-string //
+   * character ('"' or "/"). start<=middle<end private void readStringChars2a(CharArr arr, int middle) throws
+   * IOException { int ch=0; for(;;) { // find the next non-string char for (; middle<end; middle++) { ch = buf[middle];
+   * if (ch=='"' || ch=='\\') break; } arr.write(buf,start,middle-start); if (middle>=end) { getMore(); middle=start; }
+   * else { start = middle+1; // set buffer pointer to correct spot if (ch=='"') { valstate=0; return; } else if
+   * (ch=='\\') { arr.write(readEscapedChar()); if (start>=end) getMore(); middle=start; } } } }
+   ***/
 
   // return the next event when parser is in a neutral state (no
   // map separators or array element separators to read
   private int next(int ch) throws IOException {
-    for(;;) {
+    for (;;) {
       switch (ch) {
-        case ' ':
-        case '\t': break;
-        case '\r':
-        case '\n': break;  // try and keep track of linecounts?
-        case '"' :
-          valstate = STRING;
-          return STRING;
-        case '{' :
-          push();
-          state= DID_OBJSTART;
-          return OBJECT_START;
-        case '[':
-          push();
-          state=DID_ARRSTART;
-          return ARRAY_START;
-        case '0' :
-          out.reset();
-          //special case '0'?  If next char isn't '.' val=0
-          ch=getChar();
-          if (ch=='.') {
-            start--; ch='0';
-            readNumber('0',false);
-            return valstate;
-          } else if (ch>'9' || ch<'0') {
-            out.unsafeWrite('0');
-            start--;
-            lval = 0;
-            valstate=LONG;
-            return LONG;
-          } else {
-            throw err("Leading zeros not allowed");
-          }
-        case '1' :
-        case '2' :
-        case '3' :
-        case '4' :
-        case '5' :
-        case '6' :
-        case '7' :
-        case '8' :
-        case '9' :
-          out.reset();
-          lval = readNumber(ch,false);
+      case ' ':
+      case '\t':
+        break;
+      case '\r':
+      case '\n':
+        break; // try and keep track of linecounts?
+      case '"':
+        valstate = STRING;
+        return STRING;
+      case '{':
+        push();
+        state = DID_OBJSTART;
+        return OBJECT_START;
+      case '[':
+        push();
+        state = DID_ARRSTART;
+        return ARRAY_START;
+      case '0':
+        out.reset();
+        // special case '0'? If next char isn't '.' val=0
+        ch = getChar();
+        if (ch == '.') {
+          start--;
+          ch = '0';
+          readNumber('0', false);
           return valstate;
-        case '-' :
-          out.reset();
-          out.unsafeWrite('-');
-          ch = getChar();
-          if (ch<'0' || ch>'9') throw err("expected digit after '-'");
-          lval = readNumber(ch,true);
-          return valstate;
-        case 't':
-          valstate=BOOLEAN;
-          // TODO: test performance of this non-branching inline version.
-          // if ((('r'-getChar())|('u'-getChar())|('e'-getChar())) != 0) err("");
-          expect(JSONUtil.TRUE_CHARS);
-          bool=true;
-          return BOOLEAN;
-        case 'f':
-          valstate=BOOLEAN;
-          expect(JSONUtil.FALSE_CHARS);
-          bool=false;
-          return BOOLEAN;
-        case 'n':
-          valstate=NULL;
-          expect(JSONUtil.NULL_CHARS);
-          return NULL;
-        case -1:
-          if (getLevel()>0) throw new RuntimeException("Premature EOF");
-          return EOF;
-        default: throw err(null);
+        } else if (ch > '9' || ch < '0') {
+          out.unsafeWrite('0');
+          start--;
+          lval = 0;
+          valstate = LONG;
+          return LONG;
+        } else {
+          throw err("Leading zeros not allowed");
+        }
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+        out.reset();
+        lval = readNumber(ch, false);
+        return valstate;
+      case '-':
+        out.reset();
+        out.unsafeWrite('-');
+        ch = getChar();
+        if (ch < '0' || ch > '9')
+          throw err("expected digit after '-'");
+        lval = readNumber(ch, true);
+        return valstate;
+      case 't':
+        valstate = BOOLEAN;
+        // TODO: test performance of this non-branching inline version.
+        // if ((('r'-getChar())|('u'-getChar())|('e'-getChar())) != 0) err("");
+        expect(JSONUtil.TRUE_CHARS);
+        bool = true;
+        return BOOLEAN;
+      case 'f':
+        valstate = BOOLEAN;
+        expect(JSONUtil.FALSE_CHARS);
+        bool = false;
+        return BOOLEAN;
+      case 'n':
+        valstate = NULL;
+        expect(JSONUtil.NULL_CHARS);
+        return NULL;
+      case -1:
+        if (getLevel() > 0)
+          throw new RuntimeException("Premature EOF");
+        return EOF;
+      default:
+        throw err(null);
       }
 
       ch = getChar();
@@ -546,11 +542,11 @@ public class JSONParser {
   }
 
   public String toString() {
-    return "start="+start+",end="+end+",state="+state+"valstate="+valstate;
+    return "start=" + start + ",end=" + end + ",state=" + state + "valstate=" + valstate;
   }
 
-
-  /** Returns the next event encountered in the JSON stream, one of
+  /**
+   * Returns the next event encountered in the JSON stream, one of
    * <ul>
    * <li>{@link #STRING}</li>
    * <li>{@link #LONG}</li>
@@ -567,71 +563,70 @@ public class JSONParser {
    * </ul>
    */
   public int nextEvent() throws IOException {
-    if (valstate==STRING) {
-      readStringChars2(devNull,start);
-    }
-    else if (valstate==BIGNUMBER) {
+    if (valstate == STRING) {
+      readStringChars2(devNull, start);
+    } else if (valstate == BIGNUMBER) {
       continueNumber(devNull);
     }
 
-    valstate=0;
+    valstate = 0;
 
-    int ch;   // TODO: factor out getCharNWS() to here and check speed
+    int ch; // TODO: factor out getCharNWS() to here and check speed
     switch (state) {
-      case 0:
-        return event = next(getCharNWS());
-      case DID_OBJSTART:
-        ch = getCharNWS();
-        if (ch=='}') {
-          pop();
-          return event = OBJECT_END;
-        }
-        if (ch != '"') {
-          throw err("Expected string");
-        }
-        state = DID_MEMNAME;
-        valstate = STRING;
-        return event = STRING;
-      case DID_MEMNAME:
-        ch = getCharNWS();
-        if (ch!=':') {
-          throw err("Expected key,value separator ':'");
-        }
-        state = DID_MEMVAL;  // set state first because it might be pushed...
-        return event = next(getChar());
-      case DID_MEMVAL:
-        ch = getCharNWS();
-        if (ch=='}') {
-          pop();
-          return event = OBJECT_END;
-        } else if (ch!=',') {
-          throw err("Expected ',' or '}'");
-        }
-        ch = getCharNWS();
-        if (ch != '"') {
-          throw err("Expected string");
-        }
-        state = DID_MEMNAME;
-        valstate = STRING;
-        return event = STRING;
-      case DID_ARRSTART:
-        ch = getCharNWS();
-        if (ch==']') {
-          pop();
-          return event = ARRAY_END;
-        }
-        state = DID_ARRELEM;  // set state first, might be pushed...
-        return event = next(ch);
-      case DID_ARRELEM:
-        ch = getCharNWS();
-        if (ch==']') {
-          pop();
-          return event = ARRAY_END;
-        } else if (ch!=',') {
-          throw err("Expected ',' or ']'");
-        }
-        // state = DID_ARRELEM;
-        return event = next(getChar());
+    case 0:
+      return event = next(getCharNWS());
+    case DID_OBJSTART:
+      ch = getCharNWS();
+      if (ch == '}') {
+        pop();
+        return event = OBJECT_END;
+      }
+      if (ch != '"') {
+        throw err("Expected string");
+      }
+      state = DID_MEMNAME;
+      valstate = STRING;
+      return event = STRING;
+    case DID_MEMNAME:
+      ch = getCharNWS();
+      if (ch != ':') {
+        throw err("Expected key,value separator ':'");
+      }
+      state = DID_MEMVAL; // set state first because it might be pushed...
+      return event = next(getChar());
+    case DID_MEMVAL:
+      ch = getCharNWS();
+      if (ch == '}') {
+        pop();
+        return event = OBJECT_END;
+      } else if (ch != ',') {
+        throw err("Expected ',' or '}'");
+      }
+      ch = getCharNWS();
+      if (ch != '"') {
+        throw err("Expected string");
+      }
+      state = DID_MEMNAME;
+      valstate = STRING;
+      return event = STRING;
+    case DID_ARRSTART:
+      ch = getCharNWS();
+      if (ch == ']') {
+        pop();
+        return event = ARRAY_END;
+      }
+      state = DID_ARRELEM; // set state first, might be pushed...
+      return event = next(ch);
+    case DID_ARRELEM:
+      ch = getCharNWS();
+      if (ch == ']') {
+        pop();
+        return event = ARRAY_END;
+      } else if (ch != ',') {
+        throw err("Expected ',' or ']'");
+      }
+      // state = DID_ARRELEM;
+      return event = next(getChar());
     }
     return 0;
   }
@@ -640,17 +635,18 @@ public class JSONParser {
     return event;
   }
 
-
   private void goTo(int what) throws IOException {
-    if (valstate==what) { valstate=0; return; }
-    if (valstate==0) {
-      int ev = nextEvent();      // TODO
-      if (valstate!=what) {
+    if (valstate == what) {
+      valstate = 0;
+      return;
+    }
+    if (valstate == 0) {
+      int ev = nextEvent(); // TODO
+      if (valstate != what) {
         throw err("type mismatch");
       }
-      valstate=0;
-    }
-    else {
+      valstate = 0;
+    } else {
       throw err("type mismatch");
     }
   }
@@ -660,12 +656,14 @@ public class JSONParser {
     return getStringChars().toString();
   }
 
-  /** Returns the characters of a JSON string value, decoding any escaped characters.
-   * <p/>The underlying buffer of the returned <code>CharArr</code> should *not* be
-   * modified as it may be shared with the input buffer.
-   * <p/>The returned <code>CharArr</code> will only be valid up until
-   * the next JSONParser method is called.  Any required data should be
-   * read before that point.
+  /**
+   * Returns the characters of a JSON string value, decoding any escaped characters.
+   * <p/>
+   * The underlying buffer of the returned <code>CharArr</code> should *not* be modified as it may be shared with the
+   * input buffer.
+   * <p/>
+   * The returned <code>CharArr</code> will only be valid up until the next JSONParser method is called. Any required
+   * data should be read before that point.
    */
   public CharArr getStringChars() throws IOException {
     goTo(STRING);
@@ -675,11 +673,13 @@ public class JSONParser {
   /** Reads a JSON string into the output, decoding any escaped characters. */
   public void getString(CharArr output) throws IOException {
     goTo(STRING);
-    readStringChars2(output,start);
+    readStringChars2(output, start);
   }
 
-  /** Reads a number from the input stream and parses it as a long, only if
-   * the value will in fact fit into a signed 64 bit integer. */
+  /**
+   * Reads a number from the input stream and parses it as a long, only if the value will in fact fit into a signed 64
+   * bit integer.
+   */
   public long getLong() throws IOException {
     goTo(LONG);
     return lval;
@@ -690,24 +690,26 @@ public class JSONParser {
     return Double.parseDouble(getNumberChars().toString());
   }
 
-  /** Returns the characters of a JSON numeric value.
-   * <p/>The underlying buffer of the returned <code>CharArr</code> should *not* be
-   * modified as it may be shared with the input buffer.
-   * <p/>The returned <code>CharArr</code> will only be valid up until
-   * the next JSONParser method is called.  Any required data should be
-   * read before that point.
-   */  
+  /**
+   * Returns the characters of a JSON numeric value.
+   * <p/>
+   * The underlying buffer of the returned <code>CharArr</code> should *not* be modified as it may be shared with the
+   * input buffer.
+   * <p/>
+   * The returned <code>CharArr</code> will only be valid up until the next JSONParser method is called. Any required
+   * data should be read before that point.
+   */
   public CharArr getNumberChars() throws IOException {
-    int ev=0;
-    if (valstate==0) ev = nextEvent();
+    int ev = 0;
+    if (valstate == 0)
+      ev = nextEvent();
 
     if (valstate == LONG || valstate == NUMBER) {
-      valstate=0;
+      valstate = 0;
       return out;
-    }
-    else if (valstate==BIGNUMBER) {
+    } else if (valstate == BIGNUMBER) {
       continueNumber(out);
-      valstate=0;
+      valstate = 0;
       return out;
     } else {
       throw err("Unexpected " + ev);
@@ -716,18 +718,20 @@ public class JSONParser {
 
   /** Reads a JSON numeric value into the output. */
   public void getNumberChars(CharArr output) throws IOException {
-    int ev=0;
-    if (valstate==0) ev=nextEvent();
-    if (valstate == LONG || valstate == NUMBER) output.write(this.out);
-    else if (valstate==BIGNUMBER) {
+    int ev = 0;
+    if (valstate == 0)
+      ev = nextEvent();
+    if (valstate == LONG || valstate == NUMBER)
+      output.write(this.out);
+    else if (valstate == BIGNUMBER) {
       continueNumber(output);
     } else {
       throw err("Unexpected " + ev);
     }
-    valstate=0;
+    valstate = 0;
   }
 
-  /** Reads a boolean value */  
+  /** Reads a boolean value */
   public boolean getBoolean() throws IOException {
     goTo(BOOLEAN);
     return bool;
