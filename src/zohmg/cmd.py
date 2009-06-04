@@ -17,8 +17,17 @@
 
 # this is the command line interface.
 
-from zohmg.utils import fail
 import sys, os, getopt
+from zohmg.utils import fail
+
+# add all bundled eggs to sys.path
+libpath='/usr/local/lib/zohmg'
+for (dir, dirnames, files) in os.walk(libpath):
+    for file in files:
+        suffix = file.split(".")[-1]
+        if suffix == "egg":
+            sys.path.append(dir+"/"+file)
+
 
 def usage(reason = None):
     zohmg = os.path.basename(sys.argv[0])
