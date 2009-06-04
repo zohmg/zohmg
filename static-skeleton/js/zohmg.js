@@ -20,14 +20,11 @@
 
 
 // data source.
+// (oh wait, it's hardcoded.)
 var wsUrl = 'http://localhost:8086/data/';
 
-var chartWidth = 600;
-var chartHeight = 300;
-var numXTicks = chartWidth / 80; // one tick every 80 pixels
-
 // from http://beta.dailycolorscheme.com/archive/2006/09/07
-var chartWidth = 600;
+var chartWidth = 800;
 var chartHeight = 300;
 var numXTicks = chartWidth / 80; // one tick every 80 pixels
 var graphStyles = new Array(
@@ -85,7 +82,7 @@ function dictToString(ary) {
 // TODO: fix this up to not be so pre-defined.
 function loadFilters() {
     // highly hardcoded.
-    d1  = $('input#d1').val(); // and so on..
+    d1  = $('input#d1').val(); // TODO: and so on..
     d1v = $('#graphNav input[name=d1v]')[0].value;
     d2  = $('#graphNav input[name=d2]')[0].value;
     d2v = $('#graphNav input[name=d2v]')[0].value;
@@ -123,13 +120,18 @@ function loadData(t0, t1, unit, d0, d0v, filters) {
 
 // construct a google charts url.
 function chartImgUrl(graph) {
-    // axis legends: strings, limited to numXTicks entries
+    // limit the number of ticks to make sure
+    // that no label is printed more than once.
+    if (numXTicks > graph.labels.length) {
+	numXTicks = graph.labels.length;
+    }
+    // axis labels: strings, limited to numXTicks entries
     var chxl = '0:|';
     for (var idx=0; idx<numXTicks; idx++) {
-	var label = graph.legend[Math.round(idx * (graph.legend.length-1) / numXTicks)];
+	var label = graph.labels[Math.round(idx * (graph.labels.length-1) / numXTicks)];
 	chxl += label + '|';
     }
-    // axis legends: ranges
+    // axis labels: ranges
     var chxr = '1,' +
 	graph.minValue + ',' +
 	graph.maxValue;
@@ -169,27 +171,28 @@ function chartImgUrl(graph) {
 // for each time series.
 function pivot(data) {
     graph = {
-	legend: [],
-	lines: {},
+	labels: [],  // ['20090601', '20090602', '20090603']
+	lines: {},   // {"SE": [245, 230, 240], "DE": [512, 601, 585] }
 	minValue: 0,
 	maxValue: 0
     };
     var numRows = 0;
 
     // get list of all dates, so we can guarantee sort order
-    // get list of all items, so we can detect gaps in their time series
+    // get list of all keys, so we can detect gaps in their time series
     var dates = new Array();
-    var items = new Array();
+    var keys  = new Array(); // keys are attributes of the base dimension.
     var actual_data = new Array();
     $.each(data, function(index, d) {
 	    $.each(d, function(date,row) {
 		    if (date!=0) { dates.push(date); } // not sure why we always get a 0 as last date
 		    actual_data[date] = row;
-		    $.each(row, function(item,value){
-			    if ($.inArray(item, items) == -1) {
-				items.push(item);
-				if (!graph.lines[item]) {
-				    graph.lines[item] = new Array();
+		    $.each(row, function(key, value){
+			    if ($.inArray(key, keys) == -1) {
+				// key not found among keys.
+				keys.push(key);
+				if (!graph.lines[key]) {
+				    graph.lines[key] = new Array();
 				}
 			    }
 			});
@@ -201,16 +204,16 @@ function pivot(data) {
     // build graph
     $.each(dates, function(idx, date){
 	    var row = actual_data[date];
-	    graph.legend.push(date);
-	    $.each(items, function(idx,item) {
-		    var value = row[item];
+	    graph.labels.push(date);
+	    $.each(keys, function(idx, key) {
+		    var value = row[key];
 		    if (!value) {
-			graph.lines[item].push(missingValue);
+			graph.lines[key].push(missingValue);
 		    }
 		    else {
 			graph.minValue = Math.min(graph.minValue, value);
 			graph.maxValue = Math.max(graph.maxValue, value);
-			graph.lines[item].push(value);
+			graph.lines[key].push(value);
 		    }
 		});
 	    numRows++;
