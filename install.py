@@ -53,7 +53,7 @@ def copy_files():
     copy_file("bundled hbase thrift interface", "lib/Hbase.thrift", share_target)
     shutil.copytree("examples", share_target+"/examples")
     # and to lib
-    shutil.copytree("zohmg/middleware", lib_target+"/middleware")
+    shutil.copytree("src/zohmg/middleware", lib_target+"/middleware")
     shutil.copytree("static-skeleton", lib_target+"/static-skeleton")
     copy_file("pre-built python eggs", "lib/*.egg", lib_target)
     copy_file("pre-built darling jar", "lib/darling-*.jar", lib_target)
@@ -92,6 +92,7 @@ def setup():
     print "installing zohmg egg:"
 
     # install,
+    os.chdir('src')
     r = os.system(sys.executable + ' setup.py install > /tmp/zohmg-install.log')
     if r != 0:
         # try once more immediately; usually works.
