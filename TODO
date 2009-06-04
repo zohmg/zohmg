@@ -48,6 +48,8 @@ DONT compress map output - make mapred.compress.map.output=true default
 
 gui:
 + connect metadata to select-dropdowns.
++ progress spinner
++ error reporter.
 
 performance:
 + how many column families can we use? (<500k for sure)

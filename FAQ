@@ -1,10 +1,13 @@
 
-+ Are you getting ImportError in your mapper?
-Make sure you put the eggs for all non-standard python modules
-that your mapper use in the lib directory of your application.
++ My mapper raises an ImportError. What's wrong?
+
+The mapper fails to import a module. Make sure you put the eggs for
+all non-standard python modules that your mapper use in the lib
+directory of your application.
 
 
 + What does this exception mean and how do I fix it?
+
 java.lang.NullPointerException
   at org.apache.hadoop.io.BytesWritable.(BytesWritable.java:50)
   at org.apache.hadoop.typedbytes.TypedBytesWritable.(TypedBytesWritable.java:41)
@@ -26,8 +29,8 @@ you can typecast it like so: int(variable)
 + What does this error mean?
 TypeError: sequence item 0: expected string, int found
 
-The dimension points you output have to be of type str. In this case it's an int.
-Typecast it like so: str(variable).
+The dimension attributes must be strings. In this case it's an int, so
+you would have to typecast it like so: str(variable).
 
 
 + How can I speed up my mapper?
