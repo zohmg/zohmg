@@ -18,12 +18,10 @@
 #!/usr/bin/env python
 import os, shutil, sys
 
-
 # FHS-compliant.
-target     = '/usr/local/share/zohmg'
-doc_target = '/usr/local/share/zohmg/doc'
-lib_target = '/usr/local/lib/zohmg'
-
+share_target = '/usr/local/share/zohmg'
+doc_target   = '/usr/local/share/zohmg/doc'
+lib_target   = '/usr/local/lib/zohmg'
 
 
 def clean():
@@ -31,113 +29,98 @@ def clean():
     print
     print 'cleaning previous zohmg installation:'
 
-    #python_version = sys.version[:3] # works for now.
-    #system_target  = '/usr/lib/python'+python_version+'/site-packages' # might bork on 2.6
-    #os.system("rm %s/zohmg-*.egg 2> /dev/null" % system_target) # is this necessary?
-
-    for dir in [target, doc_target, lib_target]:
+    for dir in [share_target, doc_target, lib_target]:
         print "  " + dir
         os.system("rm -rf %s" % dir)
-
-def install():
-    print
-    print "installing python modules &c."
-
-    # apt-get python modules.
-    install_pythonmodules()
-
-    # thrift & hbase, etc.
-    #requires setuptools.
-    print "installing libraries with no installation mechanism of their own - the eggdance."
-    os.system("sh eggs/eggdance.sh")
 
 
 def copy_files():
     """populate /usr/local/lib/zohmg and /usr/local/share/zohmg"""
-
     print
-    print "populating zohmg directories"
+    print "populating zohmg directories:"
 
     # create directories.
-    for dir in [target, doc_target, lib_target]:
+    for dir in [share_target, doc_target, lib_target]:
         if not os.path.isdir(dir):
             os.mkdir(dir)
 
     # copy docs.
     docs = ['README']
     for doc in docs:
-        copy_bundle(doc, doc, doc_target)
+        copy_file(doc, doc, doc_target)
 
-    # HBase.thrift
-    copy_bundle("bundled hbase thrift interface", "lib/Hbase.thrift", target)
-
-    # copy examples.
-    shutil.copytree("examples", target+"/examples")
-
-    # data server middleware.
+    # copy stuff to share
+    copy_file("bundled hbase thrift interface", "lib/Hbase.thrift", share_target)
+    shutil.copytree("examples", share_target+"/examples")
+    # and to lib
     shutil.copytree("zohmg/middleware", lib_target+"/middleware")
-
-    # static skeleton.
     shutil.copytree("static-skeleton", lib_target+"/static-skeleton")
+    copy_file("pre-built python eggs", "lib/*.egg", lib_target)
+    copy_file("pre-built darling jar", "lib/darling-*.jar", lib_target)
+    copy_file("dumbo mapper import script","lib/import.py", lib_target)
 
-    # TODO: copy all of lib to lib_target.
 
-    # darling
-    copy_bundle("pre-built darling jar","lib/darling-*.jar", lib_target)
+# assumes that setuptools is available.
+def python_modules():
+    print
+    print "building python eggs:"
 
-    # usermapper sucker importer.
-    copy_bundle("dumbo mapper import script","lib/import.py", lib_target)
+    egg_target = lib_target
+    egg_log = '/tmp/zohmg-egg-log'
+    modules = ['paste', 'simplejson', 'pyyaml']
+    print 'log: %s' % egg_log
+    print 'assuming setuptools is available.'
+    for module in modules:
+        print 'module: ' + module
+        r = os.system("easy_install -maxzd %s %s >> %s" % (egg_target, module, egg_log))
+        if r != 0:
+            print
+            print 'trouble!'
+            print 'wanted to easy_install modules but failed.'
+            # pause.
+            print "press ENTER to continue the installation or CTRL-C to break."
+            try: sys.stdin.readline()
+            except KeyboardInterrupt:
+                print "ok."
+                sys.exit(1)
+    print 'python eggs shelled in ' + egg_target
 
 
 def setup():
+    """calls setup.py"""
     print
-    print "installing zohmg"
+    print "installing zohmg egg:"
 
     # install,
-    r = os.system('python setup.py install > zohmg-install.log')
+    r = os.system(sys.executable + ' setup.py install > /tmp/zohmg-install.log')
     if r != 0:
-        print "errors?!"
-        print "try again, it could work the second (or third) time."
-        sys.exit(r)
+        # try once more immediately; usually works.
+        r = os.system('python setup.py install > /tmp/zohmg-install.log')
+        if r != 0:
+            print 'trouble!'
+            print 'could not install zohmg: python setup.py install'
+            print 'log is at /tmp/zohmg-install.log'
+            sys.exit(r)
+
     # let the user know what happened,
-    os.system("egrep '(Installing|Copying) zohmg' zohmg-install.log")
+    os.system("egrep '(Installing|Copying) zohmg' /tmp/zohmg-install.log")
     # clean up.
     os.system("rm -rf build dist zohmg.egg-info")
 
 def test():
-    sys.stdout.write('testing zohmg script..')
+    print 'testing zohmg script:'
     r = os.system('zohmg 2>&1 > /dev/null')
     if r != 0:
         # fail!
-        print 'fail.'
+        print 'trouble!'
         print 'test run failed; it seems something is the matter with the installation :-|'
         sys.exit(r)
-    else:
-        print 'ok!'
+    print 'ok!'
 
 
-# don't do this.
-def install_pythonmodules():
-    packages = ['python-setuptools', 'python-paste', 'python-simplejson', 'python-yaml']
-    print 'apt-get installing pythonmodules; assuming your system is debian-based. '
-    print ', '.join(packages) + '.'
-    r = os.system('sudo apt-get install ' + ' '.join(packages))
-    if r != 0:
-        print 'problems apt-getting packages!'
-        print 'please make sure you install the following packages or their equivalents:'
-        for p in packages: print "* " + p
-        print
-        # pause.
-        print "press ENTER to continue the installation or CTRL-C to break."
-        try: sys.stdin.readline()
-        except KeyboardInterrupt:
-            print "ok."
-            sys.exit(1)
-
-
-# copies bundle (file) to target, printing msg.
-def copy_bundle(msg,file,target):
-    os.system("cp -v %s %s" % (file,target))
+# copies bundle (file) to destination, printing msg.
+def copy_file(msg, file, destination):
+    os.system("cp -v %s %s" % (file, destination))
 
 
 
@@ -150,7 +133,7 @@ if __name__ == "__main__":
 
     clean()
     copy_files()
-    install()
+    python_modules()
     setup()
     test()
 
