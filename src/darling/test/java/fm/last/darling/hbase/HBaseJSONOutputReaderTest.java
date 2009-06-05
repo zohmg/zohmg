@@ -1,4 +1,4 @@
-package fm.last.darling;
+package fm.last.darling.hbase;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -16,7 +16,9 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.streaming.PipeReducer;
 import org.junit.Test;
 
-public class HBaseOutputReaderTest {
+import fm.last.darling.hbase.HBaseJSONOutputReader;
+
+public class HBaseJSONOutputReaderTest {
 
   String keyString1 = "pageviews-20080717";
   String column1 = "country-domain-useragent-usertype:all-m.last.fm-other-all";
@@ -29,7 +31,7 @@ public class HBaseOutputReaderTest {
     PipeReducer pipeReducer = new MockPipeReducer();
     pipeReducer.configure(new JobConf());
 
-    HBaseOutputReader outputReader = new HBaseOutputReader();
+    HBaseJSONOutputReader outputReader = new HBaseJSONOutputReader();
     outputReader.initialize(pipeReducer);
 
     assertTrue(outputReader.readKeyValue());
@@ -47,8 +49,6 @@ public class HBaseOutputReaderTest {
     
     //second one
     ImmutableBytesWritable expectedKey2 = new ImmutableBytesWritable(keyString2.getBytes("UTF-8"));
-    System.out.println(new String(expectedKey2.get()));
-    System.out.println(new String(outputReader.getCurrentKey().get()));
     assertEquals(expectedKey2, outputReader.getCurrentKey());
     
     BatchUpdate expectedValue2 = new BatchUpdate(keyString2);

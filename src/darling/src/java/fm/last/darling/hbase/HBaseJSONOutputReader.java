@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package fm.last.darling;
+package fm.last.darling.hbase;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -40,7 +40,7 @@ import org.apache.noggit.ObjectBuilder;
 /**
  * OutputReader that transforms the client's output HBasey BatchUpdates.
  */
-public class HBaseOutputReader extends OutputReader<ImmutableBytesWritable, BatchUpdate> {
+public class HBaseJSONOutputReader extends OutputReader<ImmutableBytesWritable, BatchUpdate> {
 
   private ImmutableBytesWritable rowkey;
   private BatchUpdate batchupdate;
@@ -105,13 +105,14 @@ public class HBaseOutputReader extends OutputReader<ImmutableBytesWritable, Batc
       throw new IOException(e);
     }
 
-    // FIXME: ouch, that's ugly!
-    String rk = k.toString().substring(1, k.toString().length() - 1);
+    // removing a ' at the start and end of the key
+    byte[] keyBytes = trimOuterBytes(k);
 
-    rowkey = new ImmutableBytesWritable(rk.getBytes());
-    batchupdate = new BatchUpdate(rk.getBytes());
+    rowkey = new ImmutableBytesWritable(keyBytes);
+    batchupdate = new BatchUpdate(keyBytes);
 
-    String json = v.toString().substring(1, v.toString().length() - 1);
+    String tmpV = v.toString();
+    String json = tmpV.substring(1, tmpV.length() - 1);
     Map<String, Map> payload;
     try {
       payload = (Map<String, Map>) ObjectBuilder.fromJSON(json); // the 'erased' type?
@@ -125,17 +126,23 @@ public class HBaseOutputReader extends OutputReader<ImmutableBytesWritable, Batc
       Map dict = entry.getValue(); // unchecked.
 
       // expecting dict to carry 'value',
-      if (!dict.containsKey("value"))
-        return; // no good.
       Object value = dict.get("value");
+      if (value == null)
+        return; // no good.
 
       // ..and possibly 'timestamp'.
       //Object ts = 0;
       //if (dict.containsKey("timestamp"))
         //ts = dict.get("timestamp");
 
-      batchupdate.put(cfq, value.toString().getBytes());
+      batchupdate.put(cfq, value.toString().getBytes("UTF-8"));
     }
+  }
+
+  private byte[] trimOuterBytes(Text text) {
+    byte[] bytes = new byte[text.getLength() - 2];
+    System.arraycopy(text.getBytes(), 1, bytes, 0, bytes.length);
+    return bytes;
   }
 
   @Override

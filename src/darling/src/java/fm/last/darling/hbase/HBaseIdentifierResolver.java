@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package fm.last.darling;
+package fm.last.darling.hbase;
 
 import org.apache.hadoop.hbase.io.BatchUpdate;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
@@ -38,7 +38,7 @@ public class HBaseIdentifierResolver extends IdentifierResolver {
     if (identifier.equalsIgnoreCase(HBASE_ID)) {
       System.err.println("HBaseIdentifierResolver.resolve: HBASE.\n");
       setInputWriterClass(TextInputWriter.class);
-      setOutputReaderClass(HBaseOutputReader.class);
+      setOutputReaderClass(HBaseJSONOutputReader.class);
       setOutputKeyClass(ImmutableBytesWritable.class);
       setOutputValueClass(BatchUpdate.class);
     } else {
