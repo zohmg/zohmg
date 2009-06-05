@@ -15,6 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# TODO: serve root and 404 from filesystem.
+
 def root(environ, start_response):
     start_response('200 OK', [('content-type', 'text/html')])
     html = """<?xml version="1.0" encoding="utf-8"?>
@@ -78,7 +80,10 @@ def not_found_hook(environ, start_response):
             the project's static directory.
         </li>
         <li>
-            <strong>/data/?query</strong> - serves aggregates from HBase.
+            <strong><a href="/graph">/graph</a></strong> - example client.
+        </li>
+        <li>
+            <strong>/data/?some-query</strong> - data server.
         </li>
     </ul>
     </p>
