@@ -17,46 +17,61 @@
 
 # this is the command line interface.
 
-from zohmg.utils import fail
 import sys, os, getopt
+from zohmg.utils import fail
+
+# add all bundled eggs to sys.path
+eggpath='/usr/local/lib/zohmg/egg'
+for (dir, dirnames, files) in os.walk(eggpath):
+    for file in files:
+        suffix = file.split(".")[-1]
+        if suffix == "egg":
+            sys.path.append(dir+"/"+file)
+
+
+version = '0.1.0'
 
 def usage(reason = None):
     zohmg = os.path.basename(sys.argv[0])
     if reason:
         print "Error: " + reason
+    print "zohmg version " + version
     print "usage:"
     print zohmg + " create <dir>"
     print zohmg + " setup"
     print zohmg + " import <mapper> <hdfs-input-dir>"
     print zohmg + " serve [--host=<host>] [--port=<port>]"
+    print zohmg + " reset"
     print zohmg + " help"
 
 def print_version():
-    v = '0.0.30.4204-0'
-    print "zohmg version " + v
+    print "zohmg version " + version
 
 def print_help():
-    # TODO: offer help.
-    usage()
+    print "Need help?"
+    print
+    print "There are a few documents in /usr/local/share/zohmg/doc that might be of some help,"
+    print "and there's an IRC channel -- #zohmg on freenode -- where you can ask questions."
 
-# cli entry-point.
+
+# command line entry-point.
 def zohmg():
     try:
         # read the first argument.
         cmd = sys.argv[1]
     except:
+        # there was no first argument.
         usage()
         sys.exit(0)
 
-    if   cmd == 'create':  create()
-    elif cmd == 'setup':   setup()
-    elif cmd == 'import':  process()
-    elif cmd == 'serve':   serve()
-    elif cmd == 'version' or cmd == '--version': print_version()
-    elif cmd == 'help'    or cmd == '--help':    print_help()
-    else:
-        usage()
-
+    if   cmd == 'create' : create()
+    elif cmd == 'setup'  : setup()
+    elif cmd == 'import' : process()
+    elif cmd == 'serve'  : serve()
+    elif cmd == 'reset'  : reset()
+    elif cmd in ['version', '--version']: print_version()
+    elif cmd in ['help',    '--help']:    print_help()
+    else: usage()
 
 def create():
     from zohmg.create import Create
@@ -114,11 +129,13 @@ def serve():
         else:
             assert False, "unhandled option"
 
-    # get cwd.
     project_dir = os.path.abspath("")
-
-    # fire off data/transformer/client server.
     zohmg.serve.start(project_dir, host=host, port=port)
+
+def reset():
+    refuse_to_act_in_nonzohmg_directory()
+    from zohmg.reset import Reset
+    Reset().please()
 
 
 # exits if 'zohmg' was run in a directory without the special .zohmg-file.

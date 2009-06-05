@@ -20,8 +20,13 @@ import os, shutil, sys
 
 # FHS-compliant.
 share_target = '/usr/local/share/zohmg'
-doc_target   = '/usr/local/share/zohmg/doc'
 lib_target   = '/usr/local/lib/zohmg'
+doc_target   = share_target + '/doc'
+egg_target   = lib_target + '/egg'
+jar_target   = lib_target + '/jar'
+mapred_target = lib_target + '/mapred'
+
+targets = [share_target, doc_target, lib_target, egg_target, jar_target, mapred_target]
 
 
 def clean():
@@ -29,8 +34,9 @@ def clean():
     print
     print 'cleaning previous zohmg installation:'
 
-    for dir in [share_target, doc_target, lib_target]:
-        print "  " + dir
+    # remove target directories.
+    for dir in targets:
+        print " " + dir
         os.system("rm -rf %s" % dir)
 
 
@@ -39,25 +45,24 @@ def copy_files():
     print
     print "populating zohmg directories:"
 
-    # create directories.
-    for dir in [share_target, doc_target, lib_target]:
+    # create target directories.
+    for dir in targets:
         if not os.path.isdir(dir):
             os.mkdir(dir)
 
     # copy docs.
-    docs = ['README']
+    docs = ['AUTHORS', 'CONTRIBUTE', 'DEPENDENCIES', 'FAQ', 'INSTALL', 'README']
     for doc in docs:
         copy_file(doc, doc, doc_target)
 
     # copy stuff to share
-    copy_file("bundled hbase thrift interface", "lib/Hbase.thrift", share_target)
     shutil.copytree("examples", share_target+"/examples")
     # and to lib
     shutil.copytree("src/zohmg/middleware", lib_target+"/middleware")
-    shutil.copytree("static-skeleton", lib_target+"/static-skeleton")
-    copy_file("pre-built python eggs", "lib/*.egg", lib_target)
-    copy_file("pre-built darling jar", "lib/darling-*.jar", lib_target)
-    copy_file("dumbo mapper import script","lib/import.py", lib_target)
+    shutil.copytree("static-skeleton",      lib_target+"/static-skeleton")
+    copy_file("bundled eggs", "lib/egg/*.egg", egg_target)
+    copy_file("bundled jars", "lib/jar/*.jar", jar_target)
+    copy_file("dumbo bootstrapper", "lib/mapred/import.py", mapred_target)
 
 
 # assumes that setuptools is available.
@@ -65,18 +70,21 @@ def python_modules():
     print
     print "building python eggs:"
 
-    egg_target = lib_target
-    egg_log = '/tmp/zohmg-egg-log'
+    egg_log = '/tmp/zohmg-egg-install.log'
+    egg_err = '/tmp/zohmg-egg-install.err'
+    redirection = ">> %s 2>> %s" % (egg_log, egg_err)
+    os.system('date > %s ; date > %s' % (egg_log, egg_err)) # reset logs.
+
     modules = ['paste', 'simplejson', 'pyyaml']
-    print 'log: %s' % egg_log
-    print 'assuming setuptools is available.'
+    print '(assuming setuptools is available.)'
     for module in modules:
         print 'module: ' + module
-        r = os.system("easy_install -maxzd %s %s >> %s" % (egg_target, module, egg_log))
+        r = os.system("easy_install -maxzd %s %s %s" % (egg_target, module, redirection))
         if r != 0:
             print
             print 'trouble!'
             print 'wanted to easy_install modules but failed.'
+            print 'logs are at ' + egg_log + ' and ' + egg_err
             # pause.
             print "press ENTER to continue the installation or CTRL-C to break."
             try: sys.stdin.readline()
@@ -92,20 +100,22 @@ def setup():
     print "installing zohmg egg:"
 
     # install,
+    log = '/tmp/zohmg-install.log'
+    err = '/tmp/zohmg-install.err'
+    setup_cmd = sys.executable + ' setup.py install > %s 2> %s' % (log, err)
     os.chdir('src')
-    r = os.system(sys.executable + ' setup.py install > /tmp/zohmg-install.log')
+    r = os.system(setup_cmd)
     if r != 0:
         # try once more immediately; usually works.
-        r = os.system('python setup.py install > /tmp/zohmg-install.log')
+        r = os.system(setup_cmd)
         if r != 0:
             print 'trouble!'
             print 'could not install zohmg: python setup.py install'
-            print 'log is at /tmp/zohmg-install.log'
+            print 'log are at ' + log + ' and ' + err
             sys.exit(r)
 
-    # let the user know what happened,
-    os.system("egrep '(Installing|Copying) zohmg' /tmp/zohmg-install.log")
-    # clean up.
+    # let the user know what happened, clean up.
+    os.system("egrep '(Installing|Copying) zohmg' " + log)
     os.system("rm -rf build dist zohmg.egg-info")
 
 def test():
@@ -122,7 +132,6 @@ def test():
 # copies bundle (file) to destination, printing msg.
 def copy_file(msg, file, destination):
     os.system("cp -v %s %s" % (file, destination))
-
 
 
 if __name__ == "__main__":

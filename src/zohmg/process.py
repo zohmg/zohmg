@@ -17,7 +17,7 @@
 
 from zohmg.config import Config, Environ
 from zohmg.utils import fail
-import os, re, sys
+import sys, os, re
 
 class Process(object):
     def go(self, mapper, input, for_dumbo):
@@ -27,18 +27,26 @@ class Process(object):
         outputformat = 'org.apache.hadoop.hbase.mapred.TableOutputFormat'
         jobname = "%s %s" % (table, input) # overrides any name specified on cli.
 
-        opts = [('jobconf',"hbase.mapred.outputtable=" + table),
-                ('jobconf','stream.io.identifier.resolver.class=' + resolver),
-                ('streamoutput','hbase'), # resolved by identifier.resolver
+        opts = [('jobconf', "hbase.mapred.outputtable=" + table),
+                ('jobconf', 'stream.io.identifier.resolver.class=' + resolver),
+                ('streamoutput', 'hbase'), # resolved by identifier.resolver
                 ('outputformat', outputformat),
                 ('input', input),
-                ('output','/tmp/does-not-matter'),
-                # Push zohmg egg and darling jar.
-                ('libegg',[z for z in sys.path if "zohmg" in z][0]),
-                ('libjar','/usr/local/lib/zohmg/darling-0.0.4.jar'),
-                ('file','lib/usermapper.py'), # TODO: handle this more betterer.
+                ('output', '/tmp/does-not-matter'),
+                ('file', 'lib/usermapper.py'), # TODO: handle this more betterer.
                 ('name', jobname)
                ]
+
+        # add zohmg-*.egg
+        zohmg_egg = [z for z in sys.path if "zohmg" in z][0]
+        opts.append(('libegg', zohmg_egg))
+
+        # add files to the jobjar from these paths
+        jar_path = '/usr/local/lib/zohmg/jar'
+        egg_path = '/usr/local/lib/zohmg/egg'
+        directories = ["config", "lib", jar_path, egg_path]
+        file_opts = self.__add_files(directories)
+        opts.extend(file_opts)
 
         # check for '--lzo' as first extra argument.
         if len(for_dumbo) > 0 and for_dumbo[0] == '--lzo':
@@ -54,6 +62,7 @@ class Process(object):
         else:
             opts.append(('hadoop',env.get("HADOOP_HOME")))
 
+        # (?)
         classpath = env.get("CLASSPATH")
         if classpath is not None:
             for jar in classpath:
@@ -66,9 +75,6 @@ class Process(object):
             msg = "Error: CLASSPATH in config/environment is empty."
             fail(msg)
 
-        # pull everything in config and lib.
-        file_opts = self.__add_files(["config","lib"])
-        opts.extend(file_opts)
 
         # stringify arguments.
         opts_args = ' '.join("-%s '%s'" % (k, v) for (k, v) in opts)
@@ -87,7 +93,7 @@ class Process(object):
         # dispatch.
         # PYTHONPATH is added because dumbo makes a local run before
         # engaging with hadoop.
-        os.system("PYTHONPATH=lib dumbo start /usr/local/lib/zohmg/import.py " + dumboargs)
+        os.system("PYTHONPATH=lib dumbo start /usr/local/lib/zohmg/mapred/import.py " + dumboargs)
 
 
     # reads directories and returns list of tuples of
@@ -104,19 +110,15 @@ class Process(object):
                         msg = "Error: File not found, %s." % file
                         fail(msg)
 
+                    suffix = file.split(".")[-1]
                     option = None
-                    suffix = file.split(".")[-1] # infer file suffix.
-
-                    # ignore all other files but egg/jar/yaml.
                     if   suffix == "egg":  option = "libegg"
                     elif suffix == "jar":  option = "libjar"
                     elif suffix == "py":   option = "file"
-                    #elif suffix == "py":   option = "pyfile" # TODO: implement this in dumbo maybe?
                     elif suffix == "yaml": option = "file"
-                    # TODO: what about text files or other files the user wants?
-                    #       we still want to ignore certain files (e.g. .pyc).
 
                     if option:
-                        opts.append((option,dir+"/"+file))
-
+                        opts.append((option, dir+"/"+file))
+                    else:
+                        print "process.py: ignoring " + dir+'/'+file
         return opts

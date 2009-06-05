@@ -19,7 +19,7 @@ from zohmg.utils import fail
 import os, sys, shutil
 
 
-DIRS = ["config", "lib", "mappers", "transformers"]
+DIRS = ["config", "lib", "mappers"]
 
 # config/environment.py
 ENV_SCRIPT = """# Please define the following environment variables.
@@ -50,12 +50,6 @@ MAPPER = """
 def map(key, value):
     # egads!
 """
-
-TRANSFORMER = """# identity transformer.
-def transform(payload):
-    return payload
-"""
-
 
 class Create(object):
     def __init__(self, path):
@@ -90,12 +84,10 @@ units:
             msg = "Error: Could not create project directory. %s" % ose.strerror
             fail(msg, ose.errno)
 
-        # Create .zohmg, README, client, environment, mapper and transformer.
         self.__write_to_file('.zohmg')
         self.__write_to_file('README', README)
         self.__write_to_file('config/environment.py', ENV_SCRIPT)
         self.__write_to_file('mappers/empty_mapper.py', MAPPER)
-        self.__write_to_file("transformers/identity_transformer.py",TRANSFORMER)
         self.__write_to_file("config/dataset.yaml", DATASET)
 
         # static: cp -r from skel.

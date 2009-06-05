@@ -15,21 +15,14 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from setuptools import setup, find_packages
+#!/usr/bin/env python
+# the script we tell dumbo to run.
 
-setup(
-    name = 'zohmg',
-    version = '0.1.0',
-    author = 'Fredrik Mollerstrand, Per Andersson',
-    author_email = '{fredrik,per}@last.fm',
-    license = 'Apache v2',
-    packages = ['zohmg'],
-    zip_safe = True,
-    entry_points = {
-        'console_scripts': [
-            'zohmg = zohmg.cmd:zohmg',
-        ]
-    },
+import dumbo
+from zohmg.mapper import Mapper
+from zohmg.reducer import Reducer
+from zohmg.combiner import Combiner
+from usermapper import map
 
-    install_requires = ['dumbo'],
-)
+# !@#
+dumbo.run(Mapper(map), Reducer(), Combiner())
