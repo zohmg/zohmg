@@ -144,7 +144,7 @@ RUN THE MAPPER
 
 Secondly, run the mapper:
 
-    $> zohmg import mappers/mapper.py /data/weblogs/2009/05/11
+    $> zohmg import mappers/mapper.py /data/weblogs/2009/06/05
 
 The first argument to import is the path to the python file containing the map
 function, the second is a path on HDFS.
@@ -152,7 +152,17 @@ function, the second is a path on HDFS.
 
 You can enable lzo compression by giving --lzo as the third argument:
 
-    $> zohmg import mappers/mapper.py /data/weblogs/2009/05/11 --lzo
+    $> zohmg import mappers/mapper.py /data/weblogs/2009/06/05 --lzo
+
+
+Any argument after the first two (and except for --lzo) will be passed
+on to Dumbo.  If you wish to pass jobconf options, for example,
+you would do it like so:
+
+    $> zohmg import mappers/mapper.py /data/weblogs/2009/06/05 -hadoopconf someoption=yeah
+
+The Dumbo wiki has more information on what options other than
+hadoopconf are supported: http://wiki.github.com/klbostee/dumbo/running-programs
 
 
 
