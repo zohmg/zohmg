@@ -16,7 +16,7 @@
 # under the License.
 
 #!/usr/bin/env python
-import os, shutil, sys
+import os, sys, shutil
 
 # FHS-compliant.
 share_target = '/usr/local/share/zohmg'
@@ -57,9 +57,9 @@ def copy_files():
 
     # copy stuff to share
     shutil.copytree("examples", share_target+"/examples")
+    shutil.copytree('skel-project', share_target + '/skel-project')
     # and to lib
     shutil.copytree("src/zohmg/middleware", lib_target+"/middleware")
-    shutil.copytree("static-skeleton",      lib_target+"/static-skeleton")
     copy_file("bundled eggs", "lib/egg/*.egg", egg_target)
     copy_file("bundled jars", "lib/jar/*.jar", jar_target)
     copy_file("dumbo bootstrapper", "lib/mapred/import.py", mapred_target)
