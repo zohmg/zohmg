@@ -17,7 +17,7 @@
 
 from zohmg.config import Config, Environ
 from zohmg.utils import fail
-import os, re, sys
+import sys, os, re
 
 class Process(object):
     def go(self, mapper, input, for_dumbo):
@@ -27,18 +27,29 @@ class Process(object):
         outputformat = 'org.apache.hadoop.hbase.mapred.TableOutputFormat'
         jobname = "%s %s" % (table, input) # overrides any name specified on cli.
 
-        opts = [('jobconf',"hbase.mapred.outputtable=" + table),
-                ('jobconf','stream.io.identifier.resolver.class=' + resolver),
-                ('streamoutput','hbase'), # resolved by identifier.resolver
+        opts = [('jobconf', "hbase.mapred.outputtable=" + table),
+                ('jobconf', 'stream.io.identifier.resolver.class=' + resolver),
+                ('streamoutput', 'hbase'), # resolved by identifier.resolver
                 ('outputformat', outputformat),
                 ('input', input),
-                ('output','/tmp/does-not-matter'),
-                # Push zohmg egg and darling jar.
-                ('libegg',[z for z in sys.path if "zohmg" in z][0]),
-                ('libjar','/usr/local/lib/zohmg/darling-0.0.4.jar'),
-                ('file','lib/usermapper.py'), # TODO: handle this more betterer.
+                ('output', '/tmp/does-not-matter'),
+                ('file', 'lib/usermapper.py'), # TODO: handle this more betterer.
                 ('name', jobname)
                ]
+
+        # add zohmg-*.egg
+        zohmg_egg = [z for z in sys.path if "zohmg" in z][0]
+        opts.append(('libegg', zohmg_egg))
+
+        # add libpath/*.jar
+        # (not written here-syndrome)
+        libpath='/usr/local/lib/zohmg'
+        for (dir, dirnames, files) in os.walk(libpath):
+            for file in files:
+                suffix = file.split(".")[-1]
+                if suffix == "jar":
+                    jarpath = dir+"/"+file
+                    opts.append(('libjar', jarpath))
 
         # check for '--lzo' as first extra argument.
         if len(for_dumbo) > 0 and for_dumbo[0] == '--lzo':
@@ -54,6 +65,7 @@ class Process(object):
         else:
             opts.append(('hadoop',env.get("HADOOP_HOME")))
 
+        # (?)
         classpath = env.get("CLASSPATH")
         if classpath is not None:
             for jar in classpath:
