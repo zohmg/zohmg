@@ -21,8 +21,8 @@ import sys, os, getopt
 from zohmg.utils import fail
 
 # add all bundled eggs to sys.path
-libpath='/usr/local/lib/zohmg'
-for (dir, dirnames, files) in os.walk(libpath):
+eggpath='/usr/local/lib/zohmg/egg'
+for (dir, dirnames, files) in os.walk(eggpath):
     for file in files:
         suffix = file.split(".")[-1]
         if suffix == "egg":
@@ -129,10 +129,7 @@ def serve():
         else:
             assert False, "unhandled option"
 
-    # get cwd.
     project_dir = os.path.abspath("")
-
-    # fire off data/transformer/client server.
     zohmg.serve.start(project_dir, host=host, port=port)
 
 def reset():

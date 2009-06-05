@@ -41,15 +41,12 @@ class Process(object):
         zohmg_egg = [z for z in sys.path if "zohmg" in z][0]
         opts.append(('libegg', zohmg_egg))
 
-        # add libpath/*.jar
-        # (not written here-syndrome)
-        libpath='/usr/local/lib/zohmg'
-        for (dir, dirnames, files) in os.walk(libpath):
-            for file in files:
-                suffix = file.split(".")[-1]
-                if suffix == "jar":
-                    jarpath = dir+"/"+file
-                    opts.append(('libjar', jarpath))
+        # add files to the jobjar from these paths
+        jar_path = '/usr/local/lib/zohmg/jar'
+        egg_path = '/usr/local/lib/zohmg/egg'
+        directories = ["config", "lib", jar_path, egg_path]
+        file_opts = self.__add_files(directories)
+        opts.extend(file_opts)
 
         # check for '--lzo' as first extra argument.
         if len(for_dumbo) > 0 and for_dumbo[0] == '--lzo':
@@ -78,9 +75,6 @@ class Process(object):
             msg = "Error: CLASSPATH in config/environment is empty."
             fail(msg)
 
-        # pull everything in config and lib.
-        file_opts = self.__add_files(["config","lib"])
-        opts.extend(file_opts)
 
         # stringify arguments.
         opts_args = ' '.join("-%s '%s'" % (k, v) for (k, v) in opts)
@@ -99,7 +93,7 @@ class Process(object):
         # dispatch.
         # PYTHONPATH is added because dumbo makes a local run before
         # engaging with hadoop.
-        os.system("PYTHONPATH=lib dumbo start /usr/local/lib/zohmg/import.py " + dumboargs)
+        os.system("PYTHONPATH=lib dumbo start /usr/local/lib/zohmg/mapred/import.py " + dumboargs)
 
 
     # reads directories and returns list of tuples of
@@ -116,19 +110,15 @@ class Process(object):
                         msg = "Error: File not found, %s." % file
                         fail(msg)
 
+                    suffix = file.split(".")[-1]
                     option = None
-                    suffix = file.split(".")[-1] # infer file suffix.
-
-                    # ignore all other files but egg/jar/yaml.
                     if   suffix == "egg":  option = "libegg"
                     elif suffix == "jar":  option = "libjar"
                     elif suffix == "py":   option = "file"
-                    #elif suffix == "py":   option = "pyfile" # TODO: implement this in dumbo maybe?
                     elif suffix == "yaml": option = "file"
-                    # TODO: what about text files or other files the user wants?
-                    #       we still want to ignore certain files (e.g. .pyc).
 
                     if option:
-                        opts.append((option,dir+"/"+file))
-
+                        opts.append((option, dir+"/"+file))
+                    else:
+                        print "process.py: ignoring " + dir+'/'+file
         return opts

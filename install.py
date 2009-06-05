@@ -20,8 +20,13 @@ import os, shutil, sys
 
 # FHS-compliant.
 share_target = '/usr/local/share/zohmg'
-doc_target   = '/usr/local/share/zohmg/doc'
 lib_target   = '/usr/local/lib/zohmg'
+doc_target   = share_target + '/doc'
+egg_target   = lib_target + '/egg'
+jar_target   = lib_target + '/jar'
+mapred_target = lib_target + '/mapred'
+
+targets = [share_target, doc_target, lib_target, egg_target, jar_target, mapred_target]
 
 
 def clean():
@@ -29,8 +34,9 @@ def clean():
     print
     print 'cleaning previous zohmg installation:'
 
-    for dir in [share_target, doc_target, lib_target]:
-        print "  " + dir
+    # remove target directories.
+    for dir in targets:
+        print " " + dir
         os.system("rm -rf %s" % dir)
 
 
@@ -39,8 +45,8 @@ def copy_files():
     print
     print "populating zohmg directories:"
 
-    # create directories.
-    for dir in [share_target, doc_target, lib_target]:
+    # create target directories.
+    for dir in targets:
         if not os.path.isdir(dir):
             os.mkdir(dir)
 
@@ -50,15 +56,13 @@ def copy_files():
         copy_file(doc, doc, doc_target)
 
     # copy stuff to share
-    copy_file("bundled hbase thrift interface", "lib/Hbase.thrift", share_target)
     shutil.copytree("examples", share_target+"/examples")
     # and to lib
     shutil.copytree("src/zohmg/middleware", lib_target+"/middleware")
-    shutil.copytree("static-skeleton", lib_target+"/static-skeleton")
-    copy_file("pre-built python eggs", "lib/*.egg", lib_target)
-    copy_file("pre-built darling jar", "lib/darling-*.jar", lib_target)
-    copy_file("darling dep: noggit", "src/darling/lib/noggit*.jar", lib_target)
-    copy_file("dumbo mapper import script","lib/import.py", lib_target)
+    shutil.copytree("static-skeleton",      lib_target+"/static-skeleton")
+    copy_file("bundled eggs", "lib/egg/*.egg", egg_target)
+    copy_file("bundled jars", "lib/jar/*.jar", jar_target)
+    copy_file("dumbo bootstrapper", "lib/mapred/import.py", mapred_target)
 
 
 # assumes that setuptools is available.
@@ -66,7 +70,6 @@ def python_modules():
     print
     print "building python eggs:"
 
-    egg_target = lib_target
     egg_log = '/tmp/zohmg-egg-install.log'
     egg_err = '/tmp/zohmg-egg-install.err'
     redirection = ">> %s 2>> %s" % (egg_log, egg_err)
@@ -129,7 +132,6 @@ def test():
 # copies bundle (file) to destination, printing msg.
 def copy_file(msg, file, destination):
     os.system("cp -v %s %s" % (file, destination))
-
 
 
 if __name__ == "__main__":
