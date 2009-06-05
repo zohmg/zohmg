@@ -66,17 +66,21 @@ def python_modules():
     print "building python eggs:"
 
     egg_target = lib_target
-    egg_log = '/tmp/zohmg-egg-log'
+    egg_log = '/tmp/zohmg-egg-install.log'
+    egg_err = '/tmp/zohmg-egg-install.err'
+    redirection = ">> %s 2>> %s" % (egg_log, egg_err)
+    os.system('date > %s ; date > %s' % (egg_log, egg_err)) # reset logs.
+
     modules = ['paste', 'simplejson', 'pyyaml']
-    print 'log: %s' % egg_log
-    print 'assuming setuptools is available.'
+    print '(assuming setuptools is available.)'
     for module in modules:
         print 'module: ' + module
-        r = os.system("easy_install -maxzd %s %s >> %s" % (egg_target, module, egg_log))
+        r = os.system("easy_install -maxzd %s %s %s" % (egg_target, module, redirection))
         if r != 0:
             print
             print 'trouble!'
             print 'wanted to easy_install modules but failed.'
+            print 'logs are at ' + egg_log + ' and ' + egg_err
             # pause.
             print "press ENTER to continue the installation or CTRL-C to break."
             try: sys.stdin.readline()
@@ -92,20 +96,22 @@ def setup():
     print "installing zohmg egg:"
 
     # install,
+    log = '/tmp/zohmg-install.log'
+    err = '/tmp/zohmg-install.err'
+    setup_cmd = sys.executable + ' setup.py install > %s 2> %s' % (log, err)
     os.chdir('src')
-    r = os.system(sys.executable + ' setup.py install > /tmp/zohmg-install.log')
+    r = os.system(setup_cmd)
     if r != 0:
         # try once more immediately; usually works.
-        r = os.system('python setup.py install > /tmp/zohmg-install.log')
+        r = os.system(setup_cmd)
         if r != 0:
             print 'trouble!'
             print 'could not install zohmg: python setup.py install'
-            print 'log is at /tmp/zohmg-install.log'
+            print 'log are at ' + log + ' and ' + err
             sys.exit(r)
 
-    # let the user know what happened,
-    os.system("egrep '(Installing|Copying) zohmg' /tmp/zohmg-install.log")
-    # clean up.
+    # let the user know what happened, clean up.
+    os.system("egrep '(Installing|Copying) zohmg' " + log)
     os.system("rm -rf build dist zohmg.egg-info")
 
 def test():
