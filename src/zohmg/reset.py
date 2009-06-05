@@ -27,7 +27,7 @@ class Reset(object):
 
         # confirm.
         print "reset will *wipe all data* in dataset '%s'." % table
-        print "ARE YOU QUITE SURE?"
+        print "ARE YOU QUITE SURE? ('yes' to confirm.)"
 
         response = sys.stdin.readline().strip()
         if response.lower() not in ["yes", "yes!"]:
