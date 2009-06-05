@@ -229,8 +229,27 @@ parameter, the returned JSON is wrapped in a function call.
 PLOTTING THE DATA
 -----------------
 
-There is a graphing tool bundled with Zohmg. It is served statically
-by the Zohmg server at http://localhost:8086/static/index.html
+There is an example client bundled with Zohmg. It is served by the Zohmg server
+at http://localhost:8086/graph/ and is quite useful for exploring your dataset.
+You may also want to peek at the javascript code to gain some inspiration and
+insight into how the beast works.
 
 The graphing tool uses Javascript to query the data server, and plots
 graphs with the help of Google Charts.
+
+
+
+KNOWN ISSUES
+------------
+
+Zohmg is alpha software and is still learning how to behave properly in mixed
+company. You will spot more than a few minor quirks while using it and might
+perhaps even run into the odd show-stopper. If you do, please let us know!
+
+One of the most troublesome issues is that there is a definite limit on the
+number of data points that can be stored for any projection. Currently we're
+seeing slow response times for projections with more than a few hundred
+thousand combinations. Hopefully this will alleviated with HBase 0.20.
+
+Zohmg currently only supports mappers written in Python. Eventually, you will
+also be able to write mappers in Java.
