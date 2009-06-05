@@ -80,11 +80,6 @@ def not_found_hook(environ, start_response):
         <li>
             <strong>/data/?query</strong> - serves aggregates from HBase.
         </li>
-        <li>
-            <strong>/transform/filename/?query</strong> - serves
-            aggregates transformed with a transformer from the project's
-            transformers directory.
-        </li>
     </ul>
     </p>
 

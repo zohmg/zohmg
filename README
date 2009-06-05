@@ -41,8 +41,6 @@ Its contents are:
 config       - environment and dataset configuration.
 lib          - eggs or jars that will be automatically included in job jar.
 mappers      - user defined MapReduce maps.
-transformers - user defined data extraction transformations.
-
 
 
 CONFIGURE YOUR 'PROJECT'

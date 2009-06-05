@@ -21,7 +21,7 @@ import time
 # There are three points of servitude:
 #  /data
 #  /static
-#  /transformers
+#  /transformers (soon)
 #
 # Each of them are served by a class in +middleware_dir+.
 # 
