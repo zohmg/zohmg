@@ -57,6 +57,7 @@ def copy_files():
     shutil.copytree("static-skeleton", lib_target+"/static-skeleton")
     copy_file("pre-built python eggs", "lib/*.egg", lib_target)
     copy_file("pre-built darling jar", "lib/darling-*.jar", lib_target)
+    copy_file("darling dep: noggit", "src/darling/lib/noggit*.jar", lib_target)
     copy_file("dumbo mapper import script","lib/import.py", lib_target)
 
 
