@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 import org.apache.hadoop.io.IntWritable;
@@ -42,7 +43,7 @@ import fm.last.darling.utils.Util;
 // TODO FIXME this class is currently not operational
 public class MapperWrapper implements Mapper<LongWritable, Text, NSpacePoint, IntWritable> {
   private UserMapper usermapper;
-  private ArrayList<ArrayList<Dimension>> rps; 
+  private List<List<Dimension>> rps; 
 
   public MapperWrapper() throws Exception {
     // TODO: read name of user's mapper class from config.
@@ -81,7 +82,7 @@ public class MapperWrapper implements Mapper<LongWritable, Text, NSpacePoint, In
 
     // fan out into projections,
     
-    for (ArrayList<Dimension> requested : rps) {
+    for (List<Dimension> requested : rps) {
       // reduce down to the dimensions we are interested in.
       TreeMap<String, String> projection = Projectionist.dimensionality_reduction(requested, points);
       // emit once for every unit.

@@ -23,6 +23,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -40,15 +41,15 @@ public class UtilTest {
 
   @Test
   public void testreadRequestedProjections() throws FileNotFoundException {
-    File testDataFolder = new File("test/data");
+    File testDataFolder = new File("src/darling/test/data");
     File yaml = new File(testDataFolder, "dataset.yaml");
-    ArrayList<ArrayList<Dimension>> ret = Util.readRequestedProjections(yaml);
+    List<List<Dimension>> ret = Util.readRequestedProjections(yaml);
 
-    ArrayList<ArrayList<Dimension>> expected = new ArrayList<ArrayList<Dimension>>();
-    ArrayList<Dimension> projection0 = new ArrayList<Dimension>();
+    List<List<Dimension>> expected = new ArrayList<List<Dimension>>();
+    List<Dimension> projection0 = new ArrayList<Dimension>();
     projection0.add(new Dimension("country"));
     expected.add(projection0);
-    ArrayList<Dimension> projection1 = new ArrayList<Dimension>();
+    List<Dimension> projection1 = new ArrayList<Dimension>();
     projection1.add(new Dimension("country"));
     projection1.add(new Dimension("service"));
     expected.add(projection1);

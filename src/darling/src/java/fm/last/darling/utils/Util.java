@@ -23,6 +23,8 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Map;
 
 import org.ho.yaml.Yaml;
 
@@ -39,20 +41,29 @@ public class Util {
     return String.format("%04d%02d%02d", year, month, day);
   }
 
-  public static ArrayList<ArrayList<Dimension>> readRequestedProjections(File yaml) throws FileNotFoundException {
+  public static List<List<Dimension>> readRequestedProjections(File yamlFile) throws FileNotFoundException {
 
+    List<List<Dimension>> result = new ArrayList<List<Dimension>>();
+    
     // open file, read yaml, turn into pumpkin.
-    Object object = Yaml.load(yaml);
+    Map<String, ?> yaml = (Map) Yaml.load(yamlFile);
 
-    ArrayList<ArrayList<Dimension>> expected = new ArrayList<ArrayList<Dimension>>();
-    ArrayList<Dimension> projection0 = new ArrayList<Dimension>();
-    projection0.add(new Dimension("country"));
-    expected.add(projection0);
-    ArrayList<Dimension> projection1 = new ArrayList<Dimension>();
-    projection1.add(new Dimension("country"));
-    projection1.add(new Dimension("service"));
-    expected.add(projection1);
-
-    return expected;
+    List<String> projections = (List<String>) yaml.get("projections");
+    if(projections == null || projections.isEmpty()) {
+      return result;
+    }
+    
+    for (String projectionName : projections) {
+      String[] dimensionNames = projectionName.split("-");
+      List<Dimension> dimensions = new ArrayList<Dimension>();
+      
+      for (String dimension : dimensionNames) {
+        dimensions.add(new Dimension(dimension));
+      }
+      
+      result.add(dimensions);
+    }
+    
+    return result;
   }
 }

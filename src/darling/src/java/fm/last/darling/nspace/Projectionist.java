@@ -19,6 +19,7 @@
 package fm.last.darling.nspace;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 // handles projections, obviously.
@@ -30,7 +31,7 @@ public class Projectionist {
     return projection;
   }
 
-  public static TreeMap<String, String> dimensionality_reduction(ArrayList<Dimension> requested,
+  public static TreeMap<String, String> dimensionality_reduction(List<Dimension> requested,
       TreeMap<String, String> dimensions) {
     TreeMap<String, String> projection = new TreeMap<String, String>();
     for (Dimension d : requested)

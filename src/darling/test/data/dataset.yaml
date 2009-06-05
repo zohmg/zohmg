@@ -1,0 +1,12 @@
+dataset: something
+
+dimensions:
+  - country
+  - service
+
+projections:
+  - country
+  - country-service
+
+units:
+  - something

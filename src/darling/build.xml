@@ -24,16 +24,15 @@
   <property name="final.name" value="darling-${version}"/>
   <property name="year" value="2009"/>
  
-  <property name="src.dir"  location="${basedir}/src"/>
+  <property name="src.dir"  location="${basedir}/src/java"/>
 
-  <property name="src.test"  location="${basedir}/test"/>
+  <property name="src.test"  location="${basedir}/test/java"/>
   <property name="build.test"  location="${basedir}/build/test"/>
   <property name="test.timeout" value="300"/>
+  <property name="test.exclude" value="dontexcludeanything"/>
 	
   <property name="lib.dir" value="${basedir}/lib"/>
   <property name="conf.dir" value="${basedir}/conf"/>
-  <property name="docs.dir" value="${basedir}/docs"/>
-  <property name="docs.src" value="${basedir}/src/docs"/>
 
   <property name="build.dir" location="${basedir}/build"/>
   <property name="build.bin" location="${build.dir}/bin"/>
@@ -42,7 +41,6 @@
   <property name="build.classes" location="${build.dir}/classes"/>
   <property name="build.docs" value="${build.dir}/docs"/>
   <property name="build.javadoc" value="${build.docs}/api"/>
-  <property name="build.encoding" value="ISO-8859-1"/>
   <property name="build.src" value="${build.dir}/src"/>
 
   <property name="test.build.dir" value="${build.dir}/test"/>
@@ -60,7 +58,6 @@
   <property name="jarfile" value="${build.dir}/${final.name}.jar" />
 
   <property name="records.src.dir" location="records"/>
-  <property name="java.src.dir" location="src"/>
 
 
   <fileset id="lib.jars" dir="${basedir}" includes="lib/*.jar"/>
@@ -74,9 +71,10 @@
     <mkdir dir="${build.dir}"/>
     <mkdir dir="${build.classes}"/>
     <mkdir dir="${build.lib}"/>
+    <mkdir dir="${build.test}"/>
 
-  	<copy todir="${build.lib}">
-      <fileset dir="${lib.dir}" />
+    <copy todir="${build.lib}">
+    <fileset dir="${lib.dir}" />
     </copy>
     <mkdir dir="${build.conf}"/>
     <mkdir dir="${build.bin}"/>
@@ -87,16 +85,15 @@
 
   <target name="compile-records">
     <taskdef name="recordcc" classname="org.apache.hadoop.record.compiler.ant.RccTask"/>
-	<recordcc destdir="${java.src.dir}">
+	<recordcc destdir="${src.dir}">
 	  <fileset dir="${records.src.dir}" includes="**/*.jr"/>
 	</recordcc>
-	<echo>compiled records to ${java.src.dir}</echo>
+	<echo>compiled records to ${src.dir}</echo>
   </target>
 
   <target name="compile" depends="init">
    <!--Compile whats under src -->
    <javac
-    encoding="${build.encoding}"
     srcdir="${src.dir}"
     includes="**/*.java"
     destdir="${build.classes}"
@@ -116,13 +113,6 @@
       </fileset>
     </copy>
     <jar jarfile="${jarfile}" basedir="${build.classes}" >
-    	<!--
-      <fileset file="${basedir}/conf/hbase-default.xml"/>
-      <zipfileset dir="${build.webapps}" prefix="webapps"/>
-   		<manifest>
-            <attribute name="Main-Class" value="org/apache/hadoop/hbase/mapred/Driver" />
-    	</manifest>
-    	-->
     </jar>
   </target>
 
@@ -222,25 +212,6 @@
   <!-- ================================================================== -->
   <!-- Doc                                                                -->
   <!-- ================================================================== -->
-  <target name="docs" depends="forrest.check" description="Generate forrest-based documentation. To use, specify -Dforrest.home=&lt;base of Apache Forrest installation&gt; on the command line." if="forrest.home">
-    <exec dir="${docs.src}" executable="${forrest.home}/bin/forrest" failonerror="true" >
-      <env key="JAVA_HOME" value="${java5.home}"/>
-    </exec>
-    <copy todir="${docs.dir}">
-      <fileset dir="${docs.src}/build/site/" />
-    </copy>
-    <style basedir="${conf.dir}" destdir="${docs.dir}"
-           includes="hadoop-default.xml" style="conf/configuration.xsl"/>
-  </target>
-
-  <target name="forrest.check" unless="forrest.home" depends="java5.check">
-    <fail message="'forrest.home' is not defined. Please pass -Dforrest.home=&lt;base of Apache Forrest installation&gt; to Ant on the command-line." />
-  </target>
-
-  <target name="java5.check" unless="java5.home">
-    <fail message="'java5.home' is not defined.  Forrest requires Java 5.  Please pass -Djava5.home=&lt;base of Java 5 distribution&gt; to Ant on the command-line." />
-  </target>
-
   <!-- Javadoc -->
   <target name="javadoc" description="Generate javadoc">
     <mkdir dir="${build.javadoc}"/>
@@ -279,7 +250,6 @@
     <pathelement location="${build.test}" />
     <path refid="classpath"/>
     <pathelement location="${build.dir}"/>
-    <pathelement path="${clover.jar}"/>
   </path>
 
   <!--'compile-test' used to depend on 'compile' but removed it. Hudson doesn't like
@@ -287,7 +257,7 @@
       for compile.  TODO: Investigate why.  For now, test will fail
       if not preceeded by manual 'jar' or 'compile' invokation -->
   <target name="compile-test" depends="compile" description="Build test jar">
-    <javac encoding="${build.encoding}" 
+    <javac
        srcdir="${src.test}" 
        includes="**/*.java" 
        destdir="${build.test}" 
@@ -295,16 +265,13 @@
        target="${javac.version}"
        source="${javac.version}"
        deprecation="${javac.deprecation}"> 
-    <classpath refid="test.classpath"/> 
+  
+      <classpath refid="test.classpath"/> 
     </javac>
     <jar jarfile="${build.dir}/${final.name}-test.jar" >
       <fileset dir="${build.test}" includes="org/**" />
       <fileset dir="${build.classes}" />
       <fileset dir="${src.test}" includes="**/*.properties" />
-      <manifest>
-        <attribute name="Main-Class"
-          value="org/apache/hadoop/hbase/PerformanceEvaluation"/>
-      </manifest>
     </jar>
   </target>
 
@@ -318,15 +285,6 @@
       errorProperty="tests.failed" failureProperty="tests.failed"
       timeout="${test.timeout}">
       
-      <sysproperty key="test.build.data" value="${build.test}/data"/>
-      <sysproperty key="build.test" value="${build.test}"/>
-      <sysproperty key="src.testdata" value="${src.testdata}"/>
-      <sysproperty key="contrib.name" value="${name}"/>
-      
-      <sysproperty key="user.dir" value="${build.test}/data"/>
-      <sysproperty key="fs.default.name" value="${fs.default.name}"/>
-      <sysproperty key="hadoop.test.localoutputfile" value="${hadoop.test.localoutputfile}"/>
-      <sysproperty key="test.log.dir" value="${hadoop.log.dir}"/> 
       <classpath refid="test.classpath"/>
       <formatter type="${test.junit.output.format}" />
       <batchtest todir="${build.test}" unless="testcase">
