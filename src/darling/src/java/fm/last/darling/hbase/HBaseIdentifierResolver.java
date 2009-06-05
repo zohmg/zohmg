@@ -22,6 +22,9 @@ import org.apache.hadoop.hbase.io.BatchUpdate;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.streaming.io.IdentifierResolver;
 import org.apache.hadoop.streaming.io.TextInputWriter;
+import org.apache.hadoop.streaming.io.TypedBytesInputWriter;
+import org.apache.hadoop.streaming.io.TypedBytesOutputReader;
+import org.apache.hadoop.typedbytes.TypedBytesWritable;
 
 /**
  * By setting <tt>stream.io.identifier.resolver.class=HBaseIdentifierResolver</tt> and giving
@@ -39,6 +42,11 @@ public class HBaseIdentifierResolver extends IdentifierResolver {
       System.err.println("HBaseIdentifierResolver.resolve: HBASE.\n");
       setInputWriterClass(TextInputWriter.class);
       setOutputReaderClass(HBaseJSONOutputReader.class);
+      setOutputKeyClass(ImmutableBytesWritable.class);
+      setOutputValueClass(BatchUpdate.class);
+    } else if (identifier.equalsIgnoreCase(TYPED_BYTES_ID)) {
+      setInputWriterClass(TypedBytesInputWriter.class);
+      setOutputReaderClass(HBaseTypedBytesOutputReader.class);
       setOutputKeyClass(ImmutableBytesWritable.class);
       setOutputValueClass(BatchUpdate.class);
     } else {
