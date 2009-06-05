@@ -56,7 +56,8 @@ def copy_files():
         copy_file(doc, doc, doc_target)
 
     # copy stuff to share
-    shutil.copytree("examples", share_target+"/examples")
+    shutil.copytree('examples', share_target + '/examples')
+    shutil.copytree('graph', share_target + '/graph')
     shutil.copytree('skel-project', share_target + '/skel-project')
     # and to lib
     shutil.copytree("src/zohmg/middleware", lib_target+"/middleware")

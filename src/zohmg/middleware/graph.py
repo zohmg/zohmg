@@ -17,13 +17,13 @@
 
 import time
 
-class static(object):
+class graph(object):
     """
-    Application that serves static files from the 'static' directory in the
-    project directory.
+    This application serves static files from the 'graph' directory in share.
     """
     def __call__(self, environ, start_response):
         from paste.urlparser import make_static
-        project_dir = environ['zohmg_project_dir']
-        static = make_static({}, project_dir + '/static')
-        return static(environ, start_response)
+        # TODO: all hardcoded paths *will* break eventually.
+        graph_dir = '/usr/local/share/zohmg/graph'
+        graph = make_static({}, graph_dir)
+        return graph(environ, start_response)
