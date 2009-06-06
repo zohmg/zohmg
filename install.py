@@ -120,7 +120,7 @@ def setup():
     os.system("rm -rf build dist zohmg.egg-info")
 
 def test():
-    print 'testing zohmg script:'
+    print 'testing zohmg script: ',
     r = os.system('zohmg 2>&1 > /dev/null')
     if r != 0:
         # fail!
