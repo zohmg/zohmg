@@ -44,6 +44,7 @@ class Reset(object):
         except Exception, e:
             print 'reset failed :-('
             print 'error: ' + str(e)
+            sys.exit(1)
         except IOError:
             # problem is, hbase.ttypes.IOError isn't very expressive.
             print 'reset failed :-('
