@@ -57,7 +57,7 @@ class Process(object):
         env = Environ()
         hadoop_home = env.get("HADOOP_HOME")
         if not os.path.isdir(hadoop_home):
-            msg = "Error: HADOOP_HOME not set in config/environment.py."
+            msg = "error: HADOOP_HOME not set in config/environment.py."
             fail(msg)
         else:
             opts.append(('hadoop',env.get("HADOOP_HOME")))
@@ -67,12 +67,12 @@ class Process(object):
         if classpath is not None:
             for jar in classpath:
                 if not os.path.isfile(jar):
-                    msg = "Error: File not found, %s." % jar
+                    msg = "error: File not found, %s." % jar
                     fail(msg)
                 else:
                     opts.append(('libjar', jar))
         else:
-            msg = "Error: CLASSPATH in config/environment is empty."
+            msg = "error: CLASSPATH in config/environment is empty."
             fail(msg)
 
 
@@ -107,7 +107,7 @@ class Process(object):
                 # for each file add it with correct option.
                 for file in files:
                     if not os.path.isfile(dir+"/"+file):
-                        msg = "Error: File not found, %s." % file
+                        msg = "error: File not found, %s." % file
                         fail(msg)
 
                     suffix = file.split(".")[-1]
