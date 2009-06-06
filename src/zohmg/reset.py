@@ -35,11 +35,15 @@ class Reset(object):
             sys.exit(0)
 
         # disable+drop.
-        print "ok, wiping!"
-        c = setup_transport(host)
-        disable(c, table)
-        drop(c, table)
         # TODO: handle case where table does not exist.
+        # TODO: print actual error.
+        print "ok, wiping!"
+        try:
+            c = setup_transport(host)
+            disable(c, table)
+            drop(c, table)
+        except:
+            print 'reset failed :-('
 
         # recreate (with the help of our dear friend setup).
         print
