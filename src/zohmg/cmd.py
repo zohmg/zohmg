@@ -28,8 +28,8 @@ for (dir, dirnames, files) in os.walk(eggpath):
         if suffix == "egg":
             sys.path.append(dir+"/"+file)
 
-
-version = '0.1.0'
+# TODO: read version from somewhere or something.
+version = '0.1.1'
 
 def usage(reason = None):
     zohmg = os.path.basename(sys.argv[0])
