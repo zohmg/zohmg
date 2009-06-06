@@ -1,5 +1,4 @@
 verify correctness.
-move HBaseIdentifierResolver and HBaseOutputReader to hbase package.
 in readRequestedProjections: read yaml.
 read name of user's mapper class from config.
 read table/dataset from config.

@@ -1,5 +1,5 @@
-The darling package contains an OutputReader and an IdentifierResolver used by zohmg's python code
-to interpret JSON output and write to an TableOutputFormat.
+The darling package contains an OutputReader and an IdentifierResolver used by
+zohmg's python code to interpret JSON output and write to an TableOutputFormat.
 
 Also, there is quite a bit else in there, like a Java mapper-wrapper and stuff.
 Later, I might want to move this into another package or something.
@@ -10,4 +10,4 @@ hadoop-dev-streaming.jar
 hbase-dev.jar
 commons-logging.jar
 
-Use a version >= 0.19.1 of hadoop & hbase and Success is Certain (tm).
+also, patch hadoop with 1722 and 5450.
