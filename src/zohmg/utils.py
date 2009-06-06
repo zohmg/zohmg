@@ -42,7 +42,6 @@ def setup_transport(host):
 
 def create_or_bust(c, t, cfs=['fam']):
     from hbase.ttypes import ColumnDescriptor, AlreadyExists, IOError, IllegalArgument
-    print "creating hbase table %s." % t
     try:
         cds = []
         for cf in cfs:
@@ -50,17 +49,15 @@ def create_or_bust(c, t, cfs=['fam']):
             cds.append(cd)
         c.createTable(t, cds)
     except AlreadyExists:
-        print "oh noes, %s already exists." % t
+        sys.stderr.write("oh noes, %s already exists.\n" % t)
         exit(2)
     except IOError:
-        print "bust: IOError"
+        sys.stderr.write("bust: IOError\n")
         exit(3)
     except IllegalArgument, e:
-        print e
-        print "create_or_bust => bust"
+        sys.stderr.write("error: " + str(e) + "\n")
+        sys.stderr.write("create_or_bust => bust\n")
         exit(3)
-    print "ok."
-
 
 def random_string(size):
     # subopt for larger sizes.

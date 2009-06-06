@@ -19,6 +19,7 @@ import sys
 from zohmg.setup import Setup
 from zohmg.config import Config
 from zohmg.utils import setup_transport, disable, drop
+from hbase.ttypes import IOError
 
 class Reset(object):
     def please(self):
@@ -35,15 +36,19 @@ class Reset(object):
             sys.exit(0)
 
         # disable+drop.
-        # TODO: handle case where table does not exist.
-        # TODO: print actual error.
         print "ok, wiping!"
         try:
             c = setup_transport(host)
             disable(c, table)
             drop(c, table)
-        except:
+        except Exception, e:
             print 'reset failed :-('
+            print 'error: ' + str(e)
+        except IOError:
+            # problem is, hbase.ttypes.IOError isn't very expressive.
+            print 'reset failed :-('
+            print '(does the table perhaps not exist?)'
+            sys.exit(1)
 
         # recreate (with the help of our dear friend setup).
         print
