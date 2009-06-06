@@ -70,3 +70,9 @@ What's wrong?
 That happens for no good reason when re-installing zohmg. Running the
 installation again always seems to fix it (in fact, install.py already
 tried a second time and is likely to have suceeded).
+
+
++ I get this error when importing: ImportError: cannot import name map
+
+It seems like your mapper python file does not define a map() function.
+
