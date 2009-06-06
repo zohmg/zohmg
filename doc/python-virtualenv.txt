@@ -1,0 +1,7 @@
+# this describes my workstation setup; personal memory in a text file.
+# inspired by http://dumbotics.com/2009/05/24/virtual-pythonenvironments/
+
+# my zohmg environment is in ~/workspace/python-environs/zohmg
+
+# to activate it:
+$> source ~/workspace/python-environs/zohmg/bin/activate
