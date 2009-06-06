@@ -23,17 +23,17 @@ class Create(object):
         self.basename = os.path.basename(path)
         self.abspath  = os.path.abspath(path)
 
-        print ("creating project directory %s ." % self.abspath),
         try:
             shutil.copytree('/usr/local/share/zohmg/skel-project', self.abspath)
-            print '. ',
         except OSError, ose:
             # something went wrong. act accordingly.
-            msg = "error: could not create project directory. %s" % ose.strerror
+            msg = "error: could not create project directory - %s" % ose.strerror
             fail(msg, ose.errno)
+        print ("created project directory: %s" % self.abspath)
 
         # sed-replace dataset name.
         dataset_path = self.abspath + '/config/dataset.yaml'
         r0 = os.system("sed 's/DATASETNAME/%s/' %s  > /tmp/dataset.yaml" % (self.basename, dataset_path))
         r1 = os.system("mv /tmp/dataset.yaml " + dataset_path)
-        if not (r0 or r1): print "ok."
+        if (r0 or r1):
+            print 'failed to massage config/dataset.yaml :-('
