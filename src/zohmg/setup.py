@@ -31,8 +31,8 @@ class Setup(object):
             cfs.append(p)
 
         print "creating table '%s'" % dataset
-        print " column families:"
-        print "".join((map( lambda cf: "  + "+str(cf)+":\n" , cfs)))
+        print "column families:"
+        print "".join((map( lambda cf: " + "+str(cf)+":\n" , cfs)))
 
         try:
             c = setup_transport("localhost")

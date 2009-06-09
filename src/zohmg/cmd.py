@@ -28,14 +28,14 @@ for (dir, dirnames, files) in os.walk(eggpath):
         if suffix == "egg":
             sys.path.append(dir+"/"+file)
 
-
-version = '0.1.0'
+# TODO: read version from somewhere or something.
+version = '0.1.1'
 
 def usage(reason = None):
     zohmg = os.path.basename(sys.argv[0])
     if reason:
-        print "Error: " + reason
-    print "zohmg version " + version
+        print "error: " + reason
+    print "zohmg " + version
     print "usage:"
     print zohmg + " create <dir>"
     print zohmg + " setup"
@@ -142,5 +142,5 @@ def reset():
 def refuse_to_act_in_nonzohmg_directory():
     cwd = os.getcwd()
     if not os.path.exists(cwd+"/.zohmg"):
-        msg = "Error: This is not a proper zohmg project."
+        msg = "error: This is not a proper zohmg project."
         fail(msg)
