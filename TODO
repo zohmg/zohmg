@@ -5,6 +5,8 @@ docs:
 + examples examples examples!
 
 priority uno:
++ TODO => tickets
++ schema that supports >500k attribute values.
 + support mapper class (with counters and other goodness).
 + add support for multiple data sets.
 + zohmg/create.py: make default dataset.yaml follow the running example.
