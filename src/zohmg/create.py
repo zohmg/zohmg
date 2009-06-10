@@ -25,6 +25,8 @@ class Create(object):
 
         try:
             shutil.copytree('/usr/local/share/zohmg/skel-project', self.abspath)
+            # reset access and mod times.
+            os.system('cd %s; touch *; touch **/*' % self.abspath)
         except OSError, ose:
             # something went wrong. act accordingly.
             msg = "error: could not create project directory - %s" % ose.strerror
