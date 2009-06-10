@@ -6,6 +6,7 @@ docs:
 
 priority uno:
 + TODO => tickets
++ 'zohmg check' to check config against hbase table.
 + schema that supports >500k attribute values.
 + support mapper class (with counters and other goodness).
 + add support for multiple data sets.
