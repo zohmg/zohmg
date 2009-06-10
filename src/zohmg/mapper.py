@@ -18,6 +18,8 @@
 from zohmg.config import Config
 
 # exploding mapper!
+# every emitted record from the usermapper is expanded
+# to len(projections) * len(units) * 2^len(reduced) records.
 class Mapper(object):
     def __init__(self, usermapper):
         self.usermapper = usermapper
@@ -26,9 +28,10 @@ class Mapper(object):
     # helper for generating all permutations of a dictionary.
     def dict_permutations(self, dict_):
         dict = dict_.copy()
+
         # base case.
         if len(dict) == 1:
-            # {'agent': 'firefox'} => [{'agent': 'firefox'}, {'agent': 'all'}]
+            # i.e., {'agent': 'firefox'} => [{'agent': 'firefox'}, {'agent': 'all'}]
             return [dict, {dict.keys()[0] : 'all'}]
 
         x  = dict.popitem()
@@ -46,14 +49,10 @@ class Mapper(object):
         # from the usermapper: a timestamp, a point in n-space, units and their values.
         for (ts, point, units) in self.usermapper(key, value):
             for p in self.projections:
-                # dimensionality reduction,
                 reduced = {}
-                for d in p:
+                for d in p:  # dimensionality reduction.
                     reduced[d] = point[d]
-                # yield for each requested projection.
-                # include the projections list to get the order right.
                 for u in units:
                     value = units[u]
                     for permut in self.dict_permutations(reduced):
-                        # we yield len(projections) * len(units) * 2^len(reduced) times.
                         yield (ts, p, permut, u), value
