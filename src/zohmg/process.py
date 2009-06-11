@@ -65,7 +65,7 @@ class Process(object):
 
         if local_mode:
             print 'local mode: enabled.'
-            opts.appen(('output', local_output_path))
+            opts.append(('output', local_output_path))
         else:
             print 'hadoop mode: enabled.'
             opts.append(('output', '/tmp/does-not-matter'))
