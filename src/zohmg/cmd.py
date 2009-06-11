@@ -35,7 +35,7 @@ def usage(reason = None):
     zohmg = os.path.basename(sys.argv[0])
     if reason:
         print "error: " + reason
-    print "zohmg " + version
+    print "zohmg! " + version
     print "usage:"
     print zohmg + " create <dir>"
     print zohmg + " setup"
