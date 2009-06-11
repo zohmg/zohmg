@@ -76,3 +76,10 @@ tried a second time and is likely to have suceeded).
 
 It seems like your mapper python file does not define a map() function.
 
+
++ My imports runs just fine locally but seem to do the wrong thing when I run
+them on the cluster. What's up?
+
+Make sure you don't have any old eggs laying around on the cluster node. Zohmg
+ships everything it needs, so there should be no need to have the zohmg egg, for
+example, installed on the nodes.
