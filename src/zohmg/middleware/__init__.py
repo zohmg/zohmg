@@ -34,7 +34,8 @@ def root(environ, start_response):
 <div><h1>Zohmg!</h1></div>
 <div>
 <p>Zohmg is serving data from <a href="/data">/data</a>. You query it by HTTP GET requests.</p>
-<p>There is an example consumer at <a href="/static">/static</a>.</p>
+<p>There is an example consumer at <a href="/graph">/graph</a>.</p>
+<p>Any files you put in the 'static' directory of your zohmg project will be available at <a href="/static">/static</a>.</p>
 </div>
 </body>
 </html>
