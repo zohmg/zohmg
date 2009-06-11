@@ -18,26 +18,32 @@
 from zohmg.config import Config
 import simplejson as json
 
+# the output of this reducer is interpreted by HBaseOutputReader.
 class Reducer(object):
     def __init__(self):
         self.config = Config()
 
     def __call__(self, key, values):
-        ts, ps, dims, unit = key
+        timestamp, projection, dimensions, unit = key
         value = sum(values)
 
-        # rowkey: "unit-ymd".
-        rk = '-'.join([unit, str(ts)])
+        # encode dimensions and their attributes in the rowkey.
+        # (it's important that we get the ordering right.)
+        rowkeyarray = []
+        for d in projection:
+            rowkeyarray.append(d)
+            rowkeyarray.append(dimensions[d])
+        # add timestamp to rowkey.
+        rowkeyarray += [str(timestamp)]
+        # stringify
+        rowkey = '-'.join(rowkeyarray)
+        # rowkey => 'artist-97930-track-102203-20090601'
 
-        # construct column-family and qualifier strings.
-        # it's important that we get the ordering right.
-        cflist = []
-        qlist  = []
-        for p in ps:
-            cflist.append(p)
-            qlist.append(dims[p])
-        cf = '-'.join(cflist)
-        q  = '-'.join(qlist)
+        columnfamily = "unit:"
+        cfq = columnfamily + unit
+        # cfq => 'unit:scrobbles'
 
-        # remember, we'll pass the output of this reducer to HBaseOutputReader.
-        yield rk, json.dumps({cf+":"+q : {'value':value}})
+        json_payload = json.dumps({cfq : {'value': value}})
+        # json_payload => '{"unit:scrobbles": {"value": 1338}}'
+
+        yield rowkey, json_payload
