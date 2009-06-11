@@ -18,9 +18,9 @@
 #!/usr/bin/env python
 # the script we tell dumbo to run.
 
-from zohmg.mapred.mapper import Mapper
-from zohmg.mapred.reducer import Reducer
-from zohmg.mapred.combiner import Combiner
+from zohmg.mapper import Mapper
+from zohmg.reducer import Reducer
+from zohmg.combiner import Combiner
 
 from usermapper import map
 
