@@ -21,13 +21,14 @@ from zohmg.scanner import HBaseScanner
 
 
 # returns jsonp which can be used in clients.
-def dump_jsonp(data, jsonp_method=""):
+def dump_jsonp(data, jsonp_method=None):
     jsondata = json.dumps(data)
 
-    if jsonp_method == "": 
-        return jsondata
-    else:
+    if jsonp_method:
+        # client requested data to be wrapped in a function call.
         return jsonp_method + "(" + jsondata + ")"
+    else:
+        return jsondata
 
 
 # dimensions is a list of dimensions: ['country', 'usertype', 'useragent']
@@ -143,8 +144,7 @@ def hbase_get(table, projections, params):
     while scanner.has_next():
         t = {}
         r = scanner.next()
-        # extract date from row key.
-        ymd = r.row[-8:]
+        ymd = r.row[-8:] # extract date from row key.
         for column in r.columns:
             # split,
             cf, q = column.split(':')
@@ -157,6 +157,4 @@ def hbase_get(table, projections, params):
             data[ymd] = t
 
     # returns a list of dicts sorted by ymd.
-    pers_way = [ (ymd,data[ymd]) for ymd in sorted(data) ]
-    correct  = [ {ymd:data[ymd]} for ymd in sorted(data) ]
-    return correct
+    return [ {ymd:data[ymd]} for ymd in sorted(data) ]

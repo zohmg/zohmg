@@ -38,7 +38,7 @@ class data(object):
         params = parse_formvars(environ)
         # jsonp.
         try:    jsonp_method = params["jsonp"]
-        except: jsonp_method = ""
+        except: jsonp_method = None
 
         data  = {}
         try:
