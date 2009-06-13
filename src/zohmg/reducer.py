@@ -36,9 +36,7 @@ class Reducer(object):
         for d in projection:
             rowkeyarray.append(d)
             rowkeyarray.append(dimensions[d])
-        # add timestamp to rowkey.
-        rowkeyarray += [str(timestamp)]
-        # stringify
+        rowkeyarray.append(str(timestamp))
         rowkey = '-'.join(rowkeyarray)
         # rowkey => 'artist-97930-track-102203-20090601'
 
