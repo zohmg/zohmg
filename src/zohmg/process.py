@@ -63,7 +63,6 @@ class Process(object):
             opts.append(('inputformat', 'org.apache.hadoop.mapred.LzoTextInputFormat'))
             for_dumbo.pop(0) # remove '--lzo'.
 
-
         env = Environ()
 
         if local_mode:
@@ -71,15 +70,12 @@ class Process(object):
             opts.append(('output', local_output_path))
         else:
             print 'hadoop mode: enabled.'
+            hadoop_home = env.get("HADOOP_HOME")
+            if not os.path.isdir(hadoop_home):
+                msg = "error: HADOOP_HOME in config/environment.py is not a directory."
+                fail(msg)
             opts.append(('output', '/tmp/does-not-matter'))
-            opts.append(('hadoop', env.get("HADOOP_HOME")))
-
-        # read config/environment.py
-        hadoop_home = env.get("HADOOP_HOME")
-        if not os.path.isdir(hadoop_home):
-            msg = "error: HADOOP_HOME in config/environment.py is not a directory."
-            fail(msg)
-
+            opts.append(('hadoop', hadoop_home))
 
         # add jars defined in config/environment.py to jobjar.
         classpath = env.get("CLASSPATH")
