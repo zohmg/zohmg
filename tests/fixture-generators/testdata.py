@@ -43,9 +43,15 @@ scaling = {'bytes': 1000, 'pageviews': 5}
 
 countries = ['US', 'SE', 'DE', 'ES', 'GB', 'FR', 'IT', 'DK']
 hashes = {} # pre-compute country hashes.
-for c in countries: hashes[c] = hash(c) % 255
+for c in countries:
+    hashes[c] = hash(c) % 255
 
 client, transport = setup_transport('localhost')
+
+def magic_computation(unit, dimension):
+    return random() * hashes[dimension] * scaling[unit]
+
+
 
 year="2009"
 for month in range(1,13):
@@ -55,10 +61,10 @@ for month in range(1,13):
         for unit in units:    
             rk = unit + "-" + ymd
             mutations = []
-            for c in countries:
+            for country in countries:
                 m = {}
-                m['column'] = "country:"+c
-                m['value']  = str(int(random() * hashes[c] * scaling[unit]))
+                m['column'] = "country:" + country
+                m['value']  = str(int(magic_computation(unit, country)))
                 mutations.append(Mutation(m))
             print rk + " +> " + str(len(mutations)) + " mutations."
             client.mutateRow(table, rk, mutations)
