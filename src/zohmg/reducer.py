@@ -27,6 +27,9 @@ class Reducer(object):
         timestamp, projection, dimensions, unit = key
         value = sum(values)
 
+        if value == 0:
+            return
+
         # encode dimensions and their attributes in the rowkey.
         # (it's important that we get the ordering right.)
         rowkeyarray = []
