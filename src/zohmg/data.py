@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import sys
 import simplejson as json
 from zohmg.utils import compare_triples, strip
 from zohmg.scanner import HBaseScanner
@@ -97,10 +98,6 @@ def hbase_get(table, projections, params):
     print "filters: " + str(filters)
     print "--------------"
 
-    # the row key is 'unit-ymd', i.e. "pageviews-20090410".
-    startrow = unit +"-"+ t0
-    stoprow  = unit +"-"+ t1 + "~"
-
     # massage the filters.
     for k in filters.copy():
         if filters[k] in ['all', '*']:
@@ -120,15 +117,37 @@ def hbase_get(table, projections, params):
         if set(p).issuperset(wanted):
             ps.append((len(p), p.index(d0), p))
     # sort by length, then index; pick the first one.
-    pick = sorted(ps, compare_triples)[0][2]
-    cf = '-'.join(pick)
-    idx = pick.index(d0) # used for dimension-squeezing a bit later.
-    print "cf picked: " + cf
+    projection = sorted(ps, compare_triples)[0][2]
+    print "most suited projection:" + str(projection)
 
+    # TODO: ask rowkeyformatter.
+    rowkeyarray = []
+    for d in projection:
+        rowkeyarray.append(d)
+        # this becomes a bit tricky..
+        if d == d0:
+            rowkeyarray.append(d0v[0]) # TODO: fix!
+            # if d0v = [''], append 'all'
+        elif d in filters.keys():
+            rowkeyarray.append(filters[d])
+        else:
+            rowkeyarray.append('all')
+    rowkey = '-'.join(rowkeyarray)
+
+    # the row key is 'dimension-value-[dimension-value, ..]-ymd',
+    # i.e. 'artist-97930-track-102203-20090601'
+    startrow = rowkey + '-' + t0
+    stoprow  = rowkey + '-' + t1 + "~"
+    
+    print "start: " + startrow
+    print "stop:  " + stoprow
+    
+
+    # TODO: remove.
     # loop over every dimension in the target column-family
     # and specify value(s) for them.
     qs = {}
-    for d in pick:
+    for d in projection:
         if d == d0:
             if d0v == ['']:
                 qs[d] = ['.*']
@@ -138,29 +157,36 @@ def hbase_get(table, projections, params):
             qs[d] = filters[d]
         else:
             qs[d] = ['all']
-
-    print "qs: " + str(qs)
+    #print "qs: " + str(qs)
+    
 
     # make a list of cells we wish to extract from hbase.
-    cells = map(lambda q: cf+":"+q,  map(lambda l: '-'.join(l), enumerate_cells(pick, qs)))
-    print "cells: " + str(cells)
+    cf = 'unit'
+    cells = map(lambda q: cf+":"+q,  map(lambda l: '-'.join(l), enumerate_cells(projection, qs)))
+    #print "cells: " + str(cells)
+
+    idx = projection.index(d0) # used for dimension-squeezing a bit later.
+
+
+    # format column-family + qualifier
+    cfq = 'unit:' + unit
 
     # connect to hbase.
     scanner = HBaseScanner()
     scanner.connect()
-    scanner.open(table, cells, startrow, stoprow)
+    scanner.open(table, [cfq], startrow, stoprow)
 
     data = {}
+    d = d0 # TODO: fix.
     while scanner.has_next():
+        print 'row!'
         t = {}
         r = scanner.next()
         ymd = r.row[-8:] # extract date from row key.
-        for column in r.columns:
-            # split,
-            cf, q = column.split(':')
-            dimensions = q.split('-')
-            # squash,
-            d = dimensions[idx]
+        dimension_string = r.row[0:-9]
+        for column in r.columns: # there should be only one..
+            print 'column: ' + column
+            print 'value:  ' + r.columns[column].value
             t[d] = t.get(d, 0)
             t[d] += int(r.columns[column].value)
             # and save.
