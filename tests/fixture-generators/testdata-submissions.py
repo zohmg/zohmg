@@ -47,8 +47,8 @@ artists = [1001, 1002, 1003, 1004, 1005]
 projections = [('user'), ('user','artist')]
 
 hashes = {} # pre-compute hashes.
-for u in users:
-    hashes[u] = hash(u) % 255
+for a in artists:
+    hashes[a] = hash(a) % 255
 
 def magic_computation(unit, dimension):
     return random() * hashes[dimension] * scaling[unit]
@@ -60,10 +60,10 @@ def generate_data(client):
         month = "%02d" % month
         for day in range(1,31):
             ymd = year + month + "%02d" % day
-            for user in users:
+            for artist in artists:
                 rowkeyarray = []
-                rowkeyarray.append('user')
-                rowkeyarray.append(str(user))
+                rowkeyarray.append('artist')
+                rowkeyarray.append(str(artist))
                 rowkeyarray.append(ymd)
                 rowkey = '-'.join(rowkeyarray)
 
@@ -71,7 +71,7 @@ def generate_data(client):
                 for unit in units:
                     m = {}
                     m['column'] = "unit:" + unit
-                    m['value']  = str(int(magic_computation(unit, user)))
+                    m['value']  = str(int(magic_computation(unit, artist)))
                     mutations.append(Mutation(m))
                 print rowkey + " +> " + str(len(mutations)) + " mutations."
                 client.mutateRow(table, rowkey, mutations)
