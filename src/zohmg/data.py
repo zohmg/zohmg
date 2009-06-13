@@ -20,6 +20,16 @@ from zohmg.utils import compare_triples, strip
 from zohmg.scanner import HBaseScanner
 
 
+def query(table, projections, params):
+
+    # jsonp.
+    try:    jsonp_method = params["jsonp"]
+    except: jsonp_method = None
+
+    data = hbase_get(table, projections, params)
+    return dump_jsonp(data, jsonp_method)
+
+
 # returns jsonp which can be used in clients.
 def dump_jsonp(data, jsonp_method=None):
     jsondata = json.dumps(data)

@@ -16,37 +16,29 @@
 # under the License.
 
 import os, sys, time
-import simplejson as json
+import zohmg.data
 from zohmg.config import Config
 from paste.request import parse_formvars
 
-# add middleware directory to path.
-sys.path.append(os.path.dirname(__file__))
-import data_utils
-
-# this is the application responsible for serving data.
+# data application serving at /data.
 class data(object):
     def __init__(self):
-        self.config = Config()
-        self.table = self.config.dataset()
-        self.projections = self.config.projections()
+        config = Config()
+        self.table       = config.dataset()
+        self.projections = config.projections()
 
     # answer query.
     def __call__(self, environ, start_response):
-        print "[%s] Data, serving from table: %s." % (time.asctime(),self.table)
+        print "[%s] Data, serving from table: %s." % (time.asctime(), self.table)
+        # TODO: check that table exists, exit gracefully if not.
 
         params = parse_formvars(environ)
-        # jsonp.
-        try:    jsonp_method = params["jsonp"]
-        except: jsonp_method = None
 
-        data  = {}
+        start = time.time()
         try:
             # fetch.
-            start = time.time()
-            data = data_utils.hbase_get(self.table, self.projections, params)
-            elapsed = (time.time() - start)
-            sys.stderr.write("hbase query+prep time: %s\n" % elapsed)
+            json = zohmg.data.query(self.table, self.projections, params)
+
         except ValueError:
             print >>sys.stderr, "400 Bad Request: missing arguments."
             start_response('400 Bad Request', [('content-type', 'text/html')])
@@ -55,7 +47,9 @@ class data(object):
             print >>sys.stderr, "Error: ", e
             start_response('500 OK', [('content-type', 'text/html')])
             return "Sorry, I failed in serving you: " + str(e)
+        elapsed = (time.time() - start)
+        sys.stderr.write("hbase query+prep: %s\n\n" % elapsed)
 
         # serve output.
         start_response('200 OK', [('content-type', 'text/x-json')])
-        return data_utils.dump_jsonp(data, jsonp_method)
+        return json
