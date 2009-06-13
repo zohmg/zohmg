@@ -65,6 +65,21 @@ def enumerate_cells(dimensions, values, target=[]):
     return enumerate_cells(dimensions[1:], values, newtarget)
 
 
+def find_suitable_projection(projections, d0, filters):
+    # pick the best-suiting projection p.
+    # 1) p must contain all dimensions we specify.
+    # 2) of all ps satisfying 1, the position of d0 in p must be leftmost,
+    #    and p must be the shortest of the fitting candidates.
+    ps = [] # projection candidates.
+    wanted = set([d0] + filters.keys())
+    for p in projections:
+        if set(p).issuperset(wanted):
+            ps.append((len(p), p.index(d0), p))
+    # sort by length, then index; pick the first one.
+    projection = sorted(ps, compare_triples)[0][2]
+    return projection
+
+
 # fetches data from hbase,
 # returns sorted list of dictionaries suitable for json dumping.
 def hbase_get(table, projections, params):
@@ -99,25 +114,15 @@ def hbase_get(table, projections, params):
     print "--------------"
 
     # massage the filters.
-    for k in filters.copy():
-        if filters[k] in ['all', '*']:
+    for key in filters.copy():
+        if filters[key] in ['all', '*']:
             # 'all' or '*' is equivalent to not filtering at all.
-            del filters[k]
+            del filters[key]
         else:
-            # turn it into a list.
-            filters[k] = filters[k].split(',')
+            # turn comma-delimited string into list.
+            filters[key] = filters[key].split(',')
 
-    # pick the best-suiting projection p.
-    # 1) p must contain all dimensions we specify.
-    # 2) of all ps satisfying 1, the position of d0 in p must be leftmost,
-    #    and p must be the shortest of the fitting candidates.
-    ps = [] # projection candidates.
-    wanted = set([d0] + filters.keys())
-    for p in projections:
-        if set(p).issuperset(wanted):
-            ps.append((len(p), p.index(d0), p))
-    # sort by length, then index; pick the first one.
-    projection = sorted(ps, compare_triples)[0][2]
+    projection = find_suitable_projection(projections, d0, filters)
     print "most suited projection:" + str(projection)
 
     # TODO: ask rowkeyformatter.
@@ -141,32 +146,6 @@ def hbase_get(table, projections, params):
     
     print "start: " + startrow
     print "stop:  " + stoprow
-    
-
-    # TODO: remove.
-    # loop over every dimension in the target column-family
-    # and specify value(s) for them.
-    qs = {}
-    for d in projection:
-        if d == d0:
-            if d0v == ['']:
-                qs[d] = ['.*']
-            else:
-                qs[d] = d0v
-        elif d in filters.keys():
-            qs[d] = filters[d]
-        else:
-            qs[d] = ['all']
-    #print "qs: " + str(qs)
-    
-
-    # make a list of cells we wish to extract from hbase.
-    cf = 'unit'
-    cells = map(lambda q: cf+":"+q,  map(lambda l: '-'.join(l), enumerate_cells(projection, qs)))
-    #print "cells: " + str(cells)
-
-    idx = projection.index(d0) # used for dimension-squeezing a bit later.
-
 
     # format column-family + qualifier
     cfq = 'unit:' + unit
@@ -178,19 +157,20 @@ def hbase_get(table, projections, params):
 
     data = {}
     d = d0 # TODO: fix.
+    numrows = 0
     while scanner.has_next():
-        print 'row!'
         t = {}
+        numrows += 1
         r = scanner.next()
-        ymd = r.row[-8:] # extract date from row key.
-        dimension_string = r.row[0:-9]
-        for column in r.columns: # there should be only one..
-            print 'column: ' + column
-            print 'value:  ' + r.columns[column].value
+        # extract date from row key.
+        ymd = r.row[-8:]
+        # read possible old values, add.
+        for column in r.columns:
             t[d] = t.get(d, 0)
             t[d] += int(r.columns[column].value)
-            # and save.
-            data[ymd] = t
+        # and save.
+        data[ymd] = t
+    print "rows: " + str(numrows)
 
     # returns a list of dicts sorted by ymd.
     return [ {ymd:data[ymd]} for ymd in sorted(data) ]
