@@ -43,9 +43,13 @@ class data(object):
             print >>sys.stderr, "400 Bad Request: missing arguments."
             start_response('400 Bad Request', [('content-type', 'text/html')])
             return "Query is missing arguments."
+        except zohmg.data.DataNotFound, (instance):
+            print >>sys.stderr, "Error: ", instance.error
+            start_response('200 OK', [('content-type', 'text/html')])
+            return "data not found: " + instance.error
         except Exception, e:
             print >>sys.stderr, "Error: ", e
-            start_response('500 OK', [('content-type', 'text/html')])
+            start_response('500', [('content-type', 'text/html')])
             return "Sorry, I failed in serving you: " + str(e)
         elapsed = (time.time() - start)
         sys.stderr.write("hbase query+prep: %s\n\n" % elapsed)

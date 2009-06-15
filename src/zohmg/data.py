@@ -21,6 +21,13 @@ from zohmg.utils import compare_triples, strip
 from zohmg.scanner import HBaseScanner
 
 
+class DataNotFound(Exception):
+    def __init__(self, value):
+        self.error = value
+    def __str__(self):
+        return self.error
+
+
 def query(table, projections, params):
 
     # jsonp.
@@ -70,11 +77,16 @@ def find_suitable_projection(projections, d0, filters):
     # 1) p must contain all dimensions we specify.
     # 2) of all ps satisfying 1, the position of d0 in p must be leftmost,
     #    and p must be the shortest of the fitting candidates.
+
     ps = [] # projection candidates.
     wanted = set([d0] + filters.keys())
+
     for p in projections:
         if set(p).issuperset(wanted):
             ps.append((len(p), p.index(d0), p))
+
+    if len(ps) == 0: return None # no suitable projections!
+
     # sort by length, then index; pick the first one.
     projection = sorted(ps, compare_triples)[0][2]
     return projection
@@ -123,6 +135,9 @@ def hbase_get(table, projections, params):
             filters[key] = filters[key].split(',')
 
     projection = find_suitable_projection(projections, d0, filters)
+    if projection == None:
+        print 'could not find a suitable projection for ' + d0
+        raise DataNotFound("could not find a suitable projection for " + d0)
     print "most suited projection:" + str(projection)
 
     # TODO: ask rowkeyformatter.
