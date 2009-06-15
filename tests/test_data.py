@@ -20,13 +20,15 @@ import zohmg.data
 
 class TestData(unittest.TestCase):
     def test_find_suitable_projection(self):
-        projections = [['user'], ['user','artist']]
-        dimension = 'user'
+        projections = [['user'], ['user','artist'], ['artist', 'user']]
 
-        p = zohmg.data.find_suitable_projection(projections, dimension, {})
+        p = zohmg.data.find_suitable_projection(projections, 'user', {})
         self.assertEqual(p, ['user'])
+        p = zohmg.data.find_suitable_projection(projections, 'artist', {})
+        self.assertEqual(p, ['artist', 'user'])
         p = zohmg.data.find_suitable_projection(projections, 'non-existant', {})
         self.assertEqual(p, None)
+
 
 
 if __name__ == "__main__":
