@@ -51,5 +51,5 @@ class data(object):
         sys.stderr.write("hbase query+prep: %s\n\n" % elapsed)
 
         # serve output.
-        start_response('200 OK', [('content-type', 'text/x-json')])
+        start_response('200 OK', [('content-type', 'text/plain')]) # or text/x-json
         return json
