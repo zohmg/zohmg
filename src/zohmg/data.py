@@ -138,7 +138,7 @@ def hbase_get(table, projections, params):
     if projection == None:
         print 'could not find a suitable projection for ' + d0
         raise DataNotFound("could not find a suitable projection for " + d0)
-    print "most suited projection:" + str(projection)
+    print "most suited projection: " + str(projection)
 
     # TODO: ask rowkeyformatter.
     rowkeyarray = []
