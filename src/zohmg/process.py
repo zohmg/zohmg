@@ -27,8 +27,8 @@ class Process(object):
         table = Config().dataset()
         jobname = "%s %s" % (table, input) # overrides any name specified on cli.
 
-        resolver = 'fm.last.darling.HBaseIdentifierResolver'
-        outputformat = 'org.apache.hadoop.hbase.mapred.TableOutputFormat'
+        resolver = 'fm.last.darling.hbase.HBaseIdentifierResolver'
+        outputformat = 'org.apache.hadoop.hbase.mapreduce.TableOutputFormat'
 
         opts = [('jobconf', "hbase.mapred.outputtable=" + table),
                 ('jobconf', 'stream.io.identifier.resolver.class=' + resolver),

@@ -16,17 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package fm.last.darling.hbase;
 
-import org.apache.hadoop.hbase.io.BatchUpdate;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.streaming.io.IdentifierResolver;
 import org.apache.hadoop.streaming.io.TextInputWriter;
 
 /**
  * By setting <tt>stream.io.identifier.resolver.class=HBaseIdentifierResolver</tt> and giving
- * <tt>-outputformat org.apache.hadoop.hbase.mapred.TableOutputFormat</tt> to dumbo you will be able to store stuff in
- * HBase. Pro-tip: Remember to set <tt>hbase.mapred.outputtable</tt>.
+ * <tt>-outputformat org.apache.hadoop.hbase.mapred.TableOutputFormat</tt> to dumbo
+ * you will be able to store stuff in * HBase.
+ *
+ * Pro-tip: Remember to set <tt>hbase.mapred.outputtable</tt>.
  */
 public class HBaseIdentifierResolver extends IdentifierResolver {
   public static final String HBASE_ID = "hbase";
@@ -40,7 +43,7 @@ public class HBaseIdentifierResolver extends IdentifierResolver {
       setInputWriterClass(TextInputWriter.class);
       setOutputReaderClass(HBaseJSONOutputReader.class);
       setOutputKeyClass(ImmutableBytesWritable.class);
-      setOutputValueClass(BatchUpdate.class);
+      setOutputValueClass(Put.class);
     } else {
       super.resolve(identifier);
     }
