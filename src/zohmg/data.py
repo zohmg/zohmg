@@ -15,8 +15,11 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# zohmg.data, hello.
+
 import sys
 import simplejson as json
+
 from zohmg.utils import compare_triples, strip
 from zohmg.scanner import HBaseScanner
 
@@ -27,6 +30,11 @@ class DataNotFound(Exception):
     def __str__(self):
         return self.error
 
+class NoSuitableProjection(Exception):
+    def __init__(self, value):
+        self.error = value
+    def __str__(self):
+        return self.error
 
 def query(table, projections, params):
 
@@ -137,7 +145,7 @@ def hbase_get(table, projections, params):
     projection = find_suitable_projection(projections, d0, filters)
     if projection == None:
         print 'could not find a suitable projection for ' + d0
-        raise DataNotFound("could not find a suitable projection for " + d0)
+        raise NoSuitableProjection("could not find a suitable projection for dimension " + d0)
     print "most suited projection: " + str(projection)
 
     # TODO: ask rowkeyformatter.
