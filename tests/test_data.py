@@ -37,5 +37,11 @@ class TestData(unittest.TestCase):
         p = zohmg.data.find_suitable_projection(projections, 'non-existant', {})
         self.assertEqual(p, None)
 
+    def test_dump_jsonp(self):
+        json = zohmg.data.dump_jsonp([{'a':'x', 'something':700}])
+        expected = '[{"a": "x", "something": 700}]'
+        self.assertEquals(json, expected)
+
+
 if __name__ == "__main__":
     unittest.main()
