@@ -22,14 +22,20 @@ class TestData(unittest.TestCase):
     def test_find_suitable_projection(self):
         projections = [['user'], ['user','artist'], ['artist', 'user']]
 
+        ## find_suitable_projection() should:
+
+        # find the correct projection when there's a single matching projection.
         p = zohmg.data.find_suitable_projection(projections, 'user', {})
         self.assertEqual(p, ['user'])
+
+        # get the ordering right - both ['user','artist'] and ['artist', 'user']
+        # satisfy a query for 'artist', but the latter is more efficient to read from.
         p = zohmg.data.find_suitable_projection(projections, 'artist', {})
         self.assertEqual(p, ['artist', 'user'])
+
+        # return None if there is no match.
         p = zohmg.data.find_suitable_projection(projections, 'non-existant', {})
         self.assertEqual(p, None)
-
-
 
 if __name__ == "__main__":
     unittest.main()
