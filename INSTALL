@@ -5,6 +5,7 @@
 
 1) Install Zohmg:
 
+    $> cd zohmg
     $> sudo python install.py
 
 

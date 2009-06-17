@@ -11,8 +11,8 @@ directory for an automated installation of those.
 
 
 The following software is required:
- - Apache Hadoop 0.19.x with patches HADOOP-1722 and HADOOP-5450.
- - Apache HBase 0.19.x
+ - Apache Hadoop 0.20 with patches HADOOP-1722 and HADOOP-5450.
+ - Apache HBase 0.20
  - Dumbo 0.21.x
 
 # TODO: the wget of http://pypi.python.org/pypi/setuptools
@@ -34,17 +34,17 @@ These python modules come bundled:
      + http://klbostee.github.com/dumbo/
      + http://wiki.github.com/klbostee/dumbo.
 
-# Apache HBase (0.19.2)
+# Apache HBase (0.20)
 
-    BigTable inspired database implemented in Java.
-    Usually runs best if this is the same version as Hadoop.
+    HBase is a column-based datastore inspired by BigTable.
 
     more:
-     + http://hbase.org/.
+     + http://hbase.org/
+     + http://labs.google.com/papers/bigtable.html
 
-# Apache Hadoop (0.19.1)
+# Apache Hadoop (0.20)
 
-    Hadoop is a MapReduce framework. Enough said.
+    Hadoop is a MapReduce framework.
 
     Additionally Hadoop source has to be patched with the patches
     HADOOP-1722 () and HADOOP-5450:
@@ -55,4 +55,4 @@ These python modules come bundled:
      + http://hadoop.org/
      + http://en.wikipedia.org/wiki/Hadoop
      + http://dumbotics.com/2009/02/24/hadoop-1722-and-typed-bytes/
-
+     + http://labs.google.com/papers/mapreduce.html
