@@ -40,7 +40,7 @@ def usage(reason = None):
     print zohmg + " create <dir>"
     print zohmg + " setup"
     print zohmg + " import <mapper> <hdfs-input-dir> [--local] [--lzo]"
-    print zohmg + " serve [--host=<host>] [--port=<port>]"
+    print zohmg + " server [--host=<host>] [--port=<port>]"
     print zohmg + " reset"
     print zohmg + " help"
 
@@ -67,7 +67,7 @@ def zohmg():
     if   cmd == 'create' : create()
     elif cmd == 'setup'  : setup()
     elif cmd == 'import' : process()
-    elif cmd == 'serve'  : serve()
+    elif cmd == 'server'  : server()
     elif cmd == 'reset'  : reset()
     elif cmd in ['version', '--version']: print_version()
     elif cmd in ['help',    '--help']:    print_help()
@@ -107,12 +107,10 @@ def process():
     Process().go(mapperpath, inputdir, dumbo_args)
 
 
-def serve():
+def server():
     refuse_to_act_in_nonzohmg_directory()
-    import zohmg.serve
-
-    host = "localhost"
-    port = 8086
+    import zohmg.server
+    host, port = zohmg.server.defaults()
 
     try:
         opts, args = getopt.getopt(sys.argv[2:], "h:p:", ["host=", "port="])
@@ -130,7 +128,8 @@ def serve():
             assert False, "unhandled option"
 
     project_dir = os.path.abspath("")
-    zohmg.serve.start(project_dir, host=host, port=port)
+    zohmg.server.start(project_dir, host=host, port=port)
+
 
 def reset():
     refuse_to_act_in_nonzohmg_directory()

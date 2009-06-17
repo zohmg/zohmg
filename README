@@ -183,7 +183,7 @@ Lots of data scrolling by? Good! (Interrupt with CTRL-C at your leisure.)
 
 Start the Zohmg server:
 
-	$> zohmg serve
+	$> zohmg server
 
 The Zohmg server listens on port 8086 at localhost by default. It uses
 a Thrift interface for HBase queries, so make sure the thrift server is
