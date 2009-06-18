@@ -30,9 +30,13 @@ class Reset(object):
         print "reset will *wipe all data* in dataset '%s'." % table
         print "ARE YOU QUITE SURE? ('yes' to confirm.)"
 
-        response = sys.stdin.readline().strip()
-        if response.lower() not in ["yes", "yes!"]:
-            print 'phew!'
+        try:
+            response = sys.stdin.readline().strip()
+            if response.lower() not in ["yes", "yes!"]:
+                print 'phew!'
+                sys.exit(0)
+        except KeyboardInterrupt:
+            print 'break!'
             sys.exit(0)
 
         # disable+drop.
