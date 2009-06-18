@@ -36,15 +36,37 @@ class NoSuitableProjection(Exception):
     def __str__(self):
         return self.error
 
+class MissingArguments(Exception):
+    def __init__(self, value):
+        self.error = value
+    def __str__(self):
+        return self.error
+
+
+
+# public interface.
 def query(table, projections, params):
 
     # jsonp.
     try:    jsonp_method = params["jsonp"]
     except: jsonp_method = None
 
-    data = hbase_get(table, projections, params)
+    # check parameters.
+    querydict = {}
+    try:
+        querydict['t0'] = params['t0']
+        querydict['t1'] = params['t1']
+        querydict['d0'] = params['d0']
+        querydict['d0v'] = map(strip, query['d0v'].split(',')) # => ['SE', 'DE', 'US']
+        querydict['unit'] = params['unit']
+    except KeyError, e:
+        raise MissingArguments(str(e))
+
+    data = hbase_get(table, projections, querydict)
     return dump_jsonp(data, jsonp_method)
 
+
+# TODO: classify.
 
 # returns jsonp which can be used in clients.
 def dump_jsonp(data, jsonp_method=None):
@@ -102,22 +124,18 @@ def find_suitable_projection(projections, d0, filters):
 
 # fetches data from hbase,
 # returns sorted list of dictionaries suitable for json dumping.
-def hbase_get(table, projections, params):
-    try:
-        t0 = params['t0']
-        t1 = params['t1']
-        unit = params['unit']
-        d0 = params['d0']
-        d0v = map(strip, params['d0v'].split(','))
-    except:
-        raise ValueError
+# TODO: private.
+def hbase_get(table, projections, query):
+# query is guaranteed to have the following keys:
+#  t0, t1, unit, d0, d0v
+
 
     filters = {}
     # TODO: there must be a neater way of doing this.
     for n in range(1,5):
         try:
-            dim = params["d"+str(n)]
-            val = params["d"+str(n)+"v"]
+            dim = query["d"+str(n)]
+            val = query["d"+str(n)+"v"]
             filters[dim] = val
         except:
             continue

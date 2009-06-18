@@ -51,7 +51,6 @@ class data(object):
         content_type [('content-type', mime_type)]
 
         # TODO: check that table exists, exit gracefully if not.
-        print "[%s] Data, serving from table: %s." % (time.asctime(), self.table)
 
         # interpret the environment.
         params = parse_formvars(environ)
@@ -66,10 +65,10 @@ class data(object):
             start_response('200 OK', content_type)
             return json_of("data not found: " + instance.error)
 
-        except ValueError, e:
+        except zohmg.data.MissingArguments, (instance):
             print >>sys.stderr, "400 Bad Request: missing arguments."
             start_response('400 Bad Request', content_type)
-            return json_of("Query is missing arguments: " + str(e))
+            return json_of("Query is missing arguments: " + instance.error)
             # TODO: print list of required arguments.
 
         except zohmg.data.NoSuitableProjection, (instance):
@@ -80,7 +79,7 @@ class data(object):
         except Exception, e:
             print >>sys.stderr, "Error: ", e
             start_response('500', content_type)
-            return json_of("Sorry, I failed in serving you: " + str(e))
+            return json_of("egads!, I failed in serving you: " + str(e))
 
         elapsed = (time.time() - start)
         sys.stderr.write("hbase query+prep: %s\n\n" % elapsed)

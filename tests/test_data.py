@@ -42,6 +42,24 @@ class TestData(unittest.TestCase):
         expected = '[{"a": "x", "something": 700}]'
         self.assertEquals(json, expected)
 
+    def test_query(self):
+        # call query() with no arguments.
+        from zohmg.data import MissingArguments
+        self.assertRaises(MissingArguments, zohmg.data.query, 'no-table', [], {})
+
+        # TODO:
+        # query servers json.
+        # sometimes jsonp.
+
+
+    def test_hbase_get(self):
+        table = 'test' # must there be test data, then?
+        projections = [['user']]
+        params = {}
+
+
+#        r = zohmg.data.hbase_get(table, projections, params)
+#        self.assert_equal(r, 'wha?')
 
 if __name__ == "__main__":
     unittest.main()
