@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import org.apache.hadoop.hbase.io.BatchUpdate;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.streaming.PipeMapRed;
 import org.apache.hadoop.streaming.io.OutputReader;
@@ -36,59 +36,69 @@ import org.apache.hadoop.typedbytes.TypedBytesWritable;
  * OutputReader that reads the client's output as typed bytes,
  * changes to format suitable for hbase
  */
-public class HBaseTypedBytesOutputReader extends OutputReader<ImmutableBytesWritable, BatchUpdate> {
+public class HBaseTypedBytesOutputReader extends OutputReader<ImmutableBytesWritable, Put> {
 
   private byte[] bytes;
   private DataInput clientIn;
   private ImmutableBytesWritable outKey;
-  private BatchUpdate outValue;
-  private TypedBytesWritable tmpValue;
+  private Put outValue;
   private TypedBytesInput in;
   
   @Override
   public void initialize(PipeMapRed pipeMapRed) throws IOException {
     super.initialize(pipeMapRed);
-    clientIn = pipeMapRed.getClientInput();
-    outKey = new ImmutableBytesWritable();
-    outValue = new BatchUpdate();
-    tmpValue = new TypedBytesWritable();
+    clientIn = pipeMapRed.getClientInput(); // stdout of streaming script.
     in = new TypedBytesInput(clientIn);
   }
   
   @Override
   public boolean readKeyValue() throws IOException {
+	TypedBytesWritable key = new TypedBytesWritable(); // ineff. prolly
     bytes = in.readRaw();
-    if (bytes == null) {
-      return false;
-    }
-    tmpValue.set(bytes, 0, bytes.length);
-    outKey.set(tmpValue.getValue().toString().getBytes("UTF-8"));
-    
+    if (bytes == null) return false;
+    key.set(bytes, 0, bytes.length);
+
+    byte[] rowkey = key.getValue().toString().getBytes("UTF-8");
+    outKey = new ImmutableBytesWritable();
+    outKey.set(rowkey);
+
+    outValue = new Put(rowkey);
+
+    TypedBytesWritable value = new TypedBytesWritable(); // ineff. prolly
     bytes = in.readRaw();
-    tmpValue.set(bytes, 0, bytes.length);
-    if(!Type.MAP.equals(tmpValue.getType())) {
-      throw new IOException("Unexpected type: " + tmpValue);
+    if (bytes == null) return false;
+    value.set(bytes, 0, bytes.length);
+    if(!Type.MAP.equals(value.getType())) {
+      throw new IOException("Unexpected type: " + value);
     }
-    Set<Map.Entry<String, Integer>> entries = (Set<Entry<String, Integer>>) ((Map) tmpValue.getValue()).entrySet();
+    Set<Map.Entry<String, Integer>> entries = (Set<Entry<String, Integer>>) ((Map) value.getValue()).entrySet();
     for (Map.Entry<String, Integer> entry : entries) {
-      outValue.put(entry.getKey(), entry.getValue().toString().getBytes("UTF-8"));
+        String cfq = entry.getKey();
+        String[] parts = cfq.split(":");
+        if (parts.length < 2)
+           continue;
+        String family    = parts[0];
+        String qualifier = parts[1];
+
+        byte[] val = entry.getValue().toString().getBytes("UTF-8");
+        outValue.add(family.getBytes("UTF-8"), qualifier.getBytes("UTF-8"), val);
     }
     return true;
   }
   
   @Override
   public ImmutableBytesWritable getCurrentKey() throws IOException {
-    return outKey;
+	  return outKey;
   }
-  
+
   @Override
-  public BatchUpdate getCurrentValue() throws IOException {
-    return outValue;
+  public Put getCurrentValue() throws IOException {
+	  return outValue;
   }
 
   @Override
   public String getLastOutput() {
-    return new TypedBytesWritable(bytes).toString();
+	  return new TypedBytesWritable(bytes).toString();
   }
 
 }
