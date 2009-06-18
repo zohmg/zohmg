@@ -11,77 +11,48 @@ directory for an automated installation of those.
 
 
 The following software is required:
- - Apache Hadoop 0.19.x with patches HADOOP-1722 and HADOOP-5450.
- - Apache HBase 0.19.x
+ - Apache Hadoop 0.20 with patches HADOOP-1722 and HADOOP-5450.
+ - Apache HBase 0.20
  - Dumbo 0.21.x
 
-Python modules:
- - Python Paste
- - Python Setup Tools
- - Python simplejson
+# TODO: the wget of http://pypi.python.org/pypi/setuptools
+
+These python modules come bundled:
  - PyYAML
+ - Python Paste
+ - Python simplejson
 
 
 
-- Apache Hadoop (0.19.1)
 
-    MapReduce framework implemented in Java.
+# Dumbo (0.21.x)
+
+    Dumbo is a convenient Python API for writing MapReduce programs.
+
+    more:
+     + http://dumbotics.com/
+     + http://klbostee.github.com/dumbo/
+     + http://wiki.github.com/klbostee/dumbo.
+
+# Apache HBase (0.20)
+
+    HBase is a column-based datastore inspired by BigTable.
+
+    more:
+     + http://hbase.org/
+     + http://labs.google.com/papers/bigtable.html
+
+# Apache Hadoop (0.20)
+
+    Hadoop is a MapReduce framework.
 
     Additionally Hadoop source has to be patched with the patches
-    HADOOP-1722 and HADOOP-5450.
+    HADOOP-1722 () and HADOOP-5450:
+     + https://issues.apache.org/jira/browse/HADOOP-1722
+     + https://issues.apache.org/jira/browse/HADOOP-5450
 
-    For more information see http://hadoop.org/.
-
-
-- Apache HBase (0.19.2)
-
-    BigTable inspired database implemented in Java.
-
-    Usually runs best if this is the same version as Hadoop.
-
-    For more information see http://hbase.org/.
-
-
-- Dumbo (0.21.x)
-
-    Python module which wraps around Hadoop Streaming and makes it possible
-    to write MapReduce programs in Python.
-
-    For more information see http://wiki.github.com/klbostee/dumbo.
-
-
-- Python Paste
-
-    Tools for using a Web Server Gateway Interface stack.
-
-    There is a debian package called python-paste.
-
-    For more information see http://pythonpaste.org/.
-
-
-- Python Setup Tools
-
-    Framework for building, installing, upgrading and uninstalling Python
-    packages.
-
-    There is a Debian package called python-setuptools.
-
-    For more information see http://pypi.python.org/pypi/setuptools.
-
-
-- Python simplejson
-
-    Simple, fast, extensible JSON encoder/decoder for Python.
-
-    There is a Debian package called python-simplejson.
-
-    For more information see http://undefined.org/python/#simplejson.
-
-
-- PyYAML
-
-    YAML parser and emitter for Python.
-
-    There is a Debian package called python-yaml.
-
-    For more information see http://pyyaml.org/.
+    more:
+     + http://hadoop.org/
+     + http://en.wikipedia.org/wiki/Hadoop
+     + http://dumbotics.com/2009/02/24/hadoop-1722-and-typed-bytes/
+     + http://labs.google.com/papers/mapreduce.html

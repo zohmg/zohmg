@@ -41,8 +41,13 @@ class Dispatch(object):
         environ["zohmg_project_dir"] = self.project_dir
         return self.dispatch(environ, start_response)
 
+# returns a tuple of the default values.
+def defaults():
+    # host, port.
+    return ('localhost', 8086)
+
 # entry point.
-def start(project_dir, host="localhost", port="8086"):
+def start(project_dir, host="localhost", port=8086):
     from paste import httpserver
     app = Dispatch(project_dir)
     httpserver.serve(app, host=host, port=port)

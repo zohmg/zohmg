@@ -26,6 +26,15 @@ import os, re, sys, time
 #   'projections' - list of lists
 
 
+
+class ConfigNotLoaded(Exception):
+    def __init__(self, value):
+        self.error = value
+    def __str__(self):
+        return self.error
+
+
+
 # TODO: multiple dataset files
 class Config(object):
     def __init__(self, config_file=None):
@@ -79,8 +88,8 @@ class Config(object):
             # condition A.
             sys.stderr.write("Configuration error: Could not read dataset configuration " \
                               "from any of these files:\n" \
-                              "\n".join(a) + "\n")
-            sys.exit(1)
+                              "\n".join(possible_configs) + "\n")
+            raise ConfigNotLoaded("Could not read configuration file.")
 
         # check contents.
         if not self.sanity_check():

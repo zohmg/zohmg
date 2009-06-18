@@ -414,6 +414,8 @@ EOHADOOPSITE
 		echo "done."
 	fi
 	if [ "x" = "x$hadoop_only" ]; then
+	    # TODO: add pre-configured hbase-site.xml
+	    # TODO: set hbase.rootdir = hdfs://localhost:9000/hbase
 		echo "Configuring HBase."
 		# backup template configuration.
 		exec_and_log "cp -v $hbase_conf/hbase-env.sh $hbase_conf/hbase-env.sh.dist"

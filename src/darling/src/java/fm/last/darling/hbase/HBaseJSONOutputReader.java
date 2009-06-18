@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.io.BatchUpdate;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.streaming.PipeMapRed;
@@ -40,10 +40,10 @@ import org.apache.noggit.ObjectBuilder;
 /**
  * OutputReader that transforms the client's output HBasey BatchUpdates.
  */
-public class HBaseJSONOutputReader extends OutputReader<ImmutableBytesWritable, BatchUpdate> {
+public class HBaseJSONOutputReader extends OutputReader<ImmutableBytesWritable, Put> {
 
   private ImmutableBytesWritable rowkey;
-  private BatchUpdate batchupdate;
+  private Put put;
 
   // save the last seen line of output as Text
   // and the bytes, so that getLastOutput can recreate it as a string.
@@ -62,13 +62,12 @@ public class HBaseJSONOutputReader extends OutputReader<ImmutableBytesWritable, 
     super.initialize(pipeMapRed);
 
     rowkey = new ImmutableBytesWritable();
-    batchupdate = new BatchUpdate();
     line = new Text();
 
-    datainput = pipeMapRed.getClientInput();
-    conf = pipeMapRed.getConfiguration();
+    datainput    = pipeMapRed.getClientInput();
+    conf         = pipeMapRed.getConfiguration();
     numKeyFields = pipeMapRed.getNumOfKeyFields();
-    separator = pipeMapRed.getFieldSeparator();
+    separator    = pipeMapRed.getFieldSeparator();
 
     lineReader = new LineReader((InputStream) datainput, conf);
   }
@@ -109,7 +108,7 @@ public class HBaseJSONOutputReader extends OutputReader<ImmutableBytesWritable, 
     byte[] keyBytes = trimOuterBytes(k);
 
     rowkey = new ImmutableBytesWritable(keyBytes);
-    batchupdate = new BatchUpdate(keyBytes);
+    put = new Put(keyBytes);
 
     String tmpV = v.toString();
     String json = tmpV.substring(1, tmpV.length() - 1);
@@ -122,20 +121,26 @@ public class HBaseJSONOutputReader extends OutputReader<ImmutableBytesWritable, 
 
     Set<Map.Entry<String, Map>> entries = payload.entrySet();
     for (Map.Entry<String, Map> entry : entries) {
-      String cfq = entry.getKey();
+      String cfq = entry.getKey(); // let's consider not joining family and qualifier at emitter.
+      String[] parts = cfq.split(":");
+      if (parts.length < 2)
+         continue;      	
+      String family    = parts[0];
+      String qualifier = parts[1];
+
       Map dict = entry.getValue(); // unchecked.
 
       // expecting dict to carry 'value',
       Object value = dict.get("value");
       if (value == null)
-        return; // no good.
+        continue; // no good.
 
       // ..and possibly 'timestamp'.
       //Object ts = 0;
       //if (dict.containsKey("timestamp"))
         //ts = dict.get("timestamp");
 
-      batchupdate.put(cfq, value.toString().getBytes("UTF-8"));
+      put.add(family.getBytes("UTF-8"), qualifier.getBytes("UTF-8"), value.toString().getBytes("UTF-8"));
     }
   }
 
@@ -151,8 +156,8 @@ public class HBaseJSONOutputReader extends OutputReader<ImmutableBytesWritable, 
   }
 
   @Override
-  public BatchUpdate getCurrentValue() throws IOException {
-    return batchupdate;
+  public Put getCurrentValue() throws IOException {
+    return put;
   }
 
   @Override

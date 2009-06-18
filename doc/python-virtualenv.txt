@@ -1,0 +1,22 @@
+# this describes my workstation setup; personal memory in a text file.
+# inspired by http://dumbotics.com/2009/05/24/virtual-pythonenvironments/
+
+# my zohmg environment is in ~/workspace/python-environs/zohmg
+# I initially set it up like so:
+
+$> virtualenv ~/workspace/python-environs/zohmg
+New python executable in /Users/fredrik/workspace/python-environs/zohmg/bin/python
+Installing setuptools............done.
+$> source ~/workspace/python-environs/zohmg/bin/activate
+(zohmg)$> which zohmg
+/Users/fredrik/workspace/python-environs/zohmg/bin/zohmg
+(zohmg)$> cd ~/workspace/zohmg/src
+(zohmg)$> sudo python setup.py develop
+# this makes /Users/fredrik/workspace/python-environs/zohmg/lib/python2.5/site-packages/zohmg.egg-link
+# point to ~/workspace/zohmg/src, so any changes to the source code will immediately be available.
+
+
+# to activate it for another round of hacking:
+$> source ~/workspace/python-environs/zohmg/bin/activate
+(zohmg)$> cd ~/workspace/zohmg
+(zohmg)[~/workspace/zohmg]:$> # hack.

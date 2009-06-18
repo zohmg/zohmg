@@ -70,3 +70,31 @@ What's wrong?
 That happens for no good reason when re-installing zohmg. Running the
 installation again always seems to fix it (in fact, install.py already
 tried a second time and is likely to have suceeded).
+
+
++ I get this error when importing: ImportError: cannot import name map
+
+It seems like your mapper python file does not define a map() function.
+
+
++ My imports runs just fine locally but seem to do the wrong thing when I run
+them on the cluster. What's up?
+
+Make sure you don't have any old eggs laying around on the cluster node. Zohmg
+ships everything it needs, so there should be no need to have the zohmg egg, for
+example, installed on the nodes.
+
++ I see this on Hadoop 0.20 and HBase 0.20/trunk:
+2009-06-16 14:36:40,464 WARN org.apache.hadoop.mapred.TaskTracker: Error running child
+java.lang.NoClassDefFoundError: org/apache/zookeeper/Watcher
+
+That's funny, it looks as if the Zookeeper jar is not on the classpath. Make sure it is.
+
+
++ I see this on Hadoop 0.20 and HBase 0.20/trunk:
+2009-06-16 14:48:26,495 FATAL org.apache.hadoop.hbase.zookeeper.ZooKeeperWrapper: Fail to read properties from zoo.cfg
+java.io.IOException: zoo.cfg not found
+
+You need to have zoo.cfg in Hadoop's conf/ directory.
+$> cp -v $HBASE_HOME/conf/zoo.cfg $HADOOP_HOME/conf
+

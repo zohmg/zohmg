@@ -28,19 +28,19 @@ for (dir, dirnames, files) in os.walk(eggpath):
         if suffix == "egg":
             sys.path.append(dir+"/"+file)
 
-
-version = '0.1.0'
+# TODO: read version from somewhere or something.
+version = '0.1.1'
 
 def usage(reason = None):
     zohmg = os.path.basename(sys.argv[0])
     if reason:
-        print "Error: " + reason
-    print "zohmg version " + version
+        print "error: " + reason
+    print "zohmg! " + version
     print "usage:"
     print zohmg + " create <dir>"
     print zohmg + " setup"
-    print zohmg + " import <mapper> <hdfs-input-dir>"
-    print zohmg + " serve [--host=<host>] [--port=<port>]"
+    print zohmg + " import <mapper> <hdfs-input-dir> [--local] [--lzo]"
+    print zohmg + " server [--host=<host>] [--port=<port>]"
     print zohmg + " reset"
     print zohmg + " help"
 
@@ -67,7 +67,7 @@ def zohmg():
     if   cmd == 'create' : create()
     elif cmd == 'setup'  : setup()
     elif cmd == 'import' : process()
-    elif cmd == 'serve'  : serve()
+    elif cmd == 'server'  : server()
     elif cmd == 'reset'  : reset()
     elif cmd in ['version', '--version']: print_version()
     elif cmd in ['help',    '--help']:    print_help()
@@ -107,12 +107,10 @@ def process():
     Process().go(mapperpath, inputdir, dumbo_args)
 
 
-def serve():
+def server():
     refuse_to_act_in_nonzohmg_directory()
-    import zohmg.serve
-
-    host = "localhost"
-    port = 8086
+    import zohmg.server
+    host, port = zohmg.server.defaults()
 
     try:
         opts, args = getopt.getopt(sys.argv[2:], "h:p:", ["host=", "port="])
@@ -130,7 +128,8 @@ def serve():
             assert False, "unhandled option"
 
     project_dir = os.path.abspath("")
-    zohmg.serve.start(project_dir, host=host, port=port)
+    zohmg.server.start(project_dir, host=host, port=port)
+
 
 def reset():
     refuse_to_act_in_nonzohmg_directory()
@@ -142,5 +141,5 @@ def reset():
 def refuse_to_act_in_nonzohmg_directory():
     cwd = os.getcwd()
     if not os.path.exists(cwd+"/.zohmg"):
-        msg = "Error: This is not a proper zohmg project."
+        msg = "error: This is not a proper zohmg project."
         fail(msg)

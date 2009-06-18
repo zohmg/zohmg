@@ -78,6 +78,7 @@ def python_modules():
 
     modules = ['paste', 'simplejson', 'pyyaml']
     print '(assuming setuptools is available.)'
+    print '(logging to ' + egg_log + ' and ' + egg_err + ')'
     for module in modules:
         print 'module: ' + module
         r = os.system("easy_install -maxzd %s %s %s" % (egg_target, module, redirection))
@@ -120,7 +121,7 @@ def setup():
     os.system("rm -rf build dist zohmg.egg-info")
 
 def test():
-    print 'testing zohmg script:'
+    print 'testing zohmg script: ',
     r = os.system('zohmg 2>&1 > /dev/null')
     if r != 0:
         # fail!

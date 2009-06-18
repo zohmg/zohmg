@@ -15,47 +15,75 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# MIDDLEWARE DATA HELLO.
+
 import os, sys, time
 import simplejson as json
-from zohmg.config import Config
+
 from paste.request import parse_formvars
 
-# add middleware directory to path.
-sys.path.append(os.path.dirname(__file__))
-import data_utils
+import zohmg.data
+from zohmg.config import Config
 
-# this is the application responsible for serving data.
+def json_of(error_msg='wha?', status_code=400):
+    structure = {'error_msg': error_msg, 'status_code': status_code}
+    return json.dumps()
+
+# data application serving at /data.
 class data(object):
-    def __init__(self):
-        self.config = Config()
-        self.table = self.config.dataset()
-        self.projections = self.config.projections()
+    def __init__(self, dataset=None, projections=None):
+        if dataset == None or projections == None:
+            config = Config()
+
+        if dataset == None:
+            self.table = config.dataset()
+        else:
+            self.table = dataset
+
+        if projections == None:
+            self.projections = config.projections()
+        else:
+            self.projections = projections
 
     # answer query.
     def __call__(self, environ, start_response):
-        print "[%s] Data, serving from table: %s." % (time.asctime(),self.table)
+        mime_type = 'text/plain' # under what type we serve json.
+        content_type [('content-type', mime_type)]
 
+        # TODO: check that table exists, exit gracefully if not.
+
+        # interpret the environment.
         params = parse_formvars(environ)
-        # jsonp.
-        try:    jsonp_method = params["jsonp"]
-        except: jsonp_method = ""
 
-        data  = {}
         try:
-            # fetch.
+            # hbase query.
             start = time.time()
-            data = data_utils.hbase_get(self.table, self.projections, params)
-            elapsed = (time.time() - start)
-            sys.stderr.write("hbase query+prep time: %s\n" % elapsed)
-        except ValueError:
+            json = zohmg.data.query(self.table, self.projections, params)
+
+        except zohmg.data.DataNotFound, (instance):
+            print >>sys.stderr, "Data not found: ", instance.error
+            start_response('200 OK', content_type)
+            return json_of("data not found: " + instance.error)
+
+        except zohmg.data.MissingArguments, (instance):
             print >>sys.stderr, "400 Bad Request: missing arguments."
-            start_response('400 Bad Request', [('content-type', 'text/html')])
-            return "Query is missing arguments."
+            start_response('400 Bad Request', content_type)
+            return json_of("Query is missing arguments: " + instance.error)
+            # TODO: print list of required arguments.
+
+        except zohmg.data.NoSuitableProjection, (instance):
+            print >>sys.stderr, "400 Bad Request: No suitable projection. ", instance.error
+            start_response('400 Bad Request', content_type)
+            return json_of(" " + instance.error)
+
         except Exception, e:
             print >>sys.stderr, "Error: ", e
-            start_response('500 OK', [('content-type', 'text/html')])
-            return "Sorry, I failed in serving you: " + str(e)
+            start_response('500', content_type)
+            return json_of("egads!, I failed in serving you: " + str(e))
+
+        elapsed = (time.time() - start)
+        sys.stderr.write("hbase query+prep: %s\n\n" % elapsed)
 
         # serve output.
-        start_response('200 OK', [('content-type', 'text/x-json')])
-        return data_utils.dump_jsonp(data, jsonp_method)
+        start_response('200 OK', content_type) # or text/x-json
+        return json

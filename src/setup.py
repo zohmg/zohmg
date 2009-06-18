@@ -19,7 +19,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'zohmg',
-    version = '0.1.0',
+    version = '0.1.1',
     author = 'Fredrik Mollerstrand, Per Andersson',
     author_email = '{fredrik,per}@last.fm',
     license = 'Apache v2',
