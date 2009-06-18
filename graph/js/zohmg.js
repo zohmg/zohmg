@@ -96,6 +96,10 @@ function loadFilters() {
 
 // callback for the json data.
 function jsonCallback(data) {
+    // TODO: check http status, act thereafter.
+    
+    // TODO: hide spinner.
+    
     graph = pivot(data);
     var imgUrl = chartImgUrl(graph);
     $('#graph').html('<img src="' + imgUrl + '" />');
@@ -115,6 +119,8 @@ function loadData(t0, t1, unit, d0, d0v, filters) {
 
     $('#undergraph').html('<a href="' +dataUrl +'">raw data</a>');
 
+    // TODO: show spinner.
+    // TODO: set timeout thread.
     $.getJSON(dataUrl);
 }
 
