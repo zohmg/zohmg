@@ -71,10 +71,37 @@ def query(table, projections, params):
     print "d0v: "+ str(querydict['d0v'])
     print "----------"
 
+    filters = make_filters(params)
 
-
-    data = hbase_get(table, projections, querydict)
+    data = hbase_get(table, projections, querydict, filters)
     return dump_jsonp(data, jsonp_method)
+
+
+def make_filters(params):
+    # TODO: there must be a neater way of doing this.
+    filters = {}
+    for n in range(1,5):
+        try:
+            dim = params["d"+str(n)]
+            print 'passed dim'
+            val = params["d"+str(n)+"v"]
+            filters[dim] = val
+            print 'filter for ' + dim
+        except:
+            print 'no filter for ' + str(n)
+            continue
+
+    # massage the filters.
+    for key in filters.copy():
+        if filters[key] in ['all', '*']:
+            # 'all' or '*' is equivalent to not filtering at all.
+            del filters[key]
+        else:
+            # turn comma-delimited string into list.
+            filters[key] = filters[key].split(',')
+
+    print "filters: " + str(filters)
+    return filters
 
 
 # TODO: classify.
@@ -136,33 +163,9 @@ def find_suitable_projection(projections, d0, filters):
 # fetches data from hbase,
 # returns sorted list of dictionaries suitable for json dumping.
 # TODO: private.
-def hbase_get(table, projections, query):
+def hbase_get(table, projections, query, filters):
 # query is guaranteed to have the following keys:
 #  t0, t1, unit, d0, d0v
-
-
-    # TODO: do this in query().
-    # TODO: there must be a neater way of doing this.
-    filters = {}
-    for n in range(1,5):
-        try:
-            dim = query["d"+str(n)]
-            val = query["d"+str(n)+"v"]
-            filters[dim] = val
-        except:
-            continue
-
-    # massage the filters.
-    for key in filters.copy():
-        if filters[key] in ['all', '*']:
-            # 'all' or '*' is equivalent to not filtering at all.
-            del filters[key]
-        else:
-            # turn comma-delimited string into list.
-            filters[key] = filters[key].split(',')
-
-    print "filters: " + str(filters)
-
 
 
     projection = find_suitable_projection(projections, query['d0'], filters)
@@ -173,22 +176,34 @@ def hbase_get(table, projections, query):
 
     # TODO: ask rowkeyformatter.
     rowkeyarray = []
+    found_stoprow = False
     for d in projection:
         rowkeyarray.append(d)
         # this becomes a bit tricky..
         if d == query['d0']:
             rowkeyarray.append(query['d0v'][0]) # TODO: fix!
             # TODO?: if d0v = [''], append 'all'
+        elif d in filters.keys() and len(filters[d]) == 1:
+            # filtering for a single value; append.
+            rowkeyarray.append(filters[d][0])
         elif d in filters.keys():
-            rowkeyarray.append(filters[d])
+            # filtering on many values - we need to fetch them all.
+            # in this case we need to FRIGGIN fetch all dates too. mngh.
+            # TODO: consider doing many scans instead.
+            found_stoprow = True # corner cases be damned.
+            rowkey = '-'.join(rowkeyarray)
+            startrow = rowkey + '-'
+            stoprow  = rowkey + '-' + "~"
+            break
         else:
             rowkeyarray.append('all')
-    rowkey = '-'.join(rowkeyarray)
 
-    # the row key is 'dimension-value-[dimension-value, ..]-ymd',
-    # i.e. 'artist-97930-track-102203-20090601'
-    startrow = rowkey + '-' + query['t0']
-    stoprow  = rowkey + '-' + query['t1'] + "~"
+    if not found_stoprow:
+        rowkey = '-'.join(rowkeyarray)
+        # the row key is 'dimension-value-[dimension-value, ..]-ymd',
+        # i.e. 'artist-97930-track-102203-20090601'
+        startrow = rowkey + '-' + query['t0']
+        stoprow  = rowkey + '-' + query['t1'] + "~"
     
     print "start: " + startrow
     print "stop:  " + stoprow
@@ -213,13 +228,28 @@ def hbase_get(table, projections, query):
             break
         r = next[0]
         # extract date from row key.
-        ymd = r.row[-8:]
-        # read possible old values, add.
-        for column in r.columns:
-            t[u] = t.get(d, 0)
-            t[u] += int(r.columns[column].value)
-        # and save.
-        data[ymd] = t
+        rowkey = r.row
+        ymd = rowkey[-8:]
+        x   = rowkey[:-9]
+        it = iter(x.split('-'))
+        ds = dict(zip(it, it))
+        del ds[query['d0']]
+
+        filter_accepts = True
+        for k in ds.keys():
+            if not k in filters: continue
+            if not ds[k] in filters[k]: filter_accepts = False
+
+        if filter_accepts:
+            # read possible old values, add.
+            for column in r.columns:
+                t[u] = t.get(u, 0)
+                t[u] += int(r.columns[column].value)
+            print 'filter accepts! ' + ymd + ' => ' + str(t[u]) + '  -  ' + str(ds.keys())
+            # and save.
+            data[ymd] = data.get(ymd, 0)
+            data[ymd] += t[u]
+
     print "rows: " + str(numrows)
 
     # returns a list of dicts sorted by ymd.
