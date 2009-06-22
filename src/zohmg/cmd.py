@@ -67,7 +67,7 @@ def zohmg():
     if   cmd == 'create' : create()
     elif cmd == 'setup'  : setup()
     elif cmd == 'import' : process()
-    elif cmd == 'server'  : server()
+    elif cmd == 'server' : server()
     elif cmd == 'reset'  : reset()
     elif cmd in ['version', '--version']: print_version()
     elif cmd in ['help',    '--help']:    print_help()

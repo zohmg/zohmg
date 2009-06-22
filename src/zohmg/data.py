@@ -57,10 +57,21 @@ def query(table, projections, params):
         querydict['t0'] = params['t0']
         querydict['t1'] = params['t1']
         querydict['d0'] = params['d0']
-        querydict['d0v'] = map(strip, query['d0v'].split(',')) # => ['SE', 'DE', 'US']
+        querydict['d0v'] = map(strip, params['d0v'].split(',')) # => ['SE', 'DE', 'US']
         querydict['unit'] = params['unit']
     except KeyError, e:
         raise MissingArguments(str(e))
+
+    print ""
+    print "-- QUERY --"
+    print "t0: " + querydict['t0']
+    print "t1: " + querydict['t1']
+    print "unit: " + querydict['unit']
+    print "d0: " + querydict['d0']
+    print "d0v: "+ str(querydict['d0v'])
+    print "----------"
+
+
 
     data = hbase_get(table, projections, querydict)
     return dump_jsonp(data, jsonp_method)
@@ -130,8 +141,9 @@ def hbase_get(table, projections, query):
 #  t0, t1, unit, d0, d0v
 
 
-    filters = {}
+    # TODO: do this in query().
     # TODO: there must be a neater way of doing this.
+    filters = {}
     for n in range(1,5):
         try:
             dim = query["d"+str(n)]
@@ -139,17 +151,6 @@ def hbase_get(table, projections, query):
             filters[dim] = val
         except:
             continue
-
-
-    print ""
-    print "--- hbase_get ---"
-    print "t0: " + t0
-    print "t1: " + t1
-    print "unit: " + unit
-    print "d0: " + d0
-    print "d0v: "+ str(d0v)
-    print "filters: " + str(filters)
-    print "--------------"
 
     # massage the filters.
     for key in filters.copy():
@@ -160,10 +161,14 @@ def hbase_get(table, projections, query):
             # turn comma-delimited string into list.
             filters[key] = filters[key].split(',')
 
-    projection = find_suitable_projection(projections, d0, filters)
+    print "filters: " + str(filters)
+
+
+
+    projection = find_suitable_projection(projections, query['d0'], filters)
     if projection == None:
-        print 'could not find a suitable projection for ' + d0
-        raise NoSuitableProjection("could not find a suitable projection for dimension " + d0)
+        print 'could not find a suitable projection for ' + query['d0']
+        raise NoSuitableProjection("could not find a suitable projection for dimension " + query['d0'])
     print "most suited projection: " + str(projection)
 
     # TODO: ask rowkeyformatter.
@@ -171,9 +176,9 @@ def hbase_get(table, projections, query):
     for d in projection:
         rowkeyarray.append(d)
         # this becomes a bit tricky..
-        if d == d0:
-            rowkeyarray.append(d0v[0]) # TODO: fix!
-            # if d0v = [''], append 'all'
+        if d == query['d0']:
+            rowkeyarray.append(query['d0v'][0]) # TODO: fix!
+            # TODO?: if d0v = [''], append 'all'
         elif d in filters.keys():
             rowkeyarray.append(filters[d])
         else:
@@ -182,14 +187,14 @@ def hbase_get(table, projections, query):
 
     # the row key is 'dimension-value-[dimension-value, ..]-ymd',
     # i.e. 'artist-97930-track-102203-20090601'
-    startrow = rowkey + '-' + t0
-    stoprow  = rowkey + '-' + t1 + "~"
+    startrow = rowkey + '-' + query['t0']
+    stoprow  = rowkey + '-' + query['t1'] + "~"
     
     print "start: " + startrow
     print "stop:  " + stoprow
 
     # format column-family + qualifier
-    cfq = 'unit:' + unit
+    cfq = 'unit:' + query['unit']
 
     # connect to hbase.
     scanner = HBaseScanner()
@@ -197,12 +202,15 @@ def hbase_get(table, projections, query):
     scanner.open(table, [cfq], startrow, stoprow)
 
     data = {}
-    d = d0 # TODO: fix.
+    d = query['d0'] # TODO: fix.
     numrows = 0
-    while scanner.has_next():
+    while True:
         t = {}
         numrows += 1
-        r = scanner.next()
+        next = scanner.next()
+        if next == []:
+            break
+        r = next[0]
         # extract date from row key.
         ymd = r.row[-8:]
         # read possible old values, add.
