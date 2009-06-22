@@ -203,6 +203,7 @@ def hbase_get(table, projections, query):
 
     data = {}
     d = query['d0'] # TODO: fix.
+    u = query['unit']
     numrows = 0
     while True:
         t = {}
@@ -215,8 +216,8 @@ def hbase_get(table, projections, query):
         ymd = r.row[-8:]
         # read possible old values, add.
         for column in r.columns:
-            t[d] = t.get(d, 0)
-            t[d] += int(r.columns[column].value)
+            t[u] = t.get(d, 0)
+            t[u] += int(r.columns[column].value)
         # and save.
         data[ymd] = t
     print "rows: " + str(numrows)
