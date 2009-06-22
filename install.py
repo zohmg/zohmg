@@ -76,7 +76,7 @@ def python_modules():
     redirection = ">> %s 2>> %s" % (egg_log, egg_err)
     os.system('date > %s ; date > %s' % (egg_log, egg_err)) # reset logs.
 
-    modules = ['paste', 'simplejson', 'pyyaml']
+    modules = ['paste', 'pyyaml', 'simplejson']
     print '(assuming setuptools is available.)'
     print '(logging to ' + egg_log + ' and ' + egg_err + ')'
     for module in modules:
