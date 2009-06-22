@@ -27,15 +27,15 @@ class Process(object):
         table = Config().dataset()
         jobname = "%s %s" % (table, input) # overrides any name specified on cli.
 
-        resolver = 'fm.last.darling.hbase.HBaseIdentifierResolver'
+        resolver     = 'fm.last.darling.hbase.HBaseIdentifierResolver'
         outputformat = 'org.apache.hadoop.hbase.mapreduce.TableOutputFormat'
 
-        opts = [('jobconf', "hbase.mapred.outputtable=" + table),
-                ('jobconf', 'stream.io.identifier.resolver.class=' + resolver),
-                ('streamoutput', 'hbase'), # resolved by identifier.resolver
+        opts = [('D', 'hbase.mapred.outputtable=' + table),
+                ('D', 'stream.io.identifier.resolver.class=' + resolver),
+                ('D', 'stream.reduce.output=hbase'),
                 ('outputformat', outputformat),
                 ('input', input),
-                ('file', 'lib/usermapper.py'), # TODO: handle this more betterer.
+                ('file', 'lib/usermapper.py'),
                 ('name', jobname)
                ]
 
@@ -85,7 +85,7 @@ class Process(object):
                     msg = "error: jar defined in config/environment is not a file: %s." % jar
                     fail(msg)
                 else:
-                    print 'import: adding %s to jobar.' % jar
+                    print 'import: adding %s to jobjar.' % jar
                     opts.append(('libjar', jar))
         else:
             msg = "error: CLASSPATH in config/environment is empty."

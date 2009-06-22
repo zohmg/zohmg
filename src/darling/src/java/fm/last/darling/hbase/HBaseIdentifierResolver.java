@@ -22,7 +22,6 @@ package fm.last.darling.hbase;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.streaming.io.IdentifierResolver;
-import org.apache.hadoop.streaming.io.TextInputWriter;
 import org.apache.hadoop.streaming.io.TypedBytesInputWriter;
 
 /**
@@ -34,21 +33,14 @@ import org.apache.hadoop.streaming.io.TypedBytesInputWriter;
  */
 public class HBaseIdentifierResolver extends IdentifierResolver {
   public static final String HBASE_ID = "hbase";
-  public static final String TYPED_BYTES_ID = "typedbytes";
 
   /**
    * Tries to resolve a given identifier, falls back on super class.
    */
   public void resolve(String identifier) {
     if (identifier.equalsIgnoreCase(HBASE_ID)) {
-      System.err.println("HBaseIdentifierResolver.resolve: HBaseJSONOutputReader.\n");
-      setInputWriterClass(TextInputWriter.class);
-      setOutputReaderClass(HBaseJSONOutputReader.class);
-      setOutputKeyClass(ImmutableBytesWritable.class);
-      setOutputValueClass(Put.class);
-    } else if (identifier.equalsIgnoreCase(TYPED_BYTES_ID)) {
-      System.err.println("HBaseIdentifierResolver.resolve: HBaseTypedBytesOutputReader.\n");
-      setInputWriterClass(TextInputWriter.class);
+      System.err.println("resolve: HBaseTypedBytesOutputReader.\n");
+      setInputWriterClass(TypedBytesInputWriter.class); // inputwriterclass does not matter since we only set ident=hbase for output. 
       setOutputReaderClass(HBaseTypedBytesOutputReader.class);
       setOutputKeyClass(ImmutableBytesWritable.class);
       setOutputValueClass(Put.class);

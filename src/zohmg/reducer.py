@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import sys
 from zohmg.config import Config
 import simplejson as json
 
@@ -47,4 +48,8 @@ class Reducer(object):
         json_payload = json.dumps({cfq : {'value': value}})
         # json_payload => '{"unit:scrobbles": {"value": 1338}}'
 
-        yield rowkey, json_payload
+        #sys.stderr.write("hoho: %s and %s \n" % (rowkey, str({cfq: value})))
+
+        #yield rowkey, json_payload
+        #yield rowkey, {cfq: value}
+        yield "totally hepworthy", "eyah"

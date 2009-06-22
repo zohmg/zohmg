@@ -38,6 +38,7 @@ import org.apache.hadoop.typedbytes.TypedBytesWritable;
  */
 public class HBaseTypedBytesOutputReader extends OutputReader<ImmutableBytesWritable, Put> {
 
+  private boolean hasGotLastOutput = false;
   private byte[] bytes;
   private DataInput clientIn;
   private ImmutableBytesWritable outKey;
@@ -53,11 +54,14 @@ public class HBaseTypedBytesOutputReader extends OutputReader<ImmutableBytesWrit
   
   @Override
   public boolean readKeyValue() throws IOException {
+	  System.err.println("READKEYVALUE ALREADY.\n");
+	  
 	TypedBytesWritable key = new TypedBytesWritable(); // ineff. prolly
     bytes = in.readRaw();
     if (bytes == null) return false;
     key.set(bytes, 0, bytes.length);
-
+    System.err.println("read once: \n" + bytes.toString());
+    
     byte[] rowkey = key.getValue().toString().getBytes("UTF-8");
     outKey = new ImmutableBytesWritable();
     outKey.set(rowkey);
@@ -71,6 +75,8 @@ public class HBaseTypedBytesOutputReader extends OutputReader<ImmutableBytesWrit
     if(!Type.MAP.equals(value.getType())) {
       throw new IOException("Unexpected type: " + value);
     }
+    System.err.println("read twice.\n");
+
     Set<Map.Entry<String, Integer>> entries = (Set<Entry<String, Integer>>) ((Map) value.getValue()).entrySet();
     for (Map.Entry<String, Integer> entry : entries) {
         String cfq = entry.getKey();
@@ -83,6 +89,7 @@ public class HBaseTypedBytesOutputReader extends OutputReader<ImmutableBytesWrit
         byte[] val = entry.getValue().toString().getBytes("UTF-8");
         outValue.add(family.getBytes("UTF-8"), qualifier.getBytes("UTF-8"), val);
     }
+    hasGotLastOutput = true;
     return true;
   }
   
@@ -98,7 +105,10 @@ public class HBaseTypedBytesOutputReader extends OutputReader<ImmutableBytesWrit
 
   @Override
   public String getLastOutput() {
-	  return new TypedBytesWritable(bytes).toString();
+	  if (hasGotLastOutput)
+		  return new ImmutableBytesWritable(bytes).toString();
+	  else
+		  return "not so much";
   }
 
 }
