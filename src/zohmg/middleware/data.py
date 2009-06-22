@@ -27,7 +27,7 @@ from zohmg.config import Config
 
 def json_of(error_msg='wha?', status_code=400):
     structure = {'error_msg': error_msg, 'status_code': status_code}
-    return json.dumps()
+    return json.dumps(structure)
 
 # data application serving at /data.
 class data(object):
@@ -48,7 +48,7 @@ class data(object):
     # answer query.
     def __call__(self, environ, start_response):
         mime_type = 'text/plain' # under what type we serve json.
-        content_type [('content-type', mime_type)]
+        content_type = [('content-type', mime_type)]
 
         # TODO: check that table exists, exit gracefully if not.
 
@@ -63,7 +63,7 @@ class data(object):
         except zohmg.data.DataNotFound, (instance):
             print >>sys.stderr, "Data not found: ", instance.error
             start_response('200 OK', content_type)
-            return json_of("data not found: " + instance.error)
+            return json_of("data not found: " + instance.error, 200)
 
         except zohmg.data.MissingArguments, (instance):
             print >>sys.stderr, "400 Bad Request: missing arguments."
@@ -78,8 +78,8 @@ class data(object):
 
         except Exception, e:
             print >>sys.stderr, "Error: ", e
-            start_response('500', content_type)
-            return json_of("egads!, I failed in serving you: " + str(e))
+            start_response('500 Internal Server Error', content_type)
+            return json_of("egads!, I failed in serving you: " + str(e), 500)
 
         elapsed = (time.time() - start)
         sys.stderr.write("hbase query+prep: %s\n\n" % elapsed)
