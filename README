@@ -26,14 +26,14 @@ RUN THE ZOHMG
 
 Zohmg is installed as a command line script. Try it out:
 
-	$> zohmg help
+  $> zohmg help
 
 
 
 CREATE YOUR FIRST 'PROJECT'
 ---------------------------
 
-    $> zohmg create weblogs
+  $> zohmg create weblogs
 
 This command creates a project directory named "weblogs".
 
@@ -84,18 +84,18 @@ Example config/dataset.yaml:
 
 After you've edited environment.py and dataset.yaml:
 
-    $> zohmg setup
+  $> zohmg setup
 
 This command creates an HBase table with the same name as your dataset.
 
 Verify that the table was created:
 
-    $> hbase shell
-    hbase(main):001:0> list
-    weblogs
-    1 row(s) in 0.1337 seconds
+  $> hbase shell
+  hbase(main):001:0> list
+  weblogs
+  1 row(s) in 0.1337 seconds
 
-    # ok!
+  # ok!
 
 
 
@@ -144,7 +144,7 @@ RUN THE MAPPER
 
 Secondly, run the mapper:
 
-    $> zohmg import mappers/mapper.py /data/weblogs/2009/06/05
+  $> zohmg import mappers/mapper.py /data/weblogs/2009/06/05
 
 The first argument to import is the path to the python file containing the map
 function, the second is a path on HDFS.
@@ -152,14 +152,14 @@ function, the second is a path on HDFS.
 
 You can enable lzo compression by giving --lzo as the third argument:
 
-    $> zohmg import mappers/mapper.py /data/weblogs/2009/06/05 --lzo
+  $> zohmg import mappers/mapper.py /data/weblogs/2009/06/05 --lzo
 
 
 Any argument after the first two (and except for --lzo) will be passed
 on to Dumbo.  If you wish to pass jobconf options, for example,
 you would do it like so:
 
-    $> zohmg import mappers/mapper.py /data/weblogs/2009/06/05 -hadoopconf someoption=yeah
+  $> zohmg import mappers/mapper.py /data/weblogs/2009/06/05 -hadoopconf someoption=yeah
 
 The Dumbo wiki has more information on what options other than
 hadoopconf are supported: http://wiki.github.com/klbostee/dumbo/running-programs
@@ -174,16 +174,16 @@ the HBase table.
 
 Verify this by firing up the HBase shell:
 
-       $> hbase shell
-       hbase(main):001:0> scan 'weblogs'
-       [..]
+  $> hbase shell
+  hbase(main):001:0> scan 'weblogs'
+  [..]
 
 Lots of data scrolling by? Good! (Interrupt with CTRL-C at your leisure.)
 
 
 Start the Zohmg server:
 
-	$> zohmg server
+  $> zohmg server
 
 The Zohmg server listens on port 8086 at localhost by default. It uses
 a Thrift interface for HBase queries, so make sure the thrift server is
