@@ -124,9 +124,12 @@ class HBaseScanner(object):
     # only used internally since HBaseScanner raises StopIteration when done.
     def __fetch_row(self):
         try:
+            # TODO: scannerGetList() for caching.
             self.__next_row = self.__client.scannerGet(self.__scannerid)
         except IOError:
             raise RowFetchError
+        # TODO:
+        # the new API returns a list; the empty list implies the old NotFound exception.
         except NotFound:
             # scanner finished, presumably.
             self.__scannerid  = None
