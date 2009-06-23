@@ -320,7 +320,8 @@ else
 		echo "cd ${streaming_src}"
 		echo "where I'll"
 		echo "ant -Dversion=${version} -Ddist.dir=${streaming_target} package"
-		cd ${streaming_src} ; echo pwd;  ant -Dversion=${version} -Ddist.dir=${streaming_target} package
+		cd ${streaming_src}
+		ant -Dversion=${version} -Ddist.dir=${streaming_target} package
 		echo "done."
 	fi
 fi
@@ -471,6 +472,12 @@ MAPREDSITE
 		# backup template configuration.
 		exec_and_log "cp -v $hbase_conf/hbase-env.sh $hbase_conf/hbase-env.sh.dist"
 		exec_and_log "cp -v $hbase_conf/hbase-site.xml $hbase_conf/hbase-site.xml.dist"
+
+		if [ "x" = "x$hbase_only" ]; then
+                    # installing both hadoop and hbase today
+		    # copy zoo.cfg to hadoop's conf.
+		    exec_and_log "cp -v $hbase_conf/zoo.cfg $hadoop_conf/"
+		fi
 
 		# emit configuration.
 		cat <<EOHBASEENV >$hbase_conf/hbase-env.sh
