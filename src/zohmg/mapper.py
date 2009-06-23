@@ -46,18 +46,18 @@ class Mapper(object):
             return [dict, all_dict]
 
 
-        # assume dict => {'agent' : 'firefox', 'country' : 'SE', 'http-status' : '200'}
-        x  = dict.popitem()               # x => ('agent', 'firefox')
-        xs = self.dict_permutations(dict) # xs => [{'http-status': '200', 'country': 'SE'}, {'http-status': '200', 'country': 'all'}, {'http-status': 'all', 'country': 'SE'}, {'http-status': 'all', 'country': 'all'}]
+        # pop head, recurse on tail.
+        x  = dict.popitem()
+        xs = self.dict_permutations(dict)
 
         # combine x and xs into a list.
         permuts = []
         for k,v in [x, (x[0], 'all')]:
             # k => 'agent'
-            # v => 'firefox' and 'all'
+            # v => 'firefox' andor 'all'
             for b in xs:
                 # b => {'http-status': '200', 'country': 'SE'}
-                # add {'agent':'firefox'} or {'agent':'all'} to b.
+                # add {'agent':'firefox'} andor {'agent':'all'} to b.
                 b[k] = v
                 permuts.append(b.copy())
         return permuts
