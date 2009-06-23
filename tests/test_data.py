@@ -58,8 +58,38 @@ class TestData(unittest.TestCase):
         params = {}
 
 
-#        r = zohmg.data.hbase_get(table, projections, params)
-#        self.assert_equal(r, 'wha?')
+        #        r = zohmg.data.hbase_get(table, projections, params)
+        #        self.assert_equal(r, 'wha?')
+
+
+
+    def test_rowkey_formatter(self):
+        projection = ['user']
+        d0 = 'user'
+        d0v = ['']
+        filters = {}
+        t0 = "20090601"
+        t1 = "20090631"
+
+        expected_startrow = "user-all-20090601"
+        expected_stoprow  = "user-all-20090631~"
+
+        startrow, stoprow = zohmg.data.rowkey_formatter(projection, d0, d0v, filters, t0, t1)
+
+        self.assertEquals(startrow, expected_startrow)
+        self.assertEquals(stoprow, expected_stoprow)
+
+
+    def test_dict_addition(self):
+        a = {'x': 1, 'y': 1}; aprim = a.copy()
+        b = {'x': 2, 'z': 1}; bprim = b.copy()
+        expected = {'x': 3, 'y': 1, 'z': 1}
+
+        self.assertEquals(expected, zohmg.data.dict_addition(a,b))
+        # make sure nothing was changed.
+        self.assertEquals(a, aprim)
+        self.assertEquals(b, bprim)
+
 
 if __name__ == "__main__":
     unittest.main()

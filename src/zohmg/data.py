@@ -160,6 +160,53 @@ def find_suitable_projection(projections, d0, filters):
     return projection
 
 
+# add the values of a dictionary.
+def dict_addition(a, b):
+    c = a.copy()
+    for k in b.keys():
+        c[k] = c.get(k, 0) + b[k]
+    return c
+
+
+
+def rowkey_formatter(projection, d0, d0v, filters, t0, t1):
+    rowkeyarray = []
+    found_stoprow = False
+    for d in projection:
+        rowkeyarray.append(d)
+        if d == d0:
+            if d0v == [] or d0v == ['']:
+                rowkeyarray.append('all')
+            else:
+                rowkeyarray.append(d0v[0])
+        elif d in filters.keys() and len(filters[d]) == 1:
+            # filtering for a single value; append.
+            rowkeyarray.append(filters[d][0])
+        elif d in filters.keys():
+            found_stoprow = True # corner cases be damned.
+            # filtering on many values - we need to fetch them all.
+            # in this case we need to FRIGGIN fetch all dates too. mngh.
+            # TODO: consider doing many scans instead.
+            rowkey = '-'.join(rowkeyarray)
+            startrow = rowkey + '-'
+            stoprow  = rowkey + '-' + "~"
+            break
+        else:
+            # d is a dimension other than the base dimension (d0)
+            # and there are no filters on it.
+            rowkeyarray.append('all')
+
+     # the common case.
+    if not found_stoprow:
+        rowkey = '-'.join(rowkeyarray)
+        # rowkey => 'artist-97930-track-102203-20090601'
+        startrow = rowkey + '-' + t0
+        stoprow  = rowkey + '-' + t1 + "~"
+
+    return startrow, stoprow
+    
+
+
 # fetches data from hbase,
 # returns sorted list of dictionaries suitable for json dumping.
 # TODO: private.
@@ -174,37 +221,8 @@ def hbase_get(table, projections, query, filters):
         raise NoSuitableProjection("could not find a suitable projection for dimension " + query['d0'])
     print "most suited projection: " + str(projection)
 
-    # TODO: ask rowkeyformatter.
-    rowkeyarray = []
-    found_stoprow = False
-    for d in projection:
-        rowkeyarray.append(d)
-        # this becomes a bit tricky..
-        if d == query['d0']:
-            rowkeyarray.append(query['d0v'][0]) # TODO: fix!
-            # TODO?: if d0v = [''], append 'all'
-        elif d in filters.keys() and len(filters[d]) == 1:
-            # filtering for a single value; append.
-            rowkeyarray.append(filters[d][0])
-        elif d in filters.keys():
-            # filtering on many values - we need to fetch them all.
-            # in this case we need to FRIGGIN fetch all dates too. mngh.
-            # TODO: consider doing many scans instead.
-            found_stoprow = True # corner cases be damned.
-            rowkey = '-'.join(rowkeyarray)
-            startrow = rowkey + '-'
-            stoprow  = rowkey + '-' + "~"
-            break
-        else:
-            rowkeyarray.append('all')
 
-    if not found_stoprow:
-        rowkey = '-'.join(rowkeyarray)
-        # the row key is 'dimension-value-[dimension-value, ..]-ymd',
-        # i.e. 'artist-97930-track-102203-20090601'
-        startrow = rowkey + '-' + query['t0']
-        stoprow  = rowkey + '-' + query['t1'] + "~"
-    
+    startrow, stoprow = rowkey_formatter(projection, query['d0'], query['d0v'], filters, query['t0'], query['t1'])
     print "start: " + startrow
     print "stop:  " + stoprow
 
@@ -247,8 +265,7 @@ def hbase_get(table, projections, query, filters):
                 t[u] += int(r.columns[column].value)
             print 'filter accepts! ' + ymd + ' => ' + str(t[u]) + '  -  ' + str(ds.keys())
             # and save.
-            data[ymd] = data.get(ymd, 0)
-            data[ymd] += t[u]
+            data[ymd] = dict_addition(t, data.get(ymd, {}))
 
     print "rows: " + str(numrows)
 
