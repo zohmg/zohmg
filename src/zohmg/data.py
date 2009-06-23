@@ -168,19 +168,8 @@ def dict_addition(a, b):
     return c
 
 
-# fetches data from hbase,
-# returns sorted list of dictionaries suitable for json dumping.
-# TODO: private.
-def hbase_get(table, projections, query, filters):
-# query is guaranteed to have the following keys:
-#  t0, t1, unit, d0, d0v
 
-
-    projection = find_suitable_projection(projections, query['d0'], filters)
-    if projection == None:
-        print 'could not find a suitable projection for ' + query['d0']
-        raise NoSuitableProjection("could not find a suitable projection for dimension " + query['d0'])
-    print "most suited projection: " + str(projection)
+def rowkey_formatter(projection, d0, d0v, filters, t0, t1):
 
     # TODO: ask rowkeyformatter.
     rowkeyarray = []
@@ -188,9 +177,11 @@ def hbase_get(table, projections, query, filters):
     for d in projection:
         rowkeyarray.append(d)
         # this becomes a bit tricky..
-        if d == query['d0']:
-            rowkeyarray.append(query['d0v'][0]) # TODO: fix!
-            # TODO?: if d0v = [''], append 'all'
+        if d == d0:
+            if d0v == [] or d0v == ['']:
+                rowkeyarray.append('all')
+            else:
+                rowkeyarray.append(d0v[0]) # TODO: fix!
         elif d in filters.keys() and len(filters[d]) == 1:
             # filtering for a single value; append.
             rowkeyarray.append(filters[d][0])
@@ -210,9 +201,29 @@ def hbase_get(table, projections, query, filters):
         rowkey = '-'.join(rowkeyarray)
         # the row key is 'dimension-value-[dimension-value, ..]-ymd',
         # i.e. 'artist-97930-track-102203-20090601'
-        startrow = rowkey + '-' + query['t0']
-        stoprow  = rowkey + '-' + query['t1'] + "~"
+        startrow = rowkey + '-' + t0
+        stoprow  = rowkey + '-' + t1 + "~"
+
+    return startrow, stoprow
     
+
+
+# fetches data from hbase,
+# returns sorted list of dictionaries suitable for json dumping.
+# TODO: private.
+def hbase_get(table, projections, query, filters):
+# query is guaranteed to have the following keys:
+#  t0, t1, unit, d0, d0v
+
+
+    projection = find_suitable_projection(projections, query['d0'], filters)
+    if projection == None:
+        print 'could not find a suitable projection for ' + query['d0']
+        raise NoSuitableProjection("could not find a suitable projection for dimension " + query['d0'])
+    print "most suited projection: " + str(projection)
+
+
+    startrow, stoprow = rowkey_formatter(projection, query['d0'], query['d0v'], filters, query['t0'], query['t1'])
     print "start: " + startrow
     print "stop:  " + stoprow
 
