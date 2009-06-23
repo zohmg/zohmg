@@ -160,6 +160,14 @@ def find_suitable_projection(projections, d0, filters):
     return projection
 
 
+# add the values of a dictionary.
+def dict_addition(a, b):
+    c = a.copy()
+    for k in b.keys():
+        c[k] = c.get(k, 0) + b[k]
+    return c
+
+
 # fetches data from hbase,
 # returns sorted list of dictionaries suitable for json dumping.
 # TODO: private.
@@ -247,8 +255,7 @@ def hbase_get(table, projections, query, filters):
                 t[u] += int(r.columns[column].value)
             print 'filter accepts! ' + ymd + ' => ' + str(t[u]) + '  -  ' + str(ds.keys())
             # and save.
-            data[ymd] = data.get(ymd, 0)
-            data[ymd] += t[u]
+            data[ymd] = dict_addition(t, data.get(ymd, {}))
 
     print "rows: " + str(numrows)
 
