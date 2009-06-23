@@ -335,7 +335,7 @@ else
 
 	cd $hbase_home
 	echo "Compiling HBase (logging to $install_log)."
-	exec_and_log "ant package" "Error: Could not compile Apache HBase."
+	exec_and_log "ant" "Error: Could not compile Apache HBase."
 	echo "done."
 fi
 
@@ -346,20 +346,22 @@ if [ "x" = "x$no_config" ]; then
 		echo "Configuring Hadoop."
 		# backup template configurations.
 		exec_and_log "cp -v $hadoop_conf/hadoop-env.sh $hadoop_conf/hadoop-env.sh.dist"
-		exec_and_log "cp -v $hadoop_conf/hadoop-site.xml $hadoop_conf/hadoop-site.xml.dist"
+		exec_and_log "cp -v $hadoop_conf/core-site.xml $hadoop_conf/core-site.xml.dist"
+		exec_and_log "cp -v $hadoop_conf/hdfs-site.xml $hadoop_conf/hdfs-site.xml.dist"
+		exec_and_log "cp -v $hadoop_conf/mapred-site.xml $hadoop_conf/mapred-site.xml.dist"
 
 		# emit configuration.
-		cat << EOHADOOPENV >$hadoop_conf/hadoop-env.sh
+		cat << EOHADOOPENV > $hadoop_conf/hadoop-env.sh
 # Set Hadoop-specific environment variables here.
 
-# The only required environment variable is JAVA_HOME.	All others are
-# optional.	 When running a distributed configuration it is best to
+# The only required environment variable is JAVA_HOME.  All others are
+# optional.  When running a distributed configuration it is best to
 # set JAVA_HOME in this file, so that it is correctly defined on
 # remote nodes.
 
 # The java implementation to use.  Required.
-# export JAVA_HOME=/usr/lib/j2sdk1.5-sun
-# Automatically infer \$JAVA_HOME on Debian based systems.
+# export JAVA_HOME=/usr/lib/jvm/java-6-sun
+# Debian Magic:
 export JAVA_HOME=\`ls -l /etc/alternatives/java | sed 's#.* -> \(.*\)/jre/bin/java#\1#'\`
 
 # Extra Java CLASSPATH elements.  Optional.
@@ -372,11 +374,11 @@ export JAVA_HOME=\`ls -l /etc/alternatives/java | sed 's#.* -> \(.*\)/jre/bin/ja
 # export HADOOP_OPTS=-server
 
 # Command specific options appended to HADOOP_OPTS when specified
-export HADOOP_NAMENODE_OPTS="-Dcom.sun.management.jmxremote \$HADOOP_NAMENODE_OPTS"
-export HADOOP_SECONDARYNAMENODE_OPTS="-Dcom.sun.management.jmxremote \$HADOOP_SECONDARYNAMENODE_OPTS"
-export HADOOP_DATANODE_OPTS="-Dcom.sun.management.jmxremote \$HADOOP_DATANODE_OPTS"
-export HADOOP_BALANCER_OPTS="-Dcom.sun.management.jmxremote \$HADOOP_BALANCER_OPTS"
-export HADOOP_JOBTRACKER_OPTS="-Dcom.sun.management.jmxremote \$HADOOP_JOBTRACKER_OPTS"
+export HADOOP_NAMENODE_OPTS="-Dcom.sun.management.jmxremote $HADOOP_NAMENODE_OPTS"
+export HADOOP_SECONDARYNAMENODE_OPTS="-Dcom.sun.management.jmxremote $HADOOP_SECONDARYNAMENODE_OPTS"
+export HADOOP_DATANODE_OPTS="-Dcom.sun.management.jmxremote $HADOOP_DATANODE_OPTS"
+export HADOOP_BALANCER_OPTS="-Dcom.sun.management.jmxremote $HADOOP_BALANCER_OPTS"
+export HADOOP_JOBTRACKER_OPTS="-Dcom.sun.management.jmxremote $HADOOP_JOBTRACKER_OPTS"
 # export HADOOP_TASKTRACKER_OPTS=
 # The following applies to multiple commands (fs, dfs, fsck, distcp etc)
 # export HADOOP_CLIENT_OPTS
@@ -384,16 +386,16 @@ export HADOOP_JOBTRACKER_OPTS="-Dcom.sun.management.jmxremote \$HADOOP_JOBTRACKE
 # Extra ssh options.  Empty by default.
 # export HADOOP_SSH_OPTS="-o ConnectTimeout=1 -o SendEnv=HADOOP_CONF_DIR"
 
-# Where log files are stored.  \$HADOOP_HOME/logs by default.
-# export HADOOP_LOG_DIR=\${HADOOP_HOME}/logs
+# Where log files are stored.  $HADOOP_HOME/logs by default.
+# export HADOOP_LOG_DIR=${HADOOP_HOME}/logs
 
-# File naming remote slave hosts.  \$HADOOP_HOME/conf/slaves by default.
-# export HADOOP_SLAVES=\${HADOOP_HOME}/conf/slaves
+# File naming remote slave hosts.  $HADOOP_HOME/conf/slaves by default.
+# export HADOOP_SLAVES=${HADOOP_HOME}/conf/slaves
 
 # host:path where hadoop code should be rsync'd from.  Unset by default.
-# export HADOOP_MASTER=master:/home/\$USER/src/hadoop
+# export HADOOP_MASTER=master:/home/$USER/src/hadoop
 
-# Seconds to sleep between slave commands.	Unset by default.  This
+# Seconds to sleep between slave commands.  Unset by default.  This
 # can be useful in large clusters, where, e.g., slave rsyncs can
 # otherwise arrive faster than the master can service them.
 # export HADOOP_SLAVE_SLEEP=0.1
@@ -401,14 +403,49 @@ export HADOOP_JOBTRACKER_OPTS="-Dcom.sun.management.jmxremote \$HADOOP_JOBTRACKE
 # The directory where pid files are stored. /tmp by default.
 # export HADOOP_PID_DIR=/var/hadoop/pids
 
-# A string representing this instance of hadoop. \$USER by default.
-# export HADOOP_IDENT_STRING=\$USER
+# A string representing this instance of hadoop. $USER by default.
+# export HADOOP_IDENT_STRING=$USER
 
-# The scheduling priority for daemon processes.	 See 'man nice'.
+# The scheduling priority for daemon processes.  See 'man nice'.
 # export HADOOP_NICENESS=10
 EOHADOOPENV
 
-		cat <<EOHADOOPSITE >$hadoop_conf/hadoop-site.xml
+		cat <<CORESITE > $hadoop_conf/core-site.xml
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+  <property>
+	<name>fs.default.name</name>
+	<value>hdfs://localhost:9000</value>
+  </property>
+</configuration>
+CORESITE
+
+		cat <<HDFSSITE > $hadoop_conf/hdfs-site.xml
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+  <property>
+	<name>fs.default.name</name>
+	<value>hdfs://localhost:9000</value>
+  </property>
+  <property>
+	<name>dfs.replication</name>
+	<value>1</value>
+  </property>
+  <property>
+    <name>dfs.datanode.socket.write.timeout</name>
+    <value>0</value>
+  </property>
+</configuration>
+HDFSSITE
+		cat <<MAPREDSITE > $hadoop_conf/mapred-site.xml
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 
@@ -423,85 +460,96 @@ EOHADOOPENV
 	<name>mapred.job.tracker</name>
 	<value>localhost:9001</value>
   </property>
-  <property>
-	<name>dfs.replication</name>
-	<value>1</value>
-  </property>
 </configuration>
-EOHADOOPSITE
+MAPREDSITE
+
 		echo "done."
 	fi
 	if [ "x" = "x$hadoop_only" ]; then
-	    # TODO: add pre-configured hbase-site.xml
 	    # TODO: set hbase.rootdir = hdfs://localhost:9000/hbase
 		echo "Configuring HBase."
 		# backup template configuration.
 		exec_and_log "cp -v $hbase_conf/hbase-env.sh $hbase_conf/hbase-env.sh.dist"
+		exec_and_log "cp -v $hbase_conf/hbase-site.xml $hbase_conf/hbase-site.xml.dist"
 
 		# emit configuration.
 		cat <<EOHBASEENV >$hbase_conf/hbase-env.sh
-#
-# lifted from hbase release 0.x and trixed up for debian based systems.
-# 
-#/**
-# * Copyright 2007 The Apache Software Foundation
-# *
-# * Licensed to the Apache Software Foundation (ASF) under one
-# * or more contributor license agreements.	 See the NOTICE file
-# * distributed with this work for additional information
-# * regarding copyright ownership.	The ASF licenses this file
-# * to you under the Apache License, Version 2.0 (the
-# * "License"); you may not use this file except in compliance
-# * with the License.  You may obtain a copy of the License at
-# *
-# *		http://www.apache.org/licenses/LICENSE-2.0
-# *
-# * Unless required by applicable law or agreed to in writing, software
-# * distributed under the License is distributed on an "AS IS" BASIS,
-# * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# * See the License for the specific language governing permissions and
-# * limitations under the License.
-# */
-
 # Set environment variables here.
 
 # The java implementation to use.  Java 1.6 required.
 # export JAVA_HOME=/usr/java/jdk1.6.0/
-# Automatically infer \$JAVA_HOME on Debian based systems.
+# Debian Magic
 export JAVA_HOME=\`ls -l /etc/alternatives/java | sed 's#.* -> \(.*\)/jre/bin/java#\1#'\`
 
 # Extra Java CLASSPATH elements.  Optional.
 # export HBASE_CLASSPATH=
 
 # The maximum amount of heap to use, in MB. Default is 1000.
-# export HBASE_HEAPSIZE=1000
+export HBASE_HEAPSIZE=3000
+
+# Extra Java runtime options.
+# Below are what we set by default.  May only work with SUN JVM.
+# For more on why as well as other possible settings,
+# see http://wiki.apache.org/hadoop/PerformanceTuning
+export HBASE_OPTS="-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode"
 
 # Extra Java runtime options.  Empty by default.
 # export HBASE_OPTS=-server
 
-# File naming hosts on which HRegionServers will run.  \$HBASE_HOME/conf/regionservers by default.
-# export HBASE_REGIONSERVERS=\${HBASE_HOME}/conf/regionservers
+# File naming hosts on which HRegionServers will run.  $HBASE_HOME/conf/regionservers by default.
+# export HBASE_REGIONSERVERS=${HBASE_HOME}/conf/regionservers
 
 # Extra ssh options.  Empty by default.
 # export HBASE_SSH_OPTS="-o ConnectTimeout=1 -o SendEnv=HBASE_CONF_DIR"
 
-# Where log files are stored.  \$HBASE_HOME/logs by default.
-# export HBASE_LOG_DIR=\${HBASE_HOME}/logs
+# Where log files are stored.  $HBASE_HOME/logs by default.
+# export HBASE_LOG_DIR=${HBASE_HOME}/logs
 
-# A string representing this instance of hbase. \$USER by default.
-# export HBASE_IDENT_STRING=\$USER
+# A string representing this instance of hbase. $USER by default.
+# export HBASE_IDENT_STRING=$USER
 
-# The scheduling priority for daemon processes.	 See 'man nice'.
+# The scheduling priority for daemon processes.  See 'man nice'.
 # export HBASE_NICENESS=10
 
 # The directory where pid files are stored. /tmp by default.
 # export HBASE_PID_DIR=/var/hadoop/pids
 
-# Seconds to sleep between slave commands.	Unset by default.  This
+# Seconds to sleep between slave commands.  Unset by default.  This
 # can be useful in large clusters, where, e.g., slave rsyncs can
 # otherwise arrive faster than the master can service them.
 # export HBASE_SLAVE_SLEEP=0.1
+
+# export HBASE_MANAGES_ZK=true
 EOHBASEENV
+
+		cat <<EOF > $hbase_conf/hbase-site.xml
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+  <property>
+    <name>hbase.master.port</name>
+    <value>60000</value>
+    <description>The port master should bind to.</description>
+  </property>
+
+  <property>
+    <name>hbase.cluster.distributed</name>
+    <value>false</value>
+    <description>The mode the cluster will be in. Possible values are
+      false: standalone and pseudo-distributed setups with managed Zookeeper
+      true: fully-distributed with unmanaged Zookeeper Quorum (see hbase-env.sh)
+    </description>
+  </property>
+
+  <property>
+    <name>hbase.rootdir</name>
+    <value>hdfs://localhost:9000/hbase</value>
+    <description>The directory shared by region servers.
+    </description>
+  </property>
+</configuration>
+EOF
+
 		echo "done."
 	fi
 else
