@@ -30,6 +30,7 @@ fi
 
 # set default variables.
 prefix="/opt"
+version="0.20.0" # for streaming jar.
 hadoop_version="hadoop-0.20.0"
 hbase_version="hbase-0.20.0-alpha"
 
@@ -51,8 +52,8 @@ hbase_url="http://people.apache.org/~stack/hbase-0.20.0-alpha/$hbase_tar"
 
 # HADOOP-1722  Make streaming to handle non-utf8 byte array - ASF JIRA
 # https://issues.apache.org/jira/browse/HADOOP-1722
-patch_1722="HADOOP-1722-branch-0.19.patch"
-patch_1722_url="http://issues.apache.org/jira/secure/attachment/12401426/$patch_1722"
+patch_1722="HADOOP-1722-v6.patch"
+patch_1722_url="http://issues.apache.org/jira/secure/attachment/12400123/$patch_1722"
 
 # Add support for application-specific typecodes to typed bytes
 # https://issues.apache.org/jira/browse/HADOOP-5450
@@ -271,6 +272,11 @@ hbase_home="$prefix/$hbase_version"
 hadoop_conf=$hadoop_home/conf
 hbase_conf=$hbase_home/conf
 
+streaming_src="$hadoop_home/src/contrib/streaming"
+streaming_target="$hadoop_home/build"
+
+
+
 # hadoop
 if [ ! "x" = "x$hbase_only" ]; then
 	echo "Skipping installation of Apache Hadoop."
@@ -307,7 +313,14 @@ else
 		echo "done."
 		
 		echo "Compiling Hadoop (logging to $install_log)."
-		exec_and_log "ant package" "Error: Could not compile Hadoop."
+		exec_and_log "ant" "Error: Could not compile Hadoop."
+		echo "done."
+
+		echo "Compiling Hadoop Streaming."
+		echo "cd ${streaming_src}"
+		echo "where I'll"
+		echo "ant -Dversion=${version} -Ddist.dir=${streaming_target} package"
+		cd ${streaming_src} ; echo pwd;  ant -Dversion=${version} -Ddist.dir=${streaming_target} package
 		echo "done."
 	fi
 fi
