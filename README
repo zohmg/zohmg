@@ -4,7 +4,8 @@ INTRODUCING: ZOHMG.
 
 Zohmg is a data store for aggregation of multi-dimensional time series data. It
 is built on top of Hadoop, Dumbo and HBase. The core idea is to pre-compute
-aggregates – Zohmg is wasteful with storage in order to answer queries faster.
+aggregates and store them in a read-efficient manner – Zohmg is
+wasteful with storage in order to answer queries faster.
 
 This README assumes a working installation of zohmg. Please see INSTALL for
 installation instructions.
@@ -29,18 +30,74 @@ Zohmg is installed as a command line script. Try it out:
   $> zohmg help
 
 
+AN EXAMPLE: TELEVISION!
+-----------------------
+
+Imagine that you are the director of operations of a web-based
+television channel. Your company streams videos, called "clips", to
+users' web browser.
+
+Every time a clip is streamed across the intertubes, your software
+makes a note of it in a logfile. The logfile contains information
+about the clip (id, length, producer) and about the user watching it
+(country of origin, useragent, etc).
+
+Your objective is to find out how many people watch a certain clip
+over time, broken down by country and player, for example.
+
+The rest of this text will show you by example how to make sense of
+that log file using Zohmg.
+
+
+THE ANATOMY OF YOUR DATA SET
+----------------------------
+
+Each line of the logfile has the following space-delimited format:
+
+timestamp clipid producerid length usercountry player love
+
+Examples:
+1245775664 1440 201 722 GB VLC 0
+1245775680 1394 710 2512 GB VLC 1
+1245776010 1440 201 722 DE QUICKTIME 0
+
+The timestamp is a UNIX timestamp, the length is counted in seconds
+and the id's are all integers. Usercountry is a two-letter ISO
+standard code while the player is an arbitrary string.
+
+The last field -- "love" -- is a boolean that indicates whether the user
+clicked the heart shaped icon, meaning that she was truly moved by the
+clip.
+
+
+DO YOU SPEAK ZOHMG?
+-------------------
+
+In the parlance of Zohmg, clip and producer as well as country and
+player are dimensions. 1440, 'GB', 'VLC', etc, are called attributes of
+those dimensions.
+
+The length of a clip, whether it was loved, etc, are called
+measurements. In the configuration, which we will take a look at
+shortly, we define the units of measurements. Measurements must be
+integers so that they can be summed.
+
+Simple enough!
+
 
 CREATE YOUR FIRST 'PROJECT'
 ---------------------------
 
-  $> zohmg create weblogs
+Every Zohmg project lives in its own directory. A project is created
+like so:
 
-This command creates a project directory named "weblogs".
+  $> zohmg create television
 
-Its contents are:
-config       - environment and dataset configuration.
-lib          - eggs or jars that will be automatically included in job jar.
-mappers      - user defined MapReduce maps.
+This creates a project directory named 'television'. Its contents are:
+
+ config     - environment and dataset configuration.
+ lib        - eggs or jars that will be automatically included in job jar.
+ mappers    - MapReduce maps - you will write these!
 
 
 CONFIGURE YOUR 'PROJECT'
@@ -58,28 +115,42 @@ the streaming jar built for you.
 
 config/dataset.yaml:
 
-Define your data set. This means setting up the dimensions and
-projections that will be used. The dimensions lets Zohmg know what
-your data looks like while the projections list hints at what queries
-you will ask the data store.
+Defining your data set means setting up dimensions, projections and
+units.
 
+The dimensions lets Zohmg know what your data looks like while the
+projections list hints at what queries you will want to ask.
 
-Example config/dataset.yaml:
+For example, if you wish to look at how many times a certain clip has
+been watched broken down by country, you would want to set up a
+projection where clip is the first dimension and country is the second
+one.
 
-    dataset:
-      weblogs
+For the television station, something like the following will do just
+fine.
+
+config/dataset.yaml:
+
+    dataset: television
 
     dimensions:
-     - user
-     - status
+     - clip
+     - producer
+     - country
+     - player
 
     projections:
-     - user
-     - status
-     - user-status
+     - clip
+     - player
+     - country
+     - clip-country
+     - producer-country
+     - producer-clip
 
     units:
-     - pageviews
+     - plays
+     - loves
+     - seconds
 
 
 After you've edited environment.py and dataset.yaml:
@@ -92,10 +163,10 @@ Verify that the table was created:
 
   $> hbase shell
   hbase(main):001:0> list
-  weblogs
+  television
   1 row(s) in 0.1337 seconds
 
-  # ok!
+Brilliant!
 
 
 
@@ -103,34 +174,28 @@ WRITE A  MAPPER
 ----------------
 
 After the project is created and setup correctly it is time to import some
-data. This is done in two steps: Write a map function and then run that
-function over the data, which is stored on HDFS.
+data.
 
-Firstly, writing the mapper. (Assuming Apache common log format, see
-http://httpd.apache.org/docs/2.0/logs.html for more information.)
+Data import is done in two steps: writing a map function that analyzes
+the data line for line, and running that function over the data.
 
-In the arguments to map there are key and value. The argument key is the
-row number in the file being processed, the value argument is the actual
-line data from the file.
+The data is normally stored on HDFS, but it is also possible to run on
+local data.
 
-In this example, the access time, user (HTTP auth) and the status for each
-request are requested and passed along to the data store.
 
-    def map(key,value):
-        # parse log string, extract year, month and day
-        import re
-        mo = re.search(r"\[(\d{2})/(\w{3})/(\d{4})",value) # [20/Apr/2009
-        year  = mo.group(3)
-        month = mo.group(2)
-        day   = mo.group(1)
+First we'll write the mapper. It will have this signature:
 
-        time  = year + month + day
-        dimensions = {'user'   : value.split(" ")[2],
-                      'status' : value.split(" ")[8]
-                     }
-        values = {'pageviews' : 1}
+  def map(key, value)
 
-        yield time,dimensions,values
+The 'key' argument defines the line number of the input data and is
+usually (but not always!) not very interesting. The 'value' argument is a
+string - it represents a single line of input.
+
+Analyzing a single line of input is straight forward: split the line
+on spaces and collect the debris.
+
+
+
 
 
 The output of the mapper goes into a reducer that, for each
