@@ -78,7 +78,7 @@ def query(table, projections, params):
 
 
 def make_filters(params):
-    # TODO: there must be a neater way of doing this.
+    # TODO: there is a neater way of doing this.
     filters = {}
     for n in range(1,5):
         try:
@@ -240,7 +240,7 @@ def hbase_get(table, projections, query, filters):
             if not k in filters: continue
             if not ds[k] in filters[k]: filter_accepts = False
 
-        if filter_accepts:
+        if filter_accepts and (ymd >= query['t0'] and ymd <= query['t1']):
             # read possible old values, add.
             for column in r.columns:
                 t[u] = t.get(u, 0)
