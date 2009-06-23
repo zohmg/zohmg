@@ -30,16 +30,21 @@ fi
 
 # set default variables.
 prefix="/opt"
-hadoop_version="hadoop-0.19.1"
-hbase_version="hbase-0.19.3"
+hadoop_version="hadoop-0.20.0"
+hbase_version="hbase-0.20.0-alpha"
 
 hadoop_tar="$hadoop_version.tar.gz"
 hadoop_url="http://apache.mirror.infiniteconflict.com/hadoop/core/$hadoop_version/$hadoop_tar"
 # or from http://www.apache.org/dyn/closer.cgi/hadoop/core/
 
-hbase_tar="$hbase_version.tar.gz"
-hbase_url="http://apache.mirror.infiniteconflict.com/hadoop/hbase/$hbase_version/$hbase_tar"
+##hbase_tar="$hbase_version.tar.gz"
+##hbase_url="http://apache.mirror.infiniteconflict.com/hadoop/hbase/$hbase_version/$hbase_tar"
 # or from http://www.apache.org/dyn/closer.cgi/hadoop/hbase
+
+# using the alpha for now
+hbase_tar="hbase-0.20.0-alpha.tar.gz"
+hbase_url="http://people.apache.org/~stack/hbase-0.20.0-alpha/$hbase_tar"
+
 
 # Dumbo (http://github.com/klbostee/dumbo) needs 1722 and 5450.
 # (disable patching with --no-patches)

@@ -15,10 +15,10 @@ Zohmg is alpha software. Be gentle.
 CONTACT
 -------
 
-IRC: #zohmg at freenode
-Web: http://zohmg.com/ (soon)
-Code: http://github.com/zohmg/zohmg/tree/master
-Mailing list: http://groups.google.com/group/zohmg-user
+IRC:           #zohmg at freenode
+Code:          http://github.com/zohmg/zohmg/tree/master
+User list:     http://groups.google.com/group/zohmg-user
+Dev list:      http://groups.google.com/group/zohmg-dev
 
 
 RUN THE ZOHMG
@@ -255,11 +255,6 @@ KNOWN ISSUES
 Zohmg is alpha software and is still learning how to behave properly in mixed
 company. You will spot more than a few minor quirks while using it and might
 perhaps even run into the odd show-stopper. If you do, please let us know!
-
-One of the most troublesome issues is that there is a definite limit on the
-number of data points that can be stored for any projection. Currently we're
-seeing slow response times for projections with more than a few hundred
-thousand combinations. Hopefully this will alleviated with HBase 0.20.
 
 Zohmg currently only supports mappers written in Python. Eventually, you will
 also be able to write mappers in Java.

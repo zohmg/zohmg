@@ -6,8 +6,8 @@ Zohmg depends on a number of software packages and Python modules.
 
 The installation procedure described in INSTALL will take care of
 these dependencies for you, except for patched versions of 
-Hadoop and HBase. Please see install_hadoop_hbase.sh in the scripts
-directory for an automated installation of those.
+Hadoop and HBase. Please see scripts/install_hadoop_hbase.sh 
+for an assisted installation of Hadoop and HBase.
 
 
 The following software is required:
@@ -15,13 +15,10 @@ The following software is required:
  - Apache HBase 0.20
  - Dumbo 0.21.x
 
-# TODO: the wget of http://pypi.python.org/pypi/setuptools
-
 These python modules come bundled:
  - PyYAML
  - Python Paste
  - Python simplejson
-
 
 
 
@@ -46,13 +43,13 @@ These python modules come bundled:
 
     Hadoop is a MapReduce framework.
 
-    Additionally Hadoop source has to be patched with the patches
-    HADOOP-1722 () and HADOOP-5450:
+    Additionally Hadoop source has to be patched with HADOOP-1722 and
+    HADOOP-5450:
      + https://issues.apache.org/jira/browse/HADOOP-1722
      + https://issues.apache.org/jira/browse/HADOOP-5450
 
     more:
      + http://hadoop.org/
      + http://en.wikipedia.org/wiki/Hadoop
-     + http://dumbotics.com/2009/02/24/hadoop-1722-and-typed-bytes/
      + http://labs.google.com/papers/mapreduce.html
+     + http://dumbotics.com/2009/02/24/hadoop-1722-and-typed-bytes/

@@ -1,30 +1,32 @@
+
 0) Get Zohmg:
 
-    $> git clone git://github.com/zohmg/zohmg.git
+  $> git clone git://github.com/zohmg/zohmg.git
+   -- or --
+  $> # get the latest tar ball from http://github.com/zohmg/zohmg/downloads
 
 
 1) Install Zohmg:
 
-    $> cd zohmg
-    $> sudo python install.py
+  $> cd zohmg
+  $> sudo python install.py
 
 
 2) Verify that the installation works:
 
-    $> zohmg help
+  $> zohmg help
 
 
 3a) Get help installing Hadoop and HBase in pseudo-distributed mode:
 
-    $> sudo scripts/install_hadoop_hbase.sh --prefix=/opt
+  $> sudo scripts/install_hadoop_hbase.sh --prefix=/opt
 
 - OR -
 
 3b) If you already have a running Hadoop 0.19 and HBase 0.19 cluster you will want to:
 
-    - Patch the Hadoop installation with HADOOP-1722 and HADOOP-5450
-    - Make sure hbase-site.xml is copied to $HADOOP_HOME/conf
+  - Patch the Hadoop installation with HADOOP-1722 and HADOOP-5450
+  - Make sure hbase-site.xml is copied to $HADOOP_HOME/conf
 
 
-4) Please see README for getting started with Zohmg.
-
+4) See README to get started.
