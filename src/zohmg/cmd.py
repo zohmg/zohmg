@@ -28,14 +28,14 @@ for (dir, dirnames, files) in os.walk(eggpath):
         if suffix == "egg":
             sys.path.append(dir+"/"+file)
 
-# TODO: read version from somewhere or something.
-version = '0.1.1'
+# TODO: read version from $somewhere.
+version = '0.2.0'
 
 def usage(reason = None):
     zohmg = os.path.basename(sys.argv[0])
     if reason:
         print "error: " + reason
-    print "zohmg! " + version
+    print "zohmg " + version
     print "usage:"
     print zohmg + " create <dir>"
     print zohmg + " setup"

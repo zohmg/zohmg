@@ -19,10 +19,10 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'zohmg',
-    version = '0.1.1',
+    version = '0.2.0',
     author = 'Fredrik Mollerstrand, Per Andersson',
     author_email = '{fredrik,per}@last.fm',
-    license = 'Apache v2',
+    license = 'Apache License 2.0',
     packages = ['zohmg'],
     zip_safe = True,
     entry_points = {
@@ -30,6 +30,5 @@ setup(
             'zohmg = zohmg.cmd:zohmg',
         ]
     },
-
-    install_requires = ['dumbo'],
+    install_requires = ['dumbo']
 )
