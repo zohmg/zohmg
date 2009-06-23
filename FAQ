@@ -44,7 +44,7 @@ Set the flag like so: zohmg import <mapper> <input> -jobconf mapred.compress.map
 Make an egg out of the module with easy_install and put that egg in the lib directory:
 
  $> easy_install -zmaxd . yrfavoritemodule
- $> cp yrfavoritemodule-0.1.egg lib
+ $> cp yrfavoritemodule-0.1.egg ~/zohmg/lib/egg
 
 
 + Why am I getting 'OSError: Permission denied' when running an import?
