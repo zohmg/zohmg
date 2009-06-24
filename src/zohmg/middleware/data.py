@@ -25,9 +25,13 @@ from paste.request import parse_formvars
 import zohmg.data
 from zohmg.config import Config
 
-def json_of(error_msg='wha?', status_code=400):
+def json_of(error_msg='wha?', status_code=400, callback=None):
     structure = {'error_msg': error_msg, 'status_code': status_code}
-    return json.dumps(structure)
+    jsondata = json.dumps(structure)
+    if callback:
+        return callback+"("+jsondata+")"
+    else:
+        return jsondata
 
 # data application serving at /data.
 class data(object):
@@ -55,6 +59,11 @@ class data(object):
         # interpret the environment.
         params = parse_formvars(environ)
 
+        # error callback?
+        # (hm! can not do json error callbacks on error codes other than 200.)
+        try:    errorcallback = params['jsonperror']
+        except: errorcallback = None
+
         try:
             # hbase query.
             start = time.time()
@@ -63,23 +72,26 @@ class data(object):
         except zohmg.data.DataNotFound, (instance):
             print >>sys.stderr, "Data not found: ", instance.error
             start_response('200 OK', content_type)
-            return json_of("data not found: " + instance.error, 200)
+            return json_of("data not found: " + instance.error, 200, errorcallback)
 
         except zohmg.data.MissingArguments, (instance):
             print >>sys.stderr, "400 Bad Request: missing arguments."
-            start_response('400 Bad Request', content_type)
-            return json_of("Query is missing arguments: " + instance.error)
+            #start_response('400 Bad Request', content_type)
+            start_response('200 OK', content_type)
+            return json_of("Query is missing arguments: " + instance.error, 400, errorcallback)
             # TODO: print list of required arguments.
 
         except zohmg.data.NoSuitableProjection, (instance):
             print >>sys.stderr, "400 Bad Request: No suitable projection. ", instance.error
-            start_response('400 Bad Request', content_type)
-            return json_of(" " + instance.error)
+            #start_response('400 Bad Request', content_type)
+            start_response('200 OK', content_type)
+            return json_of(" " + instance.error, 400, errorcallback)
 
         except Exception, e:
             print >>sys.stderr, "Error: ", e
-            start_response('500 Internal Server Error', content_type)
-            return json_of("egads!, I failed in serving you: " + str(e), 500)
+            #start_response('500 Internal Server Error', content_type)
+            start_response('200 OK', content_type)
+            return json_of("egads!, I failed in serving you: " + str(e), 500, errorcallback)
 
         elapsed = (time.time() - start)
         sys.stderr.write("hbase query+prep: %s\n\n" % elapsed)

@@ -96,14 +96,24 @@ function loadFilters() {
 
 // callback for the json data.
 function jsonCallback(data) {
-    // TODO: check http status, act thereafter.
-    
     // TODO: hide spinner.
-    
-    graph = pivot(data);
-    var imgUrl = chartImgUrl(graph);
-    $('#graph').html('<img src="' + imgUrl + '" />');
-    $('#undergraph').append(' and <a href="' +imgUrl  +'">chart</a>.');
+
+    // check length of data.
+    if (data.length == 0) {
+	$('#errormsg').html('empty dataset.');
+    } else {
+	$('#errormsg').html('' + data.length + ' days of data.');
+	graph = pivot(data);
+	var imgUrl = chartImgUrl(graph);
+	$('#graph').html('<img src="' + imgUrl + '" />');
+	$('#undergraph').append(' and <a href="' +imgUrl  +'">chart</a>.');
+    }
+}
+
+function jsonErrorCallback(error) {
+    // TODO: hide spinner.
+    $('#errormsg').append('ERROR: ');
+    $('#errormsg').append(error['error_msg']);
 }
 
 function loadData(t0, t1, unit, d0, d0v, filters) {
@@ -115,9 +125,11 @@ function loadData(t0, t1, unit, d0, d0v, filters) {
 	'&d0v=' + encodeURIComponent(d0v) +
 	'&' + filters +
 	'&jsoncallback=?' +
-	'&jsonp=jsonCallback'
+	'&jsonp=jsonCallback' +
+	'&jsonperror=jsonErrorCallback'
 
     $('#undergraph').html('<a href="' +dataUrl +'">raw data</a>');
+    $('#errormsg').html('');
 
     // TODO: show spinner.
     // TODO: set timeout thread.

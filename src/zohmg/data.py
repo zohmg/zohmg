@@ -112,7 +112,7 @@ def dump_jsonp(data, jsonp_method=None):
 
     if jsonp_method:
         # client requested data to be wrapped in a function call.
-        return jsonp_method + "(" + jsondata + ")"
+        return jsonp_method+"("+jsondata+")"
     else:
         return jsondata
 
