@@ -34,26 +34,26 @@ AN EXAMPLE: TELEVISION!
 -----------------------
 
 Imagine that you are the director of operations of a web-based
-television channel. Your company streams videos, called "clips", to
-users' web browser.
+television channel. Your company streams videos, called "clips".
 
 Every time a clip is streamed across the intertubes, your software
-makes a note of it in a logfile. The logfile contains information
-about the clip (id, length, producer) and about the user watching it
-(country of origin, useragent, etc).
+makes a note of it in a log file. The log contains information about
+the clip (id, length, producer) and about the user watching it
+(country of origin, player).
 
-Your objective is to find out how many people watch a certain clip
-over time, broken down by country and player, for example.
+Your objective is to analyze the logs to find out how many people
+watch a certain clip over time, broken down by country and player,
+etc.
 
 The rest of this text will show you by example how to make sense of
-that log file using Zohmg.
+logs using Zohmg.
 
 
 THE ANATOMY OF YOUR DATA SET
 ----------------------------
 
 Each line of the logfile has the following space-delimited format:
-
+ 
 timestamp clipid producerid length usercountry player love
 
 Examples:
