@@ -1,0 +1,10 @@
+This is your zohmg application!
+
+In a nutshell:
+Configure config/dataset.yaml to match your data,
+set the variables in config/environment.py,
+run 'zohmg setup' to create an hbase table,
+write a mapper and run it with 'zohmg import'.
+
+See /usr/local/share/zohmg/doc/README for further documentation
+and /usr/local/share/zohmg/examples for, yes, examples.

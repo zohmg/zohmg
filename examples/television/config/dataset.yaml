@@ -1,0 +1,20 @@
+    dataset: television
+
+    dimensions:
+     - clip
+     - producer
+     - country
+     - player
+
+    projections:
+     - clip
+     - player
+     - country
+     - clip-country
+     - producer-country
+     - producer-clip-player
+
+    units:
+     - plays
+     - loves
+     - seconds
