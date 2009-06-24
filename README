@@ -97,7 +97,7 @@ This creates a project directory named 'television'. Its contents are:
 
  config     - environment and dataset configuration.
  lib        - eggs or jars that will be automatically included in job jar.
- mappers    - MapReduce maps - you will write these!
+ mappers    - mapreduce mappers (you will write these!)
 
 
 CONFIGURE YOUR 'PROJECT'
@@ -115,13 +115,15 @@ the streaming jar built for you.
 
 config/dataset.yaml:
 
-Defining your data set means setting up dimensions, projections and
+Defining your data set means defining dimensions, projections and
 units.
 
 The dimensions lets Zohmg know what your data looks like while the
-projections list hints at what queries you will want to ask.
+projections hints at what queries you will want to ask. Once you get
+more comfortable with Zohmg you will want to optimize your projections
+for efficiency.
 
-For example, if you wish to look at how many times a certain clip has
+For example, if you wish to find out how many times a certain clip has
 been watched broken down by country, you would want to set up a
 projection where clip is the first dimension and country is the second
 one.
@@ -129,28 +131,29 @@ one.
 For the television station, something like the following will do just
 fine.
 
-config/dataset.yaml:
 
-    dataset: television
+## config/dataset.yaml
 
-    dimensions:
-     - clip
-     - producer
-     - country
-     - player
+dataset: television
 
-    projections:
-     - clip
-     - player
-     - country
-     - clip-country
-     - producer-country
-     - producer-clip
+dimensions:
+ - clip
+ - producer
+ - country
+ - player
 
-    units:
-     - plays
-     - loves
-     - seconds
+projections:
+ - clip
+ - player
+ - country
+ - clip-country
+ - producer-country
+ - producer-clip-player
+
+units:
+ - plays
+ - loves
+ - seconds
 
 
 After you've edited environment.py and dataset.yaml:
@@ -169,19 +172,19 @@ Verify that the table was created:
 Brilliant!
 
 
-
-WRITE A  MAPPER
-----------------
+DATA IMPORT
+-----------
 
 After the project is created and setup correctly it is time to import some
 data.
 
-Data import is done in two steps: writing a map function that analyzes
-the data line for line, and running that function over the data.
+Data import is a process in two steps: write a map function that analyzes
+the data line for line, and run that function over the data. The data
+is normally stored on HDFS, but it is also possible to run on local data.
 
-The data is normally stored on HDFS, but it is also possible to run on
-local data.
 
+WRITE A  MAPPER
+----------------
 
 First we'll write the mapper. It will have this signature:
 
@@ -191,68 +194,102 @@ The 'key' argument defines the line number of the input data and is
 usually (but not always!) not very interesting. The 'value' argument is a
 string - it represents a single line of input.
 
-Analyzing a single line of input is straight forward: split the line
+Analyzing a single line of input is straightforward: split the line
 on spaces and collect the debris.
 
+## mappers/mapper.py
+
+import time
+
+def map(key, value):
+    # split on space; make sure there are 7 parts.
+    parts = value.split(' ')
+    if len(parts) < 7: return
+
+    # extract values.
+    epoch = parts[0]
+    clipid, producerid, length = parts[1:4]
+    country, player, love      = parts[4:7]
+
+    # format timestamp as yyyymmdd.
+    ymd = "%d%02d%02d" % time.localtime(float(epoch))[0:3]
+
+    # dimension attributes are strings.
+    dimensions = {}
+    dimensions['clip']     = str(clipid)
+    dimensions['producer'] = str(producerid)
+    dimensions['country']  = country
+    dimensions['player']   = player
+
+    # measurements are integers.
+    measurements = {}
+    measurements['plays']   = 1
+    measurements['seconds'] = int(length)
+    measurements['loves']   = int(love)
+
+    yield ymd, dimensions, measurements
 
 
+The output of the mapper is a three-tuple: the first element is a
+string of format yyyymmdd (i.e. "20090601") and the other two elements
+are dictionaries.
 
-
-The output of the mapper goes into a reducer that, for each
-dimension-tuple, sums the values of each unit and passes them along to the
-actual underlying data stare. Make sure the values are of type int.
+The mapper's output is fed to a reducer that sums the values of the
+units and passes the data on to the underlying data store.
 
 
 
 RUN THE MAPPER
 --------------
 
-Secondly, run the mapper:
+Populate a file with a small data sample:
 
-  $> zohmg import mappers/mapper.py /data/weblogs/2009/06/05
+  $> cat > data/short.log
+  1245775664 1440 201 722 GB VLC 0
+  1245775680 1394 710 2512 GB VLC 1
+  1245776010 1440 201 722 DE QUICKTIME 0
+  ^D
+
+Perform a local test-run:
+
+  $> zohmg import mappers/mapper.py data/short.log --local
 
 The first argument to import is the path to the python file containing the map
-function, the second is a path on HDFS.
+function, the second is a path on the local file system.
+
+The local run will direct its output to a file instead of writing to
+the data store. Inspect it like so:
+
+  $> cat /tmp/zohmg-output
+  'clip-1440-country-DE-20090623' '{"unit:length": {"value": 722}}'
+  'clip-1440-country-DE-20090623' '{"unit:plays": {"value": 1}}'
+  'clip-all-country-DE-20090623'  '{"unit:length": {"value": 722}}'
+  [..]
 
 
-You can enable lzo compression by giving --lzo as the third argument:
+If Hadoop and HBase are up, run the mapper on the cluster:
 
-  $> zohmg import mappers/mapper.py /data/weblogs/2009/06/05 --lzo
-
-
-Any argument after the first two (and except for --lzo) will be passed
-on to Dumbo.  If you wish to pass jobconf options, for example,
-you would do it like so:
-
-  $> zohmg import mappers/mapper.py /data/weblogs/2009/06/05 -hadoopconf someoption=yeah
-
-The Dumbo wiki has more information on what options other than
-hadoopconf are supported: http://wiki.github.com/klbostee/dumbo/running-programs
-
-
-
-SERVE DATA
-----------
+  $> zohmg import mappers/mapper.py /data/television/20090620.log
 
 Assuming the mapper finished successfully there is now some data in
-the HBase table.
-
-Verify this by firing up the HBase shell:
+the HBase table. Verify this by firing up the HBase shell:
 
   $> hbase shell
-  hbase(main):001:0> scan 'weblogs'
+  hbase(main):001:0> scan 'television'
   [..]
 
 Lots of data scrolling by? Good! (Interrupt with CTRL-C at your leisure.)
 
 
+SERVE DATA
+----------
+
 Start the Zohmg server:
 
   $> zohmg server
 
-The Zohmg server listens on port 8086 at localhost by default. It uses
-a Thrift interface for HBase queries, so make sure the thrift server is
-on (i.e. 'hbase thrift start').
+The Zohmg server listens on port 8086 at localhost by default. Browse
+http://localhost:8086/ and have a look!
 
 
 
@@ -260,7 +297,7 @@ THE API
 -------
 
 Zohmg's data server exposes the data store through an HTTP API. Every
-successful request returns a JSON-formatted string.
+request returns a JSON-formatted string.
 
 The JSON looks something like this:
 
@@ -306,6 +343,7 @@ PLOTTING THE DATA
 
 There is an example client bundled with Zohmg. It is served by the Zohmg server
 at http://localhost:8086/graph/ and is quite useful for exploring your dataset.
+
 You may also want to peek at the javascript code to gain some inspiration and
 insight into how the beast works.
 
