@@ -315,7 +315,7 @@ The parameters t0 and t1 define the time span. They are strings of the
 format "yyyymmdd", i.e. "t0=20090601&t1=20090630".
 
 The unit parameter defines the one unit for which you query, for
-example 'unit=pageviews'.
+example 'unit=plays'.
 
 The parameter d0 defines the base dimension, for example 'd0=country'.
 
@@ -326,11 +326,11 @@ empty, all values of the base dimension will be returned.
 
 A typical query string looks like this:
 
- http://localhost:8086/?t0=20090601&t1=20090630&unit=pageviews&d0=country&d0v=DE,SE,US
+ http://localhost:8086/?t0=20090601&t1=20090630&unit=plays&d0=country&d0v=DE,SE,US
 
-This example query would return pageview data for the time span between the
-first and last of June broken down by the countries Sweden, Germany and
-the United States.
+This example query would return the number of clips streamed for the
+time span between the first and last of June broken down by the
+countries Sweden, Germany and the United States.
 
 
 The API supports JSONP via the jsonp parameter. By setting this
