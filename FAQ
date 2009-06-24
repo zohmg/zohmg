@@ -1,4 +1,19 @@
 
++ Can I use LZO compression?
+
+Sure! Just add the --lzo flag to your import like so:
+$> zohmg import mapper.py data/ --lzo
+
+
++ Can I pass any argument to Dumbo and/or Hadoop Streaming?
+
+Sure! Just append the arguments of your choice like so:
+$> zohmg import mapper.py data/ -hadoopconf someoption=yeah
+
+The Dumbo wiki has more information on what options other than
+hadoopconf are supported: http://wiki.github.com/klbostee/dumbo/running-programs
+
+
 + My mapper raises an ImportError. What's wrong?
 
 The mapper fails to import a module. Make sure you put the eggs for
