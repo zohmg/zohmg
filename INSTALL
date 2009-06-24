@@ -23,10 +23,10 @@
 
 - OR -
 
-3b) If you already have a running Hadoop 0.19 and HBase 0.19 cluster you will want to:
+3b) If you already have a running Hadoop 0.20 and HBase 0.20 cluster you will want to:
 
   - Patch the Hadoop installation with HADOOP-1722 and HADOOP-5450
-  - Make sure hbase-site.xml is copied to $HADOOP_HOME/conf
+  - Make sure hbase-site.xml and zoo.cfg is copied to $HADOOP_HOME/conf
 
 
 4) See README to get started.
