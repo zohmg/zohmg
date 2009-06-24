@@ -13,7 +13,7 @@ for an assisted installation of Hadoop and HBase.
 The following software is required:
  - Apache Hadoop 0.20 with patches HADOOP-1722 and HADOOP-5450.
  - Apache HBase 0.20
- - Dumbo 0.21.x
+ - Dumbo >=0.21.17
 
 These python modules come bundled:
  - PyYAML
@@ -22,7 +22,7 @@ These python modules come bundled:
 
 
 
-# Dumbo (0.21.x)
+# Dumbo (>=0.21.17)
 
     Dumbo is a convenient Python API for writing MapReduce programs.
 
