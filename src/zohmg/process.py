@@ -103,7 +103,8 @@ class Process(object):
             # TODO: need to be *very* certain we're not unlinking the wrong file.
             os.unlink(usermapper)
         # TODO: SECURITY, need to be certain that we symlink correct file.
-        os.symlink(mapper,usermapper)
+        # TODO: borks if lib directory does not exist.
+        os.symlink(mapper, usermapper)
 
         # let the user know what will happen.
         if local_mode:
