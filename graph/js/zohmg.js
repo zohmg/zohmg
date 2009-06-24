@@ -46,7 +46,7 @@ var missingValue = '_';
 // falling back on the defaults.
 function updateForm() {
     var fields = ["t0", "t1", "unit", "d0", "d0v", "d1", "d1v", "d2", "d2v", "d3", "d3v", "d4", "d4v"];
-    var defaults = {'t0':'20090101', 't1':'20091231', 'unit':'pageviews', 'd0':'country', 'd0v':'US,DE,SE'}
+    var defaults = {'t0':'20090101', 't1':'20091231', 'unit':'plays', 'd0':'country', 'd0v':'US,GB,SE'}
     $.each(fields, function(i, item) {
         $("input#"+item).val(urldecode($(document).getUrlParam(item, defaults[item])))
     });
