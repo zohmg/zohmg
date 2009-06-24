@@ -175,10 +175,10 @@ def rowkey_formatter(projection, d0, d0v, filters, t0, t1):
     for d in projection:
         rowkeyarray.append(d)
         if d == d0:
-            if d0v == [] or d0v == ['']:
+            if d0v == '':
                 rowkeyarray.append('all')
             else:
-                rowkeyarray.append(d0v[0])
+                rowkeyarray.append(d0v)
         elif d in filters.keys() and len(filters[d]) == 1:
             # filtering for a single value; append.
             rowkeyarray.append(filters[d][0])
@@ -206,6 +206,48 @@ def rowkey_formatter(projection, d0, d0v, filters, t0, t1):
     return startrow, stoprow
     
 
+def scan(table, columns, startrow, stoprow, basedimension, range, filters, data):
+    t0, t1 = range
+
+    # connect to hbase.
+    scanner = HBaseScanner()
+    scanner.connect()
+    scanner.open(table, columns, startrow, stoprow)
+
+    numrows = 0
+    while True:
+        t = {}
+        numrows += 1
+        next = scanner.next()
+        if next == []:
+            break
+        r = next[0]
+        # extract date from row key.
+        rowkey = r.row
+        ymd = rowkey[-8:]
+        x   = rowkey[:-9]
+        # wha?
+        it = iter(x.split('-'))
+        ds = dict(zip(it, it))
+        dval = ds.get('artist')
+        del ds[basedimension]
+
+        filter_accepts = True
+        for k in ds.keys():
+            if not k in filters: continue
+            if not ds[k] in filters[k]: filter_accepts = False
+
+        if filter_accepts and (ymd >= t0 and ymd <= t1):
+            # read possible old values, add.
+            for column in r.columns:
+                t[dval] = t.get(dval, 0)
+                t[dval] += int(r.columns[column].value)
+            # and save.
+            data[ymd] = dict_addition(t, data.get(ymd, {}))
+
+    return data, numrows
+
+
 
 # fetches data from hbase,
 # returns sorted list of dictionaries suitable for json dumping.
@@ -222,52 +264,19 @@ def hbase_get(table, projections, query, filters):
     print "most suited projection: " + str(projection)
 
 
-    startrow, stoprow = rowkey_formatter(projection, query['d0'], query['d0v'], filters, query['t0'], query['t1'])
-    print "start: " + startrow
-    print "stop:  " + stoprow
 
     # format column-family + qualifier
     cfq = 'unit:' + query['unit']
 
-    # connect to hbase.
-    scanner = HBaseScanner()
-    scanner.connect()
-    scanner.open(table, [cfq], startrow, stoprow)
-
     data = {}
-    d = query['d0'] # TODO: fix.
-    u = query['unit']
-    numrows = 0
-    while True:
-        t = {}
-        numrows += 1
-        next = scanner.next()
-        if next == []:
-            break
-        r = next[0]
-        # extract date from row key.
-        rowkey = r.row
-        ymd = rowkey[-8:]
-        x   = rowkey[:-9]
-        it = iter(x.split('-'))
-        ds = dict(zip(it, it))
-        del ds[query['d0']]
-
-        filter_accepts = True
-        for k in ds.keys():
-            if not k in filters: continue
-            if not ds[k] in filters[k]: filter_accepts = False
-
-        if filter_accepts and (ymd >= query['t0'] and ymd <= query['t1']):
-            # read possible old values, add.
-            for column in r.columns:
-                t[u] = t.get(u, 0)
-                t[u] += int(r.columns[column].value)
-            print 'filter accepts! ' + ymd + ' => ' + str(t[u]) + '  -  ' + str(ds.keys())
-            # and save.
-            data[ymd] = dict_addition(t, data.get(ymd, {}))
-
-    print "rows: " + str(numrows)
+    rows = 0
+    for val in query['d0v']:
+        startrow, stoprow = rowkey_formatter(projection, query['d0'], val, filters, query['t0'], query['t1'])
+        print "start: " + startrow
+        print "stop:  " + stoprow
+        data, r = scan(table, [cfq], startrow, stoprow, query['d0'], (query['t0'], query['t1']), filters, data)
+        rows += r
+    print "scanned a total of %d rows." % rows
 
     # returns a list of dicts sorted by ymd.
     return [ {ymd:data[ymd]} for ymd in sorted(data) ]
