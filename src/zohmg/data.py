@@ -229,7 +229,7 @@ def scan(table, columns, startrow, stoprow, basedimension, range, filters, data)
         # wha?
         it = iter(x.split('-'))
         ds = dict(zip(it, it))
-        dval = ds.get('artist')
+        dval = ds.get(basedimension)
         del ds[basedimension]
 
         filter_accepts = True
