@@ -93,9 +93,9 @@ before a new batch arrives, and for very large data sets a single computer
 would simply not be able to fit the intermediate data set in its working
 memory.
 
-It is suitable to exploit the parallel nature of the records by breaking up
-the data sets in pieces and to have each piece be processed on a separate
-node in a large compute cluster. It is also suitable to store the data across
+It is appropriate to exploit the parallel nature of the records by breaking up
+the data sets in pieces and to have each piece be processed on a separate node
+in a large compute cluster. It is also appropriate to store the data across
 many storage nodes in what is called a distributed file system.
 
 
@@ -495,8 +495,8 @@ Furthermore, a rough sketch and discussion of the Zohmg systems different
 components will be presented. Secondly, the Zohmg system requirements will be
 featured.
 
-Throughout this chapter distinction is made between the developer: who develops
-the application, and the user: who uses the product which the developer
+Throughout this chapter distinction is made between the developer who develops
+the application, and the user who uses the product which the developer
 creates. Although, in reality, they might be the same person.
 
 
@@ -504,11 +504,14 @@ creates. Although, in reality, they might be the same person.
 
 Last.fm has a central statistics and metrics tool built on a relational
 database. It is possible to import analyzed data to this tool; the data is
-presented to the user as graphs. Disadvantages of this system include problems
-with new data source additions: they can sometimes not be loaded because they
-are too big. If a user wants to perform a custom query, manual intervention by
-the developer is necessary. There is no way for this system to handle custom
-queries.
+presented to the user as graphs. Disadvantages of this system include
+\begin{itemize}
+\item Problems with new data source additions: they can sometimes not be loaded
+because they are too big.
+\item If a user wants to perform a custom query, manual intervention by the
+developer is necessary.
+\item There is no way for this system to handle custom queries.
+\end{itemize}
 
 The data source is typically a log file; it is often a large file, up to
 gigabytes in size, of structured data. The data is structured the same way on
@@ -537,7 +540,7 @@ storing, and exporting data.
 
 At Last.fm there are several different facilities which produce logs, among
 them: web servers, scrobbling\footnote{Last.fm users can submit what music they
-listen to, this is called scrobbling.}, radio streaming etc. This data reside
+listen to, this is called scrobbling.}, radio streaming etc. This data resides
 on a commodity hardware cluster used for parallel computation. The system needs to
 be able to easily import data from these logs, taking in to account both the
 locality of the data as well as the structure of the individual data records.
@@ -567,7 +570,7 @@ viewed as a set. For example, the dimension of \textit{logged in} has a
 cardinality of two since \textit{logged in} is a boolean variable; the user
 is either logged in or not. The \textit{country} dimension has a much
 higher cardinality: there are some 300 countries in the world. Certainly,
-there could be dimensions whose cardinality is infinite: the \textit{path}
+there could be dimensions whose cardinality is unbound: the \textit{path}
 dimension in the web log example, for example, could in theory have a
 limitless number of values.
 
@@ -671,13 +674,13 @@ impact on design and implementation choices for the Zohmg system.
 
 This section describes how we structured our work over the course of the thesis
 project. It describes how we, by working in an exploratory fashion, reached a
-good understanding of the problem at hand, and how we successively inched closer
+good understanding of the problem at hand, and how we successively moved closer
 to a working solution by building early prototypes and iteratively improving
 upon them.
 
 The design phase, which we entered once our understanding of the problem scope
 and its theoretical solution was satisfactory, and the following implementation
-are described, followed by a summary of our literature studies.
+are described, followed by a summary of our tools studies.
 
 
 \subsection*{Beginning}
@@ -727,7 +730,7 @@ documents which BigTable-like databases utilize.
 
 \subsubsection*{Benchmarks}
 
-Only HBase made it this far, the other databases in the roster was hard or
+Only HBase made it this far, the other databases in the roster were hard or
 impossible to either compile, install, setup, or all of them.
 
 HBase was benchmarked (the benchmarks was similar to the ones found in the
