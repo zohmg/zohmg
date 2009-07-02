@@ -29,7 +29,7 @@ for (dir, dirnames, files) in os.walk(eggpath):
             sys.path.append(dir+"/"+file)
 
 # TODO: read version from $somewhere.
-version = '0.2.1'
+version = '0.2.2-dev'
 
 def usage(reason = None):
     zohmg = os.path.basename(sys.argv[0])
