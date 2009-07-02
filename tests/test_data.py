@@ -89,6 +89,10 @@ class TestData(unittest.TestCase):
         expected = ('20090601', {'artist': '97930', 'track': '102203'})
         self.assertEqual(expected, zohmg.data.rowkey_interpreter(rowkey))
 
+        rowkey = 'artist-97930-track-102203-20090601223000'
+        expected = ('20090601223000', {'artist': '97930', 'track': '102203'})
+        self.assertEqual(expected, zohmg.data.rowkey_interpreter(rowkey))
+
 
     def test_dict_addition(self):
         a = {'x': 1, 'y': 1}; aprim = a.copy()

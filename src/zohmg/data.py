@@ -207,9 +207,9 @@ def rowkey_formatter(projection, d0, d0v, filters, t0, t1):
     
 # rowkey => (timestamp, dimension+attribute pairs)
 def rowkey_interpreter(rowkey):
-    timestamp = rowkey[-8:]
-    x = rowkey[:-9]
-    it = iter(x.split('-'))
+    rk = rowkey.split('-')
+    timestamp = rk.pop()
+    it = iter(rk)
     return timestamp, dict(zip(it, it))
 
 
