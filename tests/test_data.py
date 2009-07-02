@@ -52,6 +52,11 @@ class TestData(unittest.TestCase):
         # sometimes jsonp.
 
 
+    def test_scan(self):
+        # TODO: mock scanner, assert correctness of scan().
+        pass
+
+
     def test_hbase_get(self):
         table = 'test' # must there be test data, then?
         projections = [['user']]
@@ -78,6 +83,11 @@ class TestData(unittest.TestCase):
 
         self.assertEquals(startrow, expected_startrow)
         self.assertEquals(stoprow, expected_stoprow)
+
+    def test_rowkey_interpreter(self):
+        rowkey = 'artist-97930-track-102203-20090601'
+        expected = ('20090601', {'artist': '97930', 'track': '102203'})
+        self.assertEqual(expected, zohmg.data.rowkey_interpreter(rowkey))
 
 
     def test_dict_addition(self):

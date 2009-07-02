@@ -175,7 +175,7 @@ def rowkey_formatter(projection, d0, d0v, filters, t0, t1):
     for d in projection:
         rowkeyarray.append(d)
         if d == d0:
-            if d0v == '':
+            if d0v == '' or d0v == ['']:
                 rowkeyarray.append('all')
             else:
                 rowkeyarray.append(d0v)
@@ -205,6 +205,13 @@ def rowkey_formatter(projection, d0, d0v, filters, t0, t1):
 
     return startrow, stoprow
     
+# rowkey => (timestamp, dimension+attribute pairs)
+def rowkey_interpreter(rowkey):
+    timestamp = rowkey[-8:]
+    x = rowkey[:-9]
+    it = iter(x.split('-'))
+    return timestamp, dict(zip(it, it))
+
 
 def scan(table, columns, startrow, stoprow, basedimension, range, filters, data):
     t0, t1 = range
@@ -222,13 +229,7 @@ def scan(table, columns, startrow, stoprow, basedimension, range, filters, data)
         if next == []:
             break
         r = next[0]
-        # extract date from row key.
-        rowkey = r.row
-        ymd = rowkey[-8:]
-        x   = rowkey[:-9]
-        # wha?
-        it = iter(x.split('-'))
-        ds = dict(zip(it, it))
+        timestamp, ds = rowkey_interpreter(r.row)
         dval = ds.get(basedimension)
         del ds[basedimension]
 
@@ -237,13 +238,13 @@ def scan(table, columns, startrow, stoprow, basedimension, range, filters, data)
             if not k in filters: continue
             if not ds[k] in filters[k]: filter_accepts = False
 
-        if filter_accepts and (ymd >= t0 and ymd <= t1):
+        if filter_accepts and (timestamp >= t0 and timestamp <= t1):
             # read possible old values, add.
             for column in r.columns:
                 t[dval] = t.get(dval, 0)
                 t[dval] += int(r.columns[column].value)
             # and save.
-            data[ymd] = dict_addition(t, data.get(ymd, {}))
+            data[timestamp] = dict_addition(t, data.get(timestamp, {}))
 
     return data, numrows
 
@@ -278,5 +279,5 @@ def hbase_get(table, projections, query, filters):
         rows += r
     print "scanned a total of %d rows." % rows
 
-    # returns a list of dicts sorted by ymd.
-    return [ {ymd:data[ymd]} for ymd in sorted(data) ]
+    # returns a list of dicts sorted by timestamp.
+    return [ {timestamp:data[timestamp]} for timestamp in sorted(data) ]
