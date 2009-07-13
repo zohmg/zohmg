@@ -59,34 +59,31 @@ Bickle}
 % TODO: introduce time-series, data warehousing, mapreduce, bigtable
 % TODO: why is time important? (we query for time, etc.)
 
-Any organization will eventually want to analyze various characteristics of
-its service and operations. The services can be anything from web sites to
-theme park; the analysis might include characteristics such as the number of
+Any organization will eventually want to analyze various characteristics of its
+service and operations. The services can be anything from web sites to theme
+parks; the analysis might include characteristics such as the number of
 visitors per day, or the average time a theme park guest spends queueing for a
-particular ride.
-
-Generally, the services and operations will generate a log for later analysis.
-As the services grow in size, so will the data sets they generate.
+particular ride. Generally, the services and operations will generate a log for
+later analysis. As the services grow in size, so will the data sets they
+generate. The size of the data sets at Last.fm is in the range of several
+gigabytes per day. Some data sets are many times larger. It is our belief that
+this is typical.
 
 An important property of these data sets is that they generally have a regular
 structure and are broken down into records that are independent of each other.
-The records can be analyzed one at a time without losing any of their meaning
-and are as such very well suited for parallel analysis.
+The records can be analyzed independently of each other without losing any of
+their meaning, as such they are very well suited for parallel analysis.
 
 Each log record typically contains a number of fields. For example, a log of
-visits to a web site might contain a timestamp, information about what country
-the visitor is from and what web browser she used.
+visits to a web site might contain a time-stamp, information about what country
+the visitor originates from, and what web browser used by the user.
 
-When the records in the data set have been analyzed, one can draw conclusions
+When the records in the data set have been analyzed, conclusions can be made
 about what countries generate the most traffic to the site, which web browser
 is most popular in a certain country, etc. Summaries of data are generally
 called aggregates. To aggregate data, for example to compute the sum of
-visitors for all European countries, is a common technique for speeding up
-data lookup in data stores.
-
-The size of the data sets at Last.fm is in the range of several gigabytes per
-day. Some data sets are many times larger. It is our belief that this is
-typical.
+visitors for all European countries, is a common technique for speeding up data
+lookup in data stores.
 
 A single computer is not likely to be able to process that amount of data
 before a new batch arrives, and for very large data sets a single computer
@@ -98,23 +95,20 @@ the data sets in pieces and to have each piece be processed on a separate node
 in a large compute cluster. It is also appropriate to store the data across
 many storage nodes in what is called a distributed file system.
 
-
 % TODO: write about how mapreduce already solves the problem of parallel
 % computation, and how gfs solves the problem of distributed storage.
-
 
 % introducing variables and dimensions.
 
 Organizations measure their operations by considering many variables. When
-these variables are placed in a spreadsheet, which organizations are wont to
-do, the variables are set on the x and y axes. Each axis represents a logical
-grouping of variables. In the example of a log file of visits to a web site
-above, country of origin is one such variable. A variable is generally called
-a dimension in this thesis.
+these variables are placed in a spreadsheet, the variables are set on the x and
+y axes. Each axis represents a logical grouping of variables. In the example of
+a log file of visits to a web site above, country of origin is one such
+variable. A variable is generally called a dimension in this thesis.
 
-The International Aerodyne Corporation, a leading exporter of woodworking
-nails, uses a spreadsheet to keep track of the number of nails exported to
-each country every month (see table 1.1).
+As an example: The International Aerodyne Corporation, a leading exporter of
+woodworking nails, uses a spreadsheet to keep track of the number of nails
+exported to each country every month (see table 1.1).
 
 \begin{table}[h]
     \begin{center}
@@ -150,17 +144,13 @@ specialized tools to analyze and visualize their data.
 
 \subsection*{Last.fm}
 
-% TODO: renskriv these thoughts.
-
-Last.fm is an internet radio station focusing on content, being a musical
-encyclopedia. Last.fm lets users submit what music they listen to, called
-\textit{scrobbling}, this user submitted data is analyzed and Last.fm offer
-their users personalized charts, music and event recommendations, based ther
-listening. Last.fm also streams content, via internet, to users. The Last.fm web
-site ties together all these areas and presents it to the users.
-
-The web site, radio streaming and submissions (scrobbling) generates gigabytes
-of data every day.
+Last.fm is an internet radio station that also has a large focus on metadata.
+Their users can submit what music they listen to, this is called
+\textit{scrobbling}. Data submitted by users is analyzed and the user is offered
+personalized charts, music, and event recommendations, based on their listening.
+Users can also edit metadata about artists, albums, events etc; this forms a
+musical encyclopedia and community. The Last.fm web site ties together the above
+mentioned areas and presents it to the users.
 
 
 \section*{Problem description}
@@ -188,48 +178,25 @@ to publish new data sets.
 \section*{Goal}
 % Syftesformulering.
 
-% TODO: define aggregates!
-
 The goal is to build a data store that enables its users to perform
 multi-dimensional analysis.
 
 In addition, the secondary goal is to build a tool that allows users to easily
-store their data sets in the data store. The tool should provide a simple – as
-in minimalistic – mechanism for data analysis (import) and querying (export).
+store their data sets in this data store. The tool should provide a simple---as
+in minimalistic---mechanism for data analysis (import) and querying (export).
 
-% is mapreduce part of the goal? hardly.
 The data analysis will require the user to write a custom import program. The
 queries will be performed via an export API for consumption by computer
-programs.
+programs. Common queries must be answered expediently to allow for analysts to
+explore data in real time.
 
-% these are more likely part of the scope.
-The queries will always be made over a time range and for a single unit. The
-tool will support analytical functions such as drill-down, slicing, etc.
-
-The tool should be aware of dimensions in general and the dimension of time in
-particular. Measurements will be specified in a unit. There will be no limit
-on the number of units.
-
-There should be no theoretical boundary on the number of dimensions. Common
-queries must be answered expediently to allow for analysts to explore data in
-real time.
+The tool will support analytical functions such as drill-down, slicing, etc; it
+should also be aware of dimensions in general and the time dimension in
+particular. Each dimension contains a measurement in a specified unit.  Example
+units are plays, page views, space travels, or such. There should be no upper
+bound on either on the number of units nor on the number of dimensions.
 
 
-\section*{Scope}
-% Avgransning.
-
-% TODO: argue why we do these avgränsningar.
-
-The data store is just that: a data store with import and export
-functionality. The data store does not interpret the data it store.
-
-The data store is time-series-based: all data must include the time dimension.
-
-All measures are integers. Sum is the only supported aggregation function. The
-data store does not support reach-like data (i.e. number of unique visitors)
-since it is not summable.
-
-There is no functionality for plotting data sets, etc.
 
 
 \section*{Existing Software}
@@ -397,7 +364,7 @@ are sorted by their keys. The typical use-case of BigTable is to scan a range of
 rows. It is therefor important to set up the row keys so that related data is
 close to each other. For example, if it makes sense to traverse the data in
 chronological order, the key might contain a representation of the data's
-timestamp. The classic example is to have the reversed domain name (i.e.
+time-stamp. The classic example is to have the reversed domain name (i.e.
 com.google.www) as the row key, which means that all sub-domains of any domain
 are next to each other (see table 2.1).
 
@@ -408,18 +375,18 @@ BigTable's data model can indeed be thought of as a sparse distributed
 multidimensional sorted map. In concept, this multidimensional map is identical
 to a nested hash table. The dimensions of this multidimensional map is mapped
 out on the row key, the column family and the column qualifier, and possibly
-also of the version timestamp.
+also of the version time-stamp.
 
 \vspace{12pt}
 
 \begin{lstlisting}[caption=BigTable data model illustration.,captionpos=b]
-   (row key,column key,timestamp) -> value
+   (row key,column key,time-stamp) -> value
 \end{lstlisting}
 
 \vspace{12pt}
 
 The data model is a simple one: Rows of data are stored in labeled tables. Each
-row is indexed with a row key, a column key, and a timestamp. The columns have
+row is indexed with a row key, a column key, and a time-stamp. The columns have
 the form "column-family:qualifier", where the column-family is one of a number
 of fixed column-families defined by the table's schema, and the qualifier is an
 arbitrary string specified by the application. In effect, column-families are
@@ -428,7 +395,7 @@ each column family are stored together, so the user will want to store items
 that have similar characteristics in the same column family.  Each data point is
 called a cell. A cell is an uninterpreted array of bytes, there are no data
 types, and it is up to the application to interpret the data correctly. The
-table can store any number of timestamped versions of each cell, allowing
+table can store any number of time-stamped versions of each cell, allowing
 versioning of data.
 
 % TODO: fix positioning.
@@ -534,7 +501,7 @@ handle time-series was brought upon the system. This decision was reached
 mainly to keep the implementation simple.
 
 
-\subsection*{System components}
+\subsection*{System Components}
 
 The following three components form the outline of the Zohmg system: importing,
 storing, and exporting data.
@@ -546,25 +513,21 @@ on a commodity hardware cluster used for parallel computation. The system needs 
 be able to easily import data from these logs, taking in to account both the
 locality of the data as well as the structure of the individual data records.
 
+% import.
+The Zohmg import component concists of a framework which enables the user to
+write import programs. The import component handles half of the MapReduce
+pattern, the reduce part; it also adds an interface for relaying the imported
+data to the storage component. The import programs written by the user include
+the other half of the MapReduce pattern, namely the map part, and uses the
+interface for storing the imported data.
+
 % storage.
-Because the data sources are typically large, the storage needs to be efficient.
-Storing the analyzed data can be done in different ways, for instance storing
-the raw data or just aggregates. Storing the raw data is very expensive, since
-it would basically copy the data to the data store. Because of this the decision
-was made to only store aggregates.
+The storage component is built upon a BigTable-like database. Although BigTable
+is schema less, the user imposes a loose structure by configuring the layout of
+the wanted data sets. Basically, this configuration defines the table layout and
+defines what structure the imported data must have.
 
-There are several different ways of modelling multidimensional data.
-
-TODO: How to discuss modelling of data in a general sense, without mentioning
-MapReduce and BigTable?
-% thinking in simple data structures,
-
-% TODO: analysis.
-- Something about cardinality -
-
-TODO?: When reasoning about dimensions, the issue of cardinality will come
-up sooner or later.
-
+% analysis.
 The cardinality of a dimension is the number of distinct values of the
 dimension, see it as number of members in a set where the dimension is
 viewed as a set. For example, the dimension of \textit{logged in} has a
@@ -585,10 +548,15 @@ interesting is both a time and space save, and in many cases the only
 feasible solution.
 
 % export.
-Due to the several different data sources, there exist several
-different types of applications. Therefor the system does not implement any user
-interface other than the REST API\footnote{The REST API is detailed in appendix
-X}. Making sense of the data is left for the developer.
+Due to the several different data sources, there exist several different types
+of applications one could build on top of Zohmg. Therefore the system does not
+implement any user interface other than the HTTP API; which takes a query with
+time range, unit, and selected units to extract.
+
+When extracting data it is important to remember that data handled by and stored
+in Zohmg is not typed in any way. The developer is responsible for interpreting
+the data in a correct manner.
+
 
 
 \section{System Requirements}
@@ -596,8 +564,7 @@ X}. Making sense of the data is left for the developer.
 
 The four key requirements of the Zohmg system are: ease of use, speed,
 scalability, and adoption, where adoption means being able to fit in the
-existing software and hardware eco-system.
-% dave probably knows a better word than 'fit'.
+existing software and hardware ecosystem.
 
 % ease of use.
 The system should have an easy facility for importing and analyzing new data
@@ -628,14 +595,13 @@ cost, since commodity hardware is cheap; thusly preferred in most situations.
 
 % scaling.
 In order for a computational setup, cluster or other, to be efficient it needs
-to scale well, this means adding more hardware should add as close as possible
-to the hardware's potential addition to the computational power.
-
+to scale well. In this sense, scaling means that adding more hardware should, in
+a best case scenario, add all of the computational power of the new hardware.
 
 % fit in existing eco system.
 The system needs to co-exist and integrate seamlessly with the already existing
-hardware and software eco-system at Last.fm. Thus, building on top of the
-already existing software a natural choice.
+hardware and software eco-system at Last.fm. Thus, building on top of already
+existing software is a natural choice.
 
 
 \section*{Summary}
@@ -663,9 +629,11 @@ hardware and software eco-system.
 
 \section*{Introduction}
 
+% TODO
 The first section in this chapter will present the work procedure during the
-master thesis. The following chapters will discuss selected tools and their
-impact on design and implementation choices for the Zohmg system.
+master thesis. The following sections will discuss selected tools and their
+impact on design and implementation choices for the Zohmg system. The last
+section will describe the scope of the thesis.
 
 
 \section{Procedure}
@@ -707,33 +675,36 @@ The problem area was explored by prototyping solutions to a given subproblem.
 
 \subsubsection*{Software}
 
-% TODO: renskriv.
-MapReduce frameworks: Hadoop, disco.
-
-Hadoop is used in production at Last.fm, it made sense to use it because the
-work done would integrate with the Last.fm's infrastructure easily.
+There exists several MapReduce frameworks, for example Apache Hadoop and
+Disco\cite{disco} which are both free software. As mentioned in the scope
+section Hadoop was selected to be built upon because it already had an
+preeminent role in production at Last.fm.
 
 There exists a few databases which inspired by BigTable; they aim to be
 distributed and have column-oriented properties: HBase, Cassandra, MonetDB,
 MongoDB, Hypertable. CouchDB is a document-oriented database.
 
-These databases were explored and tried out. Sadly most of these BigTable-like
-databases were in a very early phase of development and hard to even install.
-The experience was that HBase was the most mature of them. Maturity was the
-compound experience with the software: community, codebase, documentation,
-stability etc. HBase is also tightly coupled with Hadoop which is used in
-production at Last.fm.
+These databases were explored and tested, but most of them were in a very early
+phase of development and hard to even install. The experience was that HBase was
+the most mature of them. Maturity was the compound experience with the software:
+community, codebase, documentation, stability etc. HBase is also tightly coupled
+with Hadoop which is used in production at Last.fm.
 
 CouchDB was experienced to be mature as well but lacked integration with
-MapReduce, all database communication would be necessary to do over HTTP.
-Setting up CouchDB with replication required some hands-on, it lacks sorting of
-documents which BigTable-like databases utilize.
+MapReduce, resulting in that all database communication had to be done over
+HTTP. This would use vast resources to keep all HTTP connections open, working
+around this adds additional work compared to BigTable-like databases. CouchDB
+also lacks sorting of documents over a computer cluster, which BigTable-like
+databases utilize. The result was that setting up CouchDB with replication,
+which would spread the work, required hands-on work.
+
 
 \subsubsection*{Benchmarks}
 
 Only HBase made it this far, the other databases in the roster were hard or
 impossible to either compile, install, setup, or all of them.
 
+% TODO: need data on this.
 HBase was benchmarked (the benchmarks was similar to the ones found in the
 BigTable paper?).
 
@@ -939,14 +910,74 @@ memory; thus they scale poorly.
 % TODO: [citation needed]
 
 
+\section{Scope}
+% Avgransning.
+
+% TODO:
+% * Live here or live in Introduction chapter? (Lots of concepts are
+%   presented after the introduction chapter.)
+% * Live at an earlier stage in this chapter?
+\subsection*{Tools}
+
+The MapReduce framework Hadoop is used in production at Last.fm. Hadoop was
+selected to be used for distributed computing, because of the need for simple
+integration with already existing infrastructure and developer competence at
+Last.fm.
+
+The BigTable-implementation HBase was selected to be used as the underlying data
+storage. It was selected because of its integration with Hadoop, and also, out of
+the box, solved several Zohmg related distributed storage problems. Several
+other distributed databases were tested, but HBase turned out to be the best
+alternative because of the easy integration with Last.fm's existing
+infrastructure, code maturity, as well as its vibrant community.
+
+
+\subsection*{Data Store}
+
+The Zohmg data store should just store data, it should have basic import
+and export functionality. Zohmg shall not interpret the stored data, this is
+left to the user to do in a correct manner. This decision was reached because of
+time constraints when implementing Zohmg.
+
+Because BigTable stores data sorted on row keys, it was decided that Zohmg only
+supports time-series-based data. Having data sorted between nodes in a computer
+cluster balances the network, computational, and storage loads, resulting in
+more even utilization of the cluster. Since Zohmg only supports time-series,
+each query has to be made over a time range.
+
+It was decided that the row keys should consist of unit and time-stamp. This
+would keep related data within close range, e.g. all rows with the same unit
+would be stored next to each other. This means reading data with different units
+would imply expensive jumps within the stored data. Because of this it was
+decided that queries only support a single unit to be queried.
+
+All measures are integers. Sum is the only supported aggregation function. The
+data store does not support reach-like data (i.e. number of unique visitors)
+since it is not summable.
+
+Zohmg is designed as a data store, which simply imports, stores, and exports
+data. Although presenting the data is important, this is left to the user to
+solve. This restriction was made because of keeping the implementation simple,
+and more general.
+
+Because the data sources are typically large, the storage needs to be efficient.
+Storing the analyzed data can be done in different ways, for instance storing
+the raw data or just aggregates. Storing the raw data is very expensive, since
+it would basically copy the data to the data store. Because of this the decision
+was made to only store aggregates.
+
+
 \section*{Summary}
 
+% TODO
 The first section of this chapter talked about the procedure during the thesis
 work. It described the exploratory model and the prototyping performed, as well
 as the design phase that led up to the implementation.
 
 The following sections presented and discussed the selected tools; they also
 discussed the impact on design and implementation choices.
+
+The last section describes the scope of the thesis.
 
 
 
@@ -974,14 +1005,15 @@ implementation details of the Zohmg system's exporting compontent.
 
 \section{Project Management}
 
-A Zohmg project is necessary for using Zohmg; they are created with a management
-script, which is also used for interacting with the Zohmg system. When the user
-has created a Zohmg project directory further actions can be performed.  The
-
-Zohmg projects reside within a project directory, which contains five
-directories: \texttt{clients}, \texttt{config}, \texttt{lib}, \texttt{mappers},
-and \texttt{transformers}. The details of these directories are presented
-throughout this chapter.
+Zohmg uses the concept of projects. These projects are self contained
+application data directories which are used with Zohmg. A Zohmg project is
+necessary for using Zohmg; they are created with a management script, which is
+also used for interacting with the Zohmg system. When the user has created a
+Zohmg project directory further actions can be performed. The Zohmg projects
+reside within a project directory, which contains five directories:
+\texttt{clients}, \texttt{config}, \texttt{lib}, \texttt{mappers}, and
+\texttt{transformers}. The details of these directories are presented throughout
+this chapter.
 
 
 \subsection*{Configuration}
@@ -992,7 +1024,7 @@ management script, which executes the configuration and creates tables in HBase
 according to the configuration.
 
 
-\subsubsection*{Data sets}
+\subsubsection*{Data Sets}
 
 % TODO: define what a data set is, and what makes it different from a project.
 
@@ -1028,8 +1060,8 @@ HBase.
 
 A standard MapReduce map function emits key-value pairs. The Zohmg usermap
 function, instead, emits triples (tuples with three values), which consist of a
-timestamp, a hash table of dimensions and their respective values, and a hash
-table with measurements (values). In effect, the dimensions and the timestamp
+time-stamp, a hash table of dimensions and their respective values, and a hash
+table with measurements (values). In effect, the dimensions and the time-stamp
 specify a point in n-space and the measurements represent the observations made
 at that point.
 
@@ -1052,7 +1084,7 @@ Combined Log Format.,captionpos=b]
 The above example log entry is line broken due to space constraints, normally
 the entire entry would be on a single line. The example log line contains access
 info for a specific request; it contains the key entries: the client's IP
-address, timestamp, requested resource, HTTP status code for the request, the
+address, time-stamp, requested resource, HTTP status code for the request, the
 client's user agent etc.
 
 Processing---which means: read, analyze, and store---logs of the format
@@ -1083,7 +1115,7 @@ line from an Apache HTTP Server log file and returns an object with the
 appropriate fields, such as useragent and statuscode.
 
 For every line of the log file (the value argument to the map function), a point
-in n-space (the dimensions and the timestamp) is emitted together with a count
+in n-space (the dimensions and the time-stamp) is emitted together with a count
 of pageviews and bytes; one pageview per request and the number of bytes served
 in the request. It is possible to add logic here, perhaps only counting requests
 from useragents that are not web spiders which resulted in a HTTP 200 status
@@ -1276,8 +1308,8 @@ function as an argument to the function itself.}.
 The transformer middleware application fetches data from HBase with the same
 mechanism as the raw data server (via the Thrift interface); it then uses a user
 transformer to alter the data and return it to the user. The user transformer is
-a Python program in the project's \texttt{transformers} directory. See the
-appendix A for more information.
+a Python program in the project's \texttt{transformers} directory. See appendix
+A for more information.
 
 The data is received in the transformer application as a hash table, which is
 then available for manipulation. The result is returned from the transformer
