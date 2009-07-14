@@ -354,6 +354,14 @@ New techniques that have appeared include column-oriented, schema free
 databases. Google's BigTable is such a database. Another new technique for
 distributed processing is Google's MapReduce.
 
+TODO:
+Other techniques that have been frequently used to build data warehouses
+include: A, B, and C, amongst others.
+
+A solves distributed computing by ...
+B is blablabla ...
+The framework C was ...
+
 
 \subsection{BigTable}
 
@@ -435,6 +443,7 @@ computing cluster work on one or more parts. The mapper on each node emits
 key-value pairs which are fed into the reduce phase. The final output is
 collated, usually on a distributed file system.
 
+TODO: expand.
 
 \section*{Summary}
 
@@ -629,51 +638,47 @@ hardware and software eco-system.
 
 \section*{Introduction}
 
-% TODO
-The first section in this chapter will present the work procedure during the
-master thesis. The following sections will discuss selected tools and their
-impact on design and implementation choices for the Zohmg system. The last
-section will describe the scope of the thesis.
+The first section describes how the thesis project work was begun and later
+structured. The design and implementation phases are also described in this
+section.
+
+The following two sections presents the tools which were selected to build Zohmg
+upon.
+
+The last section presents the scope of the thesis.
 
 
 \section{Procedure}
 
-% TODO: generally use passive tense.
-% TODO: renskriv.
+This project started with an introduction to existing tools and infrastructure
+at Last.fm. The introduction also included specifying requirements on the final
+product, and introduction to several important concepts in data warehousing
+(such as OLAP). The concepts were presented with related literature and research
+papers.
 
-This section describes how we structured our work over the course of the thesis
-project. It describes how we, by working in an exploratory fashion, reached a
-good understanding of the problem at hand, and how we successively moved closer
-to a working solution by building early prototypes and iteratively improving
-upon them.
+The general procedure of the thesis project was done as exploratory work, which
+involved rapid prototyping on sub problems and iteratively improving these
+prototypes. A working system solution successively moved closer when more of
+these sub problems was solved in a satisfactory manner.
 
-The design phase, which we entered once our understanding of the problem scope
-and its theoretical solution was satisfactory, and the following implementation
-are described, followed by a summary of our tools studies.
-
-
-\subsection*{Beginning}
-
-% not so sure I like this section much..
-
-We entered this project with a basic understanding of the problem Last.fm wanted
-to solve but with little formal knowledge of the problem domain. We were tasked
-with building a data store that would hopefully replace the store that was
-presently in use.
-
-We met the relevant people, were introduced to the current system and were
-presented with literature in the area, namely OLAP Solutions and Whatever in
-Data Warehousing.
+Once a thourough understanding of the problem scope and its theoretical solutian
+the design were entered. Finally a short implementation phase was executed.
 
 
-\subsection*{Exploration}
+\subsection*{Literature Studies}
 
-The possible tools were explored by testing and benchmarking them.
+To establish good understanding of the problem in general and new concepts,
+literature and research papers were studied. The concepts studied are data
+warehousing, OLAP, distributed storage with column-oriented databases such
+as BigTable, and distributed computing with the MapReduce pattern and
+frameworks.
 
-The problem area was explored by prototyping solutions to a given subproblem.
+Also a lot of related and surronding, possibly useful, concepts were studied;
+although some of these never made it to the final solution.
+\cite{pig,mapreducemerge}
 
 
-\subsubsection*{Software}
+\subsection*{Software}
 
 There exists several MapReduce frameworks, for example Apache Hadoop and
 Disco\cite{disco} which are both free software. As mentioned in the scope
@@ -699,47 +704,39 @@ databases utilize. The result was that setting up CouchDB with replication,
 which would spread the work, required hands-on work.
 
 
-\subsubsection*{Benchmarks}
+\subsubsection{Benchmarks}
 
-Only HBase made it this far, the other databases in the roster were hard or
+In order to evaluate software which candidated for taking responsibility for the
+data storage, benchmarked were planned. Finally, only HBase made it to the
+benchmarking part, the other databases in the roster were difficult or
 impossible to either compile, install, setup, or all of them.
 
-% TODO: need data on this.
-HBase was benchmarked (the benchmarks was similar to the ones found in the
-BigTable paper?).
+TODO: HBase was benchmarked (the benchmarks was similar to the ones found in the
+BigTable paper?). NEEDS DATA!!
 
 
-\subsubsection*{Prototyping}
+\subsection*{Prototyping}
 
-The problem domain was explored by asking, the system to be built and the
-requirements upon it.
+As mentioned above, the problem domain was explored by prototyping solutions to
+sub problems of the greater system. The prototypes were for example used to find
+out if a problem was solvable at all, or what the most efficient implementation
+of an idea was.
 
-To explore the environment, for example, we asked what data sources there are
-(web logs, scrobbling logs and radio streaming logs) and where that data is
-stored (on HDFS, it turned out). We asked how much data the system was supposed
-to handle (lots) and what the output format ought to be (any format, within
-reason).
+Most of the exploration was straight forward. Many questions could be answered
+from observations or by logical reasoning, other questions were more open ended.
+Such an open ended question was deciding on a suitable output format\footnote{An
+output format is a concept in Hadoop; it is a format which the reduce step uses
+to output the results.}. For open ended questions the approach was to first
+reason about suitable solutions, compare them against each other on the drawing
+board and then eventually as prototypes.
 
-Most of the exploration was straight forward: many questions could be answered
-from observations or by logical reasoning. Others were more open-ended, such as
-deciding on a suitable output format. For the open-ended questions we would list
-reasonable options and pitt them against each other, first on the drawing board
-and eventually as prototypes.
-
-% this is a little thin. The prototypes are small pieces of code that would
-TODO: answer questions such as Is it at all possible to.. ? and What is the most
-efficient way to..?
-
-
-\subsection*{Literature studies}
-% vet inte riktigt vad jag vill saga om det har.
-
-Studying previous work in related fields brought OLAP systems to our attention.
-It was to become very influential in our theoretical understanding of the
-subject.
+The first prototypes handled data sources. The different data sources had
+different formats and locations, the related prototypes dealt with how these
+data sources should be analyzed and imported with MapReduce. The succeeding
+prototypes explored export and data storage functionality.
 
 
-\subsection*{Python}
+\subsubsection{Python}
 
 Python is a general-purpose high-level multi-paradigm---amongst others:
 object-oriented, imperative and functional---scripting language. \cite{python}
@@ -752,6 +749,7 @@ rapid prototype development it enables.
 
 \subsection*{Design Phase}
 
+TODO: ALL OF THIS.
 After having become familiar with the problem and its theoretical solution, it
 was time to design the software.
 
@@ -773,12 +771,17 @@ is closely tied to hbase and the qualifier-limit.) If Martin is going to have
 
 \subsection*{Implementation}
 
-The implementation phase was rather small: we would simply stitch together our evolved prototypes and arrive at a solid ground to stand on: we had a system for running MapReduce jobs, storing data in HBase, etc.
+The implementation phase was rather small. The already existing evolved
+prototypes, which solved sub problems, was simply stitched together. The result
+gave a solid ground to stand on: A system which could run import programs
+(MapReduce jobs), shuffle data from the import programs into HBase, and export
+data from HBase through a HTTP API. Data cube implementation was added to this
+resulting system.
 
-Writing code on top of this that performed data cube manipulation was a kinch!
 
+\section{Tools}
 
-\section{Apache Hadoop}
+\subsection{Apache Hadoop}
 
 Hadoop is a free software implementation of Google's MapReduce-framework; it is
 written in Java, and is part of the Apache Software Foundation. Hadoop is a
@@ -786,7 +789,7 @@ fairly mature piece of software and is used in production at numerous companies,
 among them Last.fm. \cite{hadoop}
 
 
-\subsection*{Hadoop Distributed File System}
+\subsubsection{Hadoop Distributed File System}
 
 HDFS is a free software implementation of the GFS\footnote{Google File System}.
 \cite{gfs}
@@ -810,7 +813,7 @@ purpose file systems, but batch applications which read, write, or both,
 large amounts of data.
 
 
-\subsection*{Hadoop streaming}
+\subsubsection{Hadoop streaming}
 
 Any program that reads and outputs to the file pointers \texttt{stdin} and
 \texttt{stdout}, respectively, can be used as MapReduce programs with
@@ -818,14 +821,14 @@ Hadoop Streaming. This makes it possible to use any shell script or
 program which inputs and outputs this way as a MapReduce program.
 
 
-\subsubsection*{Dumbo}
+\subsubsection{Dumbo}
 
 Dumbo is a Python framework for writing Hadoop programs in Python; it exploits
 the Hadoop Streaming Mode to do so. It is used extensively at Last.fm for
 writing short prototypes. \cite{dumbo}
 
 
-\section{Apache HBase}
+\subsection{Apache HBase}
 
 HBase is a free software implementation of Google's BigTable. \cite{bigtable} It
 is a sub-project of Hadoop, written in Java and a part of the Apache Software
@@ -833,7 +836,7 @@ Foundation. HBase is still in its infancy and few organizations use it for
 mission-critical applications. \cite{hbase}
 
 
-\subsection*{Physical storage}
+\subsubsection{Physical storage}
 
 Each column-family is stored as a single file in HBase; it is then subdivided
 into column-qualifiers within this file. This is important to consider when
@@ -841,7 +844,7 @@ designing application and schemas, since reading from several column-families
 will open several files.
 
 
-\subsection*{Sparsity}
+\subsubsection{Sparsity}
 
 When many cells are empty, the table is said to be sparse. This can potentially
 be a problem, because even sparse cells may cost storage space.  BigTable and
@@ -850,7 +853,7 @@ associated with a great storage cost.
 \cite{olap_data_scalability,olap_solutions}
 
 
-\subsection*{Hierarchies}
+\subsubsection{Hierarchies}
 
 Depending on how the row keys are formatted different, hierarchies are created.
 The order in which the data is stored is important, it defines how effective
@@ -867,7 +870,7 @@ are wanted, would mean that ten rows scan are scanned of which all are
 used.
 
 
-\subsection*{Thrift}
+\subsubsection{Thrift}
 
 HBase has a Thrift server which serves as the interface to languages other than
 Java---for instance Python.
@@ -881,7 +884,7 @@ Thrift was originally developed at Facebook and in April 2007 it was released as
 free software. It entered the Apache Incubator in May 2008.
 
 
-\section{Dependability}
+\subsection{Dependability}
 
 Regarding the infrastructure, both Hadoop and HBase have high availability,
 reliability, and scalability.
@@ -942,8 +945,9 @@ time constraints when implementing Zohmg.
 Because BigTable stores data sorted on row keys, it was decided that Zohmg only
 supports time-series-based data. Having data sorted between nodes in a computer
 cluster balances the network, computational, and storage loads, resulting in
-more even utilization of the cluster. Since Zohmg only supports time-series,
-each query has to be made over a time range.
+more even utilization of the cluster. Time-series analysis is also the most
+common for logs, since each entry is time-stamped. \cite{discoveringweb} Since
+Zohmg only supports time-series, each query has to be made over a time range.
 
 It was decided that the row keys should consist of unit and time-stamp. This
 would keep related data within close range, e.g. all rows with the same unit
@@ -969,15 +973,14 @@ was made to only store aggregates.
 
 \section*{Summary}
 
-% TODO
 The first section of this chapter talked about the procedure during the thesis
 work. It described the exploratory model and the prototyping performed, as well
-as the design phase that led up to the implementation.
+as the design phase which led to the implementation.
 
 The following sections presented and discussed the selected tools; they also
-discussed the impact on design and implementation choices.
+discussed the tools' impact on design and implementation choices.
 
-The last section describes the scope of the thesis.
+The last section described the scope of the thesis.
 
 
 
