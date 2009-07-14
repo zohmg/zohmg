@@ -556,6 +556,13 @@ interesting: storing aggregates for the slices of the cube that is
 interesting is both a time and space save, and in many cases the only
 feasible solution.
 
+TODO: -- Limits on cardinality --
+
+[What are the limits of our system? How high cardinality do we support? (This
+is closely tied to hbase and the qualifier-limit.) If Martin is going to have
+\textit{normalized\_path} as one of his dimensions, we might run into trouble.]
+
+
 % export.
 Due to the several different data sources, there exist several different types
 of applications one could build on top of Zohmg. Therefore the system does not
@@ -749,24 +756,19 @@ rapid prototype development it enables.
 
 \subsection*{Design Phase}
 
-TODO: ALL OF THIS.
-After having become familiar with the problem and its theoretical solution, it
-was time to design the software.
+After familiarity with the problem and its theoretical solution was reached,
+the design phase was entered. During this phase a grand design for the system
+was layed out.
 
-Our initial design was ambitious: it contained, amongst other things, a query
-language and sub-components for query analyzation, to identity the most common
-queries, and for query optimization. These are likely advantageous features in a
-large data store but one can do without them.
+The initial design was ambitious; it contained, amongst other things, components
+to import, store, and exporte data, a query language and sub-components for
+query analyzation. The intended tasks for these components were to identify the
+most common queries and optimization. These features are likely advantageous in
+a large data store but it is possible to do without them.
 
-In the end, we much simplified our initial design and ended up with a design
-that was simpler and more to-the-point.
-
-% TODO: method.
-TODO: -- Limits on cardinality --
-
-[What are the limits of our system? How high cardinality do we support? (This
-is closely tied to hbase and the qualifier-limit.) If Martin is going to have
-\textit{normalized\_path} as one of his dimensions, we might run into trouble.]
+In the end, it was decided to use a simplified version of the initial design.
+As mentioned in chapter 3 in the section System Components, the final design
+only included components to import, store, and export data.
 
 
 \subsection*{Implementation}
@@ -961,14 +963,18 @@ since it is not summable.
 
 Zohmg is designed as a data store, which simply imports, stores, and exports
 data. Although presenting the data is important, this is left to the user to
-solve. This restriction was made because of keeping the implementation simple,
-and more general.
+solve. The section Design Phase in this chapter mentions an original plan where
+a query language and sub-components for optimization were included. In the end,
+these were left out. These restrictions were made because of keeping the
+implementation simple, and more general.
 
 Because the data sources are typically large, the storage needs to be efficient.
 Storing the analyzed data can be done in different ways, for instance storing
 the raw data or just aggregates. Storing the raw data is very expensive, since
 it would basically copy the data to the data store. Because of this the decision
 was made to only store aggregates.
+
+TODO: add summary on cardinality limits on cardinality here.
 
 
 \section*{Summary}
