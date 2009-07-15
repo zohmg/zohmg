@@ -209,7 +209,7 @@ the data store will be queried, and the user user expects a, at least close to,
 direct response.
 
 HDW is a system whose goal is to create a high performance large scale data
-warehouse based on MapReduce and Bigtable. \cite{hdw}
+warehouse based on MapReduce and BigTable. \cite{hdw}
 
 Omniture is a data warehouse used at Last.fm. Criticism against Omniture is
 that it is cumbersome and slow to use. \cite{omniture}
@@ -219,7 +219,7 @@ that it is cumbersome and slow to use. \cite{omniture}
 
 This thesis describes the Zohmg system and how to use it.
 
-In chapter 2 general data warehous concepts are introduced; it also introduces
+In chapter 2 general data warehouse concepts are introduced; it also introduces
 new techniques that the reader might not know.
 
 Chapter 3 establish the theoretical base of the problem statement, and the
@@ -237,8 +237,6 @@ conclusion.
 In appendix A an example work flow is presented. Appendix B contains a glossary.
 
 
-
-% CONCEPTS IN DATA WAREHOUSING, by clark de jean
 \chapter{Concepts}
 
 \chapterquote{ I don't let go of concepts - I meet them with understanding.
@@ -348,7 +346,7 @@ longer access times for those aggregates that were not pre-computed.
 \section{New Techniques}
 
 Classic data warehouses use relational databases as storage. A star or snowflake
-schema would be used to modell the dimensions.
+schema would be used to model the dimensions.
 
 New techniques that have appeared include column-oriented, schema free
 databases. Google's BigTable is such a database. Another new technique for
@@ -523,7 +521,7 @@ be able to easily import data from these logs, taking in to account both the
 locality of the data as well as the structure of the individual data records.
 
 % import.
-The Zohmg import component concists of a framework which enables the user to
+The Zohmg import component consists of a framework which enables the user to
 write import programs. The import component handles half of the MapReduce
 pattern, the reduce part; it also adds an interface for relaying the imported
 data to the storage component. The import programs written by the user include
@@ -615,8 +613,8 @@ to scale well. In this sense, scaling means that adding more hardware should, in
 a best case scenario, add all of the computational power of the new hardware.
 
 % fit in existing eco system.
-The system needs to co-exist and integrate seamlessly with the already existing
-hardware and software eco-system at Last.fm. Thus, building on top of already
+The system needs to coexist and integrate seamlessly with the already existing
+hardware and software eco system at Last.fm. Thus, building on top of already
 existing software is a natural choice.
 
 
@@ -634,7 +632,7 @@ discussed.
 
 Furthermore the requirements on the Zohmg system were discussed; the four key
 requirements are: ease of use, speed, scaling, and fitting into the existing
-hardware and software eco-system.
+hardware and software eco system.
 
 
 
@@ -668,7 +666,7 @@ involved rapid prototyping on sub problems and iteratively improving these
 prototypes. A working system solution successively moved closer when more of
 these sub problems was solved in a satisfactory manner.
 
-Once a thourough understanding of the problem scope and its theoretical solutian
+Once a thorough understanding of the problem scope and its theoretical solution
 the design were entered. Finally a short implementation phase was executed.
 
 
@@ -699,7 +697,7 @@ MongoDB, Hypertable. CouchDB is a document-oriented database.
 These databases were explored and tested, but most of them were in a very early
 phase of development and hard to even install. The experience was that HBase was
 the most mature of them. Maturity was the compound experience with the software:
-community, codebase, documentation, stability etc. HBase is also tightly coupled
+community, code base, documentation, stability etc. HBase is also tightly coupled
 with Hadoop which is used in production at Last.fm.
 
 CouchDB was experienced to be mature as well but lacked integration with
@@ -758,11 +756,11 @@ rapid prototype development it enables.
 
 After familiarity with the problem and its theoretical solution was reached,
 the design phase was entered. During this phase a grand design for the system
-was layed out.
+was laid out.
 
 The initial design was ambitious; it contained, amongst other things, components
-to import, store, and exporte data, a query language and sub-components for
-query analyzation. The intended tasks for these components were to identify the
+to import, store, and export data, a query language and sub-components for
+query analysis. The intended tasks for these components were to identify the
 most common queries and optimization. These features are likely advantageous in
 a large data store but it is possible to do without them.
 
@@ -797,7 +795,7 @@ HDFS is a free software implementation of the GFS\footnote{Google File System}.
 \cite{gfs}
 
 The goal of HDFS is to store large data sets while being able to handle
-hardware failure and being deployed in heterogenous hardware and software
+hardware failure and being deployed in heterogeneous hardware and software
 eco systems. Additionally, the Hadoop and HDFS interaction is designed with
 the notion that it is cheaper to move the computation, MapReduce programs,
 to the data than the other way around.
@@ -959,7 +957,7 @@ decided that queries only support a single unit to be queried.
 
 All measures are integers. Sum is the only supported aggregation function. The
 data store does not support reach-like data (i.e. number of unique visitors)
-since it is not summable.
+since it is not sumable.
 
 Zohmg is designed as a data store, which simply imports, stores, and exports
 data. Although presenting the data is important, this is left to the user to
@@ -1009,7 +1007,7 @@ implementation; it will present example data as well as an example user map
 function to import this. The third section presents the implementation of data
 interchange between Zohmg and other software, such as Hadoop, Dumbo, and HBase,
 but also throughout the Zohmg system. The third section also presents the
-implementation details of the Zohmg system's exporting compontent.
+implementation details of the Zohmg system's exporting component.
 
 
 \section{Project Management}
@@ -1045,8 +1043,8 @@ handling data to be imported.
 
 The data set files reside in the project's \texttt{config} directory. The data
 sets are configured using YAML\footnote{YAML Ain't a Markup Language}, a
-human-readable data serializaton format. Any human-readable configure file
-method could have been chosen. YAML was choosen because it is is very simple
+human-readable data serialization format. Any human-readable configure file
+method could have been chosen. YAML was chosen because it is is very simple
 for humans to read and edit, and likewise for machines. The Python module
 PyYAML was used to implement the YAML configuration reading part. \cite{pyyaml}
 
@@ -1067,7 +1065,7 @@ In order to import data to Zohmg, the user writes a map function in Python which
 Zohmg wraps; interpreting the output from the mapper program and storing it in
 HBase.
 
-A standard MapReduce map function emits key-value pairs. The Zohmg usermap
+A standard MapReduce map function emits key-value pairs. The Zohmg user map
 function, instead, emits triples (tuples with three values), which consist of a
 time-stamp, a hash table of dimensions and their respective values, and a hash
 table with measurements (values). In effect, the dimensions and the time-stamp
@@ -1125,9 +1123,9 @@ appropriate fields, such as useragent and statuscode.
 
 For every line of the log file (the value argument to the map function), a point
 in n-space (the dimensions and the time-stamp) is emitted together with a count
-of pageviews and bytes; one pageview per request and the number of bytes served
+of page views and bytes; one page view per request and the number of bytes served
 in the request. It is possible to add logic here, perhaps only counting requests
-from useragents that are not web spiders which resulted in a HTTP 200 status
+from user agents that are not web spiders which resulted in a HTTP 200 status
 code.
 
 The last line \textit{yields} the tuple. This is a Python construct, similar to
@@ -1176,7 +1174,7 @@ The user will import a day worth of logs by invoking
    /data/weblogs/2009/04/20
 \end{verbatim}
 
-This will instruct zohmg to apply the map function found in \texttt{apache.py}
+This will instruct Zohmg to apply the map function found in \texttt{apache.py}
 to all logs that it can find in the directory \texttt{/data/weblogs/2009/04/20}
 on HDFS. The emitted output is duly collected and projections are carefully
 stored in the data store.
@@ -1198,7 +1196,7 @@ and projections and dimensions.
 \section{Data Interchange}
 
 % TODO: data interchange.
-The reducer needs to communicate to the OutputReader under what rowkey,
+The reducer needs to communicate to the OutputReader under what row key,
 column-family and qualifier to store the computed sum. It does this by
 emitting the row key as the key and a JSON-serialized map of the form \\
 \texttt{\{"column-family:qualifier" : value\}}.
@@ -1253,8 +1251,8 @@ that acts as an intermediary.
 
 The data export server is built with a WSGI\footnote{Web Server Gateway
 Interface, a HTTP extension where a CGI-like environment is passed around.}
-framework, which includes both middleware and application parts. The middleware
-applications are responsible for dispatching requests to the corresponding
+framework, which includes both middleware and application parts. The middle
+ware applications are responsible for dispatching requests to the corresponding
 application or file. WSGI middleware receives a WSGI request and then performs
 logic upon this request, before passing the request to a WSGI application.
 \cite{paste,definitive_guide_to_pylons} Since the main goal was not to build a
@@ -1306,7 +1304,7 @@ wanted values associated with these variables.
    &d0=country&d0v=SE
 \end{verbatim}
 
-The above query would return the pageviews for SE between 1 January
+The above query would return the page views for SE between 1 January
 2009 and 4 April 2009. The results from the scan is served to the user as
 JSONP\footnote{JSON with padding: JSON extension which adds name of callback
 function as an argument to the function itself.}.
@@ -1330,7 +1328,7 @@ transformed result to the user as JSONP.
 \section*{Summary}
 
 This chapter's first section has presented the implementation of the Zohmg
-system. The concept of Zohmg project's and management of thesame were
+system. The concept of Zohmg project's and management of the same were
 introduced; as well as how these are configured. The second section presented
 how to import data with Zohmg, giving examples of data and the user map
 function. In the third, and final, section Zohmg's data interchange was
@@ -1538,7 +1536,7 @@ submitted to the data server via HTTP, a query could look like
    &d0=country&d0v=SE
 \end{verbatim}
 
-The above query would return the pageviews for SE between 1 January
+The above query would return the page views for SE between 1 January
 2009 and 4 April 2009.
 
 
@@ -1661,7 +1659,7 @@ how we leverage sparsity*.
 
 From a user's perspective, storing aggregates in Zohmg is as simple as writing
 a map function (in the MapReduce sense) and letting Zohmg run that map function
-over the data set. The user's map function is called \textit{usermap function}
+over the data set. The user's map function is called \textit{user map function}
 from here on. In order to let Zohmg know what output to expect from the mapper,
 the user also defines the dimensions and units of his data. After all, the user
 most likely knows his own data better than anyone else.
