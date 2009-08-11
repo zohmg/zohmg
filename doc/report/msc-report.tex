@@ -363,25 +363,24 @@ The framework C was ...
 
 \subsection{BigTable}
 
-BigTable is a data store designed for traversal of very large data sets.
-BigTable's cells are basically indexed by row key, column key, and a time-stamp.
-Each row has a key and any number of cells attached to it. The rows in a table
-are sorted by their keys. The typical use-case of BigTable is to scan a range of
-rows. It is therefor important to set up the row keys so that related data is
-close to each other. For example, if it makes sense to traverse the data in
-chronological order, the key might contain a representation of the data's
-time-stamp. The classic example is to have the reversed domain name (i.e.
-com.google.www) as the row key, which means that all sub-domains of any domain
-are next to each other (see table 2.1).
+BigTable is a data store designed for storing very large data sets. BigTable's
+cells are basically indexed by row key, column key, and a time-stamp. Each row
+has a key and any number of cells attached to it. The rows in a table are sorted
+by their keys. The typical use-case of BigTable is to scan a range of rows. It
+is therefor important to set up the row keys so that related data is close to
+each other. For example, if it makes sense to traverse the data in chronological
+order, the key might contain a representation of the data's time-stamp. The
+classic example is to have the reversed domain name (i.e. com.google.www) as the
+row key, which means that all sub-domains of any domain are next to each other
+(see table 2.1).
 
 
 \subsubsection{Data Model}
 
-BigTable's data model can indeed be thought of as a sparse distributed
-multidimensional sorted map. In concept, this multidimensional map is identical
-to a nested hash table. The dimensions of this multidimensional map is mapped
-out on the row key, the column family and the column qualifier, and possibly
-also of the version time-stamp.
+BigTable's data model can indeed be thought of as a sparse, distributed, sorted,
+multidimensional map. In concept, this multidimensional map is identical to a
+nested hash table. The dimensions of the map are: row key, column family and
+column qualifier, and a version time-stamp.
 
 \vspace{12pt}
 
@@ -392,7 +391,7 @@ also of the version time-stamp.
 \vspace{12pt}
 
 The data model is a simple one: Rows of data are stored in labeled tables. Each
-row is indexed with a row key, a column key, and a time-stamp. The columns have
+row is indexed with a row key, a column key, and a time-stamp. The column keys have
 the form "column-family:qualifier", where the column-family is one of a number
 of fixed column-families defined by the table's schema, and the qualifier is an
 arbitrary string specified by the application. In effect, column-families are
