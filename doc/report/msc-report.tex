@@ -26,20 +26,20 @@ data. [DRAFT]}
 
 % TODO: use less buzzwords; focus on the problem.
 
-Analyzing data at a massive scale is one of the biggest challenges we face at
-Last.fm. Interpreting patterns in user behaviour becomes a challenge when
-millions of users interact in billions of combinations; the data sets must be
-analyzed, summarized and presented visually in order to convey their meaning.
+Analyzing data at a massive scale is one of the biggest challenges that
+Last.fm is facing. Interpreting patterns in user behaviour becomes a challenge
+when millions of users interact in billions of combinations; the data sets
+must be analyzed, summarized and presented visually.
 
 This thesis describes a data store for multi-dimensional time-series-based data.
 Measurements are summarized across multiple dimensions. The data store is
 optimized for speed of data retrieval: one of the design goals is to serve data
 at mouse-click rate to promote real-time data exploration.
 
-Similar data stores exist; they generally use relational database systems as
-their backing database. The novelty of our approach is to model multidimensional
-data cubes on top of a column-oriented database, reaping the scalability
-benefits of such databases.
+Similar data stores do exist but they generally use relational database systems
+as their backing database. The novelty of our approach is to model
+multidimensional data cubes on top of a distributed, column-oriented database to
+reap the scalability benefits of such databases.
 
 
 \tableofcontents
@@ -245,9 +245,9 @@ Then they let go of me.}{Byron Katie}
 
 \section*{Introduction}
 
-This chapters first section presents data warehouses and the concept of data
-cubes. It then introduces common operations on data cubes: projections, slicing
-and dicing, and aggregation.
+This first section of this chapter presents data warehouses and the concept of
+data cubes. It then introduces common operations on data cubes: projections,
+slicing and dicing, and aggregation.
 
 The last section features new techniques in distributed storage and computing;
 these techniques are Google's BigTable and MapReduce.
@@ -428,12 +428,15 @@ versioning of data.
 
 \subsection{MapReduce}
 
-MapReduce is a framework for running jobs in parallel across multiple
-machines. As the name implies, MapReduce is made up of two parts or
-phases: map and reduce. The map phase consumes one piece of input at a
-time (a piece of input can be a line from a log file, for example), and
-emits an intermediate key and value. These keys and values are then
-processed by the reduce phase, which emits the final key-value pairs.
+MapReduce is a framework for distributed computations on large data sets in
+parallel across multiple clustered computers. It was inspired by the map and
+reduce functions commonly found in functional programming languages.
+
+As the name implies, MapReduce is made up of two parts or phases: map and
+reduce. The map phase consumes one piece of input at a time (a piece of input
+can be a line from a log file, for example), and emits an intermediate key and
+value. These keys and values are then processed by the reduce phase, which emits
+the final key-value pairs.
 
 MapReduce works by splitting the input, which commonly is in the size
 range of many gigabytes, into \textit{n} parts and lets each node of the
@@ -442,6 +445,7 @@ key-value pairs which are fed into the reduce phase. The final output is
 collated, usually on a distributed file system.
 
 TODO: expand.
+TODO: graph.
 
 \section*{Summary}
 
