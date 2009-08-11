@@ -391,13 +391,13 @@ column qualifier, and a version time-stamp.
 \vspace{12pt}
 
 The data model is a simple one: Rows of data are stored in labeled tables. Each
-row is indexed with a row key, a column key, and a time-stamp. The column keys have
-the form "column-family:qualifier", where the column-family is one of a number
-of fixed column-families defined by the table's schema, and the qualifier is an
-arbitrary string specified by the application. In effect, column-families are
-pre-announced when creating the table while qualifiers are not. The contents of
-each column family are stored together, so the user will want to store items
-that have similar characteristics in the same column family.  Each data point is
+row is indexed with a row key, a column key, and a time-stamp. The column keys
+have the form "column-family:qualifier", where the column-family is one of a
+number of fixed column-families defined by the table's schema, and the qualifier
+is an arbitrary string specified by the application. In effect, column-families
+are pre-announced when creating the table while qualifiers are not. The contents
+of each column family are stored together, so the user will want to store items
+that have similar characteristics in the same column family. Each data point is
 called a cell. A cell is an uninterpreted array of bytes, there are no data
 types, and it is up to the application to interpret the data correctly. The
 table can store any number of time-stamped versions of each cell, allowing
@@ -427,24 +427,26 @@ versioning of data.
 
 \subsection{MapReduce}
 
-MapReduce is a framework for distributed computations on large data sets in
-parallel across multiple clustered computers. It was inspired by the map and
-reduce functions commonly found in functional programming languages.
+MapReduce is a software framework for distributed computations on very large
+data sets. The computations are run in parallel across a network of computers.
 
 As the name implies, MapReduce is made up of two parts or phases: map and
-reduce. The map phase consumes one piece of input at a time (a piece of input
-can be a line from a log file, for example), and emits an intermediate key and
-value. These keys and values are then processed by the reduce phase, which emits
-the final key-value pairs.
+reduce. The user specifies a map function that consumes a single key/value pair
+to generate a set of intermediate key/value pairs, and a reduce function that
+merges all intermediate values that belongs to the same key. The abstraction of
+two functions to process skmall parts of the large data set was inspired by the
+map and reduce functions commonly found in functional programming languages such
+as Lisp. The use of this model allows the framework to easily parallelize the
+computations. In the inevitable case of a failure at a computational node, the
+computations that failed can simply be re-executed on another node.
 
-MapReduce works by splitting the input, which commonly is in the size
-range of many gigabytes, into \textit{n} parts and lets each node of the
-computing cluster work on one or more parts. The mapper on each node emits
-key-value pairs which are fed into the reduce phase. The final output is
-collated, usually on a distributed file system.
+MapReduce splits the input into \textit{n} pieces and assigns each computational
+node of the cluster to work on one or more piece. The map function runs on each
+node and emits key/value pairs. These are passed to the reduce function where
+the values are collated by the reduce function.
 
-TODO: expand.
-TODO: graph.
+[graphical element]
+
 
 \section*{Summary}
 
