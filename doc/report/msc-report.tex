@@ -757,12 +757,13 @@ interesting: storing aggregates for the slices of the cube that is
 interesting is both a time and space save, and in many cases the only
 feasible solution.
 
-TODO: -- Limits on cardinality --
-
-[What are the limits of our system? How high cardinality do we support? (This
-is closely tied to hbase and the qualifier-limit.) If Martin is going to have
-\textit{normalized\_path} as one of his dimensions, we might run into trouble.]
-
+Because of the distributed nature of HBase and its ability to store a very large
+number of rows, there is no actual upper bound on the cardinality supported by
+Zohmg. There may however be complex queries that have filters on
+high-cardinality that Zohmg will be unable to answer. This can be remedied in
+part by setting up projections that cater especially to those queries, but the
+issue can not be fully avoided. The authors have successfully stored data where
+the cardinality of the dimensions exceeded millions.
 
 % export.
 Due to the several different data sources, there exist several different types
@@ -1152,12 +1153,6 @@ more even utilization of the cluster. Time-series analysis is also the most
 common for logs, since each entry is time-stamped. \cite{discoveringweb} Since
 Zohmg only supports time-series, each query has to be made over a time range.
 
-It was decided that the row keys should consist of unit and time-stamp. This
-would keep related data within close range, e.g. all rows with the same unit
-would be stored next to each other. This means reading data with different units
-would imply expensive jumps within the stored data. Because of this it was
-decided that queries only support a single unit to be queried.
-
 All measures are integers. Sum is the only supported aggregation function. The
 data store does not support reach-like data (i.e. number of unique visitors)
 since it is not sumable.
@@ -1174,8 +1169,6 @@ Storing the analyzed data can be done in different ways, for instance storing
 the raw data or just aggregates. Storing the raw data is very expensive, since
 it would basically copy the data to the data store. Because of this the decision
 was made to only store aggregates.
-
-TODO: add summary on cardinality limits on cardinality here.
 
 
 \section*{Summary}
@@ -1203,81 +1196,115 @@ work, and luck is 90 percent.}{Guy Kawasaki}
 
 \section*{Introduction}
 
-This chapter will present the implementation of the Zohmg system. For a usage
-manual see the appendix.
+This chapter will present the implementation of Zohmg. For a usage manual, see
+the appendix.
 
 % TODO: Do we need to talk about the storage implementation?
 
 In the first section the implementation of project creation, configuration, and
-setup, will be presented. The second section features the data import
-implementation; it will present example data as well as an example user map
-function to import this. The third section presents the implementation of data
-interchange between Zohmg and other software, such as Hadoop, Dumbo, and HBase,
-but also throughout the Zohmg system. The third section also presents the
-implementation details of the Zohmg system's exporting component.
+setup will be presented. The second section features the data import
+implementation. It will present example data as well as an example user map
+function to show this. The third section presents the implementation of data
+interchange between Zohmg and other software such as Hadoop, Dumbo, and HBase.
+It also shows an overall of Zohmg. The third section also presents the
+implementation details of Zohmg's data export component.
 
 
 \section{Project Management}
 
-Zohmg uses the concept of projects. These projects are self contained
-application data directories which are used with Zohmg. A Zohmg project is
-necessary for using Zohmg; they are created with a management script, which is
-also used for interacting with the Zohmg system. When the user has created a
-Zohmg project directory further actions can be performed. The Zohmg projects
-reside within a project directory, which contains five directories:
-\texttt{clients}, \texttt{config}, \texttt{lib}, \texttt{mappers}, and
-\texttt{transformers}. The details of these directories are presented throughout
-this chapter.
+Zohmg employes the concept of projects. A project is a self contained
+application data directory. A Zohmg project is necessary for using Zohmg; they
+are created with a management script, which is also used for interacting with
+the Zohmg system. When the user has created a Zohmg project directory further
+actions can be performed. The Zohmg projects reside within a project directory,
+which contains five directories: \texttt{clients}, \texttt{config},
+\texttt{lib}, and \texttt{mappers}. The details of these directories are
+presented throughout this chapter.
 
 
 \subsection*{Configuration}
 
-The Zohmg system needs configuration of the user's data sets and the environment
-for Hadoop and Dumbo. When the data set files are configured, the user runs the
-management script, which executes the configuration and creates tables in HBase
-according to the configuration.
+Zohmg needs configuration of the user's data sets and the environment for Hadoop
+and Dumbo. When the data set files are configured, the user runs the management
+script, which executes the configuration and creates tables in HBase according
+to the configuration.
 
 
 \subsubsection*{Data Sets}
 
-% TODO: define what a data set is, and what makes it different from a project.
+A data set is any set of data that the user has. Zohmg requires the user to
+write a configuration that describes the attributes of the data. The
+configuration of a data set is a list of dimensions and projections. This
+configuration will be read during the import phase to match analysed data
+against the schema definition.
 
-In this context a data set is the schema that the user defines for wanted data
-sets to be handled by Zohmg. The configuration of a data set is simply a list
-of dimensions and projections, which will layout the HBase tables according to
-the schema. This configuration will also be read during the import phase, for
-handling data to be imported.
+The data set configuration files reside in the project's \texttt{config}
+directory. The data sets are configured using YAML\footnote{YAML Ain't a Markup
+Language}, a human-readable data serialization format. Any human-readable
+configure file method could have been chosen. YAML was chosen because it is is
+very simple for humans to read and edit, and likewise for machines. The Python
+module PyYAML was used to implement the YAML configuration reading part.
+\cite{pyyaml}
 
-The data set files reside in the project's \texttt{config} directory. The data
-sets are configured using YAML\footnote{YAML Ain't a Markup Language}, a
-human-readable data serialization format. Any human-readable configure file
-method could have been chosen. YAML was chosen because it is is very simple
-for humans to read and edit, and likewise for machines. The Python module
-PyYAML was used to implement the YAML configuration reading part. \cite{pyyaml}
+A typical configuration looks like this:
+
+\begin{lstlisting}[caption=A data set configuration example.,captionpos=b]
+dataset: submissions
+
+dimensions:
+ - artist
+ - track
+ - user
+
+projections:
+ - artist
+ - user
+ - user-artist
+ - user-track
+ - artist-track
+
+units:
+ - scrobbles
+ - loves
+ - bans
+ \end{lstlisting}
 
 
 \subsubsection*{Environment}
 
-The environment is a Python script which defines run-time variables, required by
-Hadoop and Dumbo. Using a Python script for run-time variables leaves the
-problem of validation to Python. The environment configuration file resides in
-the project's \texttt{config} directory.
+The execution environment is described by a Python script. In it are defined
+run-time variables which are required by Hadoop and Dumbo, namely the Java class
+path and the absolute path to the Hadoop directory.
 
-
+By using a Python script for run-time variables leaves the problem of validation
+to Python. The environment configuration file resides in the project's
+\texttt{config} directory.
 
 
 \section{Importing}
 
-In order to import data to Zohmg, the user writes a map function in Python which
-Zohmg wraps; interpreting the output from the mapper program and storing it in
-HBase.
+In order to import data to Zohmg, the user writes a map function in Python.
+Zohmg employs Dumbo to run the map function on the Hadoop instance defined by
+the hadoop home variable.
 
 A standard MapReduce map function emits key-value pairs. The Zohmg user map
-function, instead, emits triples (tuples with three values), which consist of a
+function emits triples (tuples with three values), which consist of a
 time-stamp, a hash table of dimensions and their respective values, and a hash
-table with measurements (values). In effect, the dimensions and the time-stamp
-specify a point in n-space and the measurements represent the observations made
-at that point.
+table with units and their respective measurements (values). In effect, the
+dimensions and the time-stamp specify a point in n-space (the key) and the
+measurements represent the observations made at that point (the value(s)).
+
+A reducer function that is specific to Zohmg is employed to perform aggregation
+on the output from the map phase. The reducer sums the measurements for each
+point in n-space and for each unit and emits the resulting aggregates.
+
+The output from the reducer is interpreted by a custom output reader. Commonly,
+an output reader stores the output of the reduce phase on disk. The output
+reader that Zohmg employs instead stores the aggregates in HBase. It is written
+in Java.
+
+\subsection*{Example of Importing}
+
 
 % TODO: move apache logs to introduction perhaps.
 An example data source is the Apache HTTP Server access logs. The Combined Log
@@ -1314,10 +1341,10 @@ Apache access logs.},captionpos=b]
       dimensions = {'useragent' : log.useragent,
                     'path'      : log.path,
                     'status'    : log.statuscode}
-      values = {'pageviews' : 1,
-                'bytes'     : log.size}
+      measurements = {'pageviews' : 1,
+                      'bytes'     : log.size}
 
-      yield log.timestamp,dimensions,measurements
+      yield log.timestamp, dimensions, measurements
 \end{lstlisting}
 
 \vspace{12pt}
@@ -1377,8 +1404,7 @@ that persists the data to HBase.
 The user will import a day worth of logs by invoking
 
 \begin{verbatim}
-   zohmg import mappers/apache.py \
-   /data/weblogs/2009/04/20
+   zohmg import mappers/apache.py /data/weblogs/2009/04/20
 \end{verbatim}
 
 This will instruct Zohmg to apply the map function found in \texttt{apache.py}
@@ -1389,65 +1415,59 @@ stored in the data store.
 
 \section{Storage / Data Model}
 
-% TODO: renskriv.
-The typical use case for Zohmg is to read one or more column-qualifiers,
-which correspond to one or more points in n-space, over a range of time.
-Therefor, the keys are made up of the time and unit of the measurement,
-and the qualifier queried for represents the point in n-space. More on
-this in the data model section.
+The underlying data store is HBase, which is a column-oriented database. Column
+families are pre-defined, but everything else, such as column qualifiers and
+rowkeys, can assume arbitrary values.
 
-Explain our data model, the relation between column-families, column-qualifiers
-and projections and dimensions.
+Zohmg models the aggregated data with this in mind. An HBase table is created
+for each data set, and in the table is a single column family called 'unit'. For
+every unit that the data set contains there will be a column qualifier. For
+example, 'unit:pageviews' would be one such column qualifier in the example
+above. Employing the qualifier to encode arbitrary unit names means that the
+user can add new units to his data set configuration without having to change
+the schema of the HBase table.
+
+Zohmg stores one or more projections of the data, and each projection is made up
+of one or more dimensions in addition to the ever-present time dimension. Every
+dimension is a tuple of dimension name and dimension value. The dimension tuples
+of the projection are stored in the rowkey. The rowkey is a string; the
+dimension names and values are separated by a dash. As such, the dash is one of
+the few disallowed characters in dimension names and values.
+
+For example, a rowkey for the projection of the user agent and status code
+dimensions might look like this:
+
+\begin{lstlisting}[caption=Example of rowkeys,captionpos=b]
+    useragent-firefox-statuscode-200-20090420
+    useragent-firefox-statuscode-200-20090421
+    useragent-firefox-statuscode-200-20090422
+    ..
+    useragent-firefox-statuscode-404-20090420
+    useragent-firefox-statuscode-404-20090421
+    useragent-firefox-statuscode-404-20090422
+    ..
+    useragent-safari-statuscode-200-20090420
+    useragent-safari-statuscode-200-20090421
+    ..
+\end{lstlisting}
+
+The rowkeys are sorted lexicographically. This means that all entries for the
+user agent 'firefox' will be found close to each other. If the data analyst is
+more interested in finding all entries with status code 200, it would make sense
+to set up the projection so that status code is the first dimension.
 
 
-\section{Data Interchange}
+\subsection{Internal Data Interchange}
 
-% TODO: data interchange.
-The reducer needs to communicate to the OutputReader under what row key,
-column-family and qualifier to store the computed sum. It does this by
-emitting the row key as the key and a JSON-serialized map of the form \\
+The reducer needs to communicate to the output reader under what row and column
+the computed aggregate is to be stored. The reducer does this by emitting the
+row key as key, and a JSON-serialized hash table, which is called a dict in
+python, as value. The structure of the map is of the form \\
 \texttt{\{"column-family:qualifier" : value\}}.
 
-The OutputReader interprets the JSON and persists the data. Et voila!
-
-
-\subsection*{Internal}
-
-Using JSON for data interchange between map and reduce parts in Zohmg import
-jobs.
-
-For better performance typed bytes may be used. This is what Dumbo uses
-internally.
-
-
-\subsubsection{Input Formats}
-
-An input format is a Java class which Hadoop uses for interpreting the input
-data.
-
-The simplest input format would be the TextInputFormat, this is used to parse
-flat text files which reside on HDFS.
-
-Hadoop is able to read LZO compressed files with the LzoInputFormat. In order to
-be able to do so effectively the compressed files first have to be indexed with
-a tool that is provided with Hadoop.
-
-% TODO: When is the TableInputFormat used.
-The TableInputFormat is able read input to a Hadoop program from an HBase table.
-
-
-\subsubsection{Output Formats}
-
-% TODO: not truly correct
-% TODO: A detailed explanation of generally everything in the darling dir.
-The Darling output format for HBase. Between Dumbo, which Zohmg uses for data
-import, and Hadoop JSON is used for serializing data.
-
-The Darling output format increased import speed by a factor ten, compared to
-using Thrift. The HBase Thrift interface is slow because it first spawns a Java
-HBase client which interprets everything from the HBase Thrift server.
-This actually adds an extra step to the interaction with HBase making it slower
-than talking to it natively with Java.
+The output reader, which is a Java class that is executed within the Hadoop
+framework, de-serializes the JSON structure and constructs an HBase object that
+is persisted to the underlying HBase data store.
 
 
 \section{Exporting Data}
@@ -1836,6 +1856,374 @@ partition forms a so called \textit{shard}, which may be located on a separate
 database server. The advantage is the number of rows in each table is reduced,
 which reduces index size and thus performance.
 \end{tabular}
+
+
+\chapter{Zohmg README}
+
+\begin{verbatim}
+INTRODUCING: ZOHMG.
+-------------------
+
+Zohmg is a data store for aggregation of multi-dimensional time series data. It
+is built on top of Hadoop, Dumbo and HBase. The core idea is to pre-compute
+aggregates and store them in a read-efficient manner – Zohmg is
+wasteful with storage in order to answer queries faster.
+
+This README assumes a working installation of zohmg. Please see INSTALL for
+installation instructions.
+
+Zohmg is alpha software. Be gentle.
+
+
+CONTACT
+-------
+
+IRC:           #zohmg at freenode
+Code:          http://github.com/zohmg/zohmg/tree/master
+User list:     http://groups.google.com/group/zohmg-user
+Dev list:      http://groups.google.com/group/zohmg-dev
+
+
+RUN THE ZOHMG
+-------------
+
+Zohmg is installed as a command line script. Try it out:
+
+  $> zohmg help
+
+
+AN EXAMPLE: TELEVISION!
+-----------------------
+
+Imagine that you are the director of operations of a web-based
+television channel. Your company streams videos, called "clips".
+
+Every time a clip is streamed across the intertubes, your software
+makes a note of it in a log file. The log contains information about
+the clip (id, length, producer) and about the user watching it
+(country of origin, player).
+
+Your objective is to analyze the logs to find out how many people
+watch a certain clip over time, broken down by country and player,
+etc.
+
+The rest of this text will show you by example how to make sense of
+logs using Zohmg.
+
+
+THE ANATOMY OF YOUR DATA SET
+----------------------------
+
+Each line of the logfile has the following space-delimited format:
+ 
+timestamp clipid producerid length usercountry player love
+
+Examples:
+1245775664 1440 201 722 GB VLC 0
+1245775680 1394 710 2512 GB VLC 1
+1245776010 1440 201 722 DE QUICKTIME 0
+
+The timestamp is a UNIX timestamp, the length is counted in seconds
+and the id's are all integers. Usercountry is a two-letter ISO
+standard code while the player is an arbitrary string.
+
+The last field -- "love" -- is a boolean that indicates whether the user
+clicked the heart shaped icon, meaning that she was truly moved by the
+clip.
+
+
+DO YOU SPEAK ZOHMG?
+-------------------
+
+In the parlance of Zohmg, clip and producer as well as country and
+player are dimensions. 1440, 'GB', 'VLC', etc, are called attributes of
+those dimensions.
+
+The length of a clip, whether it was loved, etc, are called
+measurements. In the configuration, which we will take a look at
+shortly, we define the units of measurements. Measurements must be
+integers so that they can be summed.
+
+Simple enough!
+
+
+CREATE YOUR FIRST 'PROJECT'
+---------------------------
+
+Every Zohmg project lives in its own directory. A project is created
+like so:
+
+  $> zohmg create television
+
+This creates a project directory named 'television'. Its contents are:
+
+ config     - environment and dataset configuration.
+ lib        - eggs or jars that will be automatically included in job jar.
+ mappers    - mapreduce mappers (you will write these!)
+
+
+CONFIGURE YOUR 'PROJECT'
+------------------------
+
+The next step is to configure environment.py and dataset.yaml.
+
+
+config/environment.py:
+
+Define HADOOP_HOME and set the paths for all three jars (hadoop, hadoop-streaming,
+hbase). You might need to run 'ant package' in $HADOOP_HOME to have
+the streaming jar built for you.
+
+
+config/dataset.yaml:
+
+Defining your data set means defining dimensions, projections and
+units.
+
+The dimensions lets Zohmg know what your data looks like while the
+projections hints at what queries you will want to ask. Once you get
+more comfortable with Zohmg you will want to optimize your projections
+for efficiency.
+
+For example, if you wish to find out how many times a certain clip has
+been watched broken down by country, you would want to set up a
+projection where clip is the first dimension and country is the second
+one.
+
+For the television station, something like the following will do just
+fine.
+
+
+## config/dataset.yaml
+
+dataset: television
+
+dimensions:
+ - clip
+ - producer
+ - country
+ - player
+
+projections:
+ - clip
+ - player
+ - country
+ - clip-country
+ - producer-country
+ - producer-clip-player
+
+units:
+ - plays
+ - loves
+ - seconds
+
+
+After you've edited environment.py and dataset.yaml:
+
+  $> zohmg setup
+
+This command creates an HBase table with the same name as your dataset.
+
+Verify that the table was created:
+
+  $> hbase shell
+  hbase(main):001:0> list
+  television
+  1 row(s) in 0.1337 seconds
+
+Brilliant!
+
+
+DATA IMPORT
+-----------
+
+After the project is created and setup correctly it is time to import some
+data.
+
+Data import is a process in two steps: write a map function that analyzes
+the data line for line, and run that function over the data. The data
+is normally stored on HDFS, but it is also possible to run on local data.
+
+
+WRITE A  MAPPER
+----------------
+
+First we'll write the mapper. It will have this signature:
+
+  def map(key, value)
+
+The 'key' argument defines the line number of the input data and is
+usually (but not always!) not very interesting. The 'value' argument is a
+string - it represents a single line of input.
+
+Analyzing a single line of input is straightforward: split the line
+on spaces and collect the debris.
+
+## mappers/mapper.py
+
+import time
+
+def map(key, value):
+    # split on space; make sure there are 7 parts.
+    parts = value.split(' ')
+    if len(parts) < 7: return
+
+    # extract values.
+    epoch = parts[0]
+    clipid, producerid, length = parts[1:4]
+    country, player, love      = parts[4:7]
+
+    # format timestamp as yyyymmdd.
+    ymd = "%d%02d%02d" % time.localtime(float(epoch))[0:3]
+
+    # dimension attributes are strings.
+    dimensions = {}
+    dimensions['clip']     = str(clipid)
+    dimensions['producer'] = str(producerid)
+    dimensions['country']  = country
+    dimensions['player']   = player
+
+    # measurements are integers.
+    measurements = {}
+    measurements['plays']   = 1
+    measurements['seconds'] = int(length)
+    measurements['loves']   = int(love)
+
+    yield ymd, dimensions, measurements
+
+
+The output of the mapper is a three-tuple: the first element is a
+string of format yyyymmdd (i.e. "20090601") and the other two elements
+are dictionaries.
+
+The mapper's output is fed to a reducer that sums the values of the
+units and passes the data on to the underlying data store.
+
+
+
+RUN THE MAPPER
+--------------
+
+Populate a file with a small data sample:
+
+  $> cat > data/short.log
+  1245775664 1440 201 722 GB VLC 0
+  1245775680 1394 710 2512 GB VLC 1
+  1245776010 1440 201 722 DE QUICKTIME 0
+  ^D
+
+Perform a local test-run:
+
+  $> zohmg import mappers/mapper.py data/short.log --local
+
+The first argument to import is the path to the python file containing the map
+function, the second is a path on the local file system.
+
+The local run will direct its output to a file instead of writing to
+the data store. Inspect it like so:
+
+  $> cat /tmp/zohmg-output
+  'clip-1440-country-DE-20090623' '{"unit:length": {"value": 722}}'
+  'clip-1440-country-DE-20090623' '{"unit:plays": {"value": 1}}'
+  'clip-all-country-DE-20090623'  '{"unit:length": {"value": 722}}'
+  [..]
+
+
+If Hadoop and HBase are up, run the mapper on the cluster:
+
+  $> zohmg import mappers/mapper.py /data/television/20090620.log
+
+Assuming the mapper finished successfully there is now some data in
+the HBase table. Verify this by firing up the HBase shell:
+
+  $> hbase shell
+  hbase(main):001:0> scan 'television'
+  [..]
+
+Lots of data scrolling by? Good! (Interrupt with CTRL-C at your leisure.)
+
+
+SERVE DATA
+----------
+
+Start the Zohmg server:
+
+  $> zohmg server
+
+The Zohmg server listens on port 8086 at localhost by default. Browse
+http://localhost:8086/ and have a look!
+
+
+
+THE API
+-------
+
+Zohmg's data server exposes the data store through an HTTP API. Every
+request returns a JSON-formatted string.
+
+The JSON looks something like this:
+
+[{"20090601": {"DE": 270, "US": 21, "SE": 5547}}, {"20090602": {"DE":
+9020, "US": 109, "SE": 11497}}, {"20090603": {"DE": 10091, "US": 186,
+"SE": 8863}}]
+
+
+The API is extremely simple: it supports a single type of GET request
+and there is no authentication.
+
+There are four required parameters: t0, t1, unit and d0.
+
+The parameters t0 and t1 define the time span. They are strings of the
+format "yyyymmdd", i.e. "t0=20090601&t1=20090630".
+
+The unit parameter defines the one unit for which you query, for
+example 'unit=plays'.
+
+The parameter d0 defines the base dimension, for example 'd0=country'.
+
+Values for d0 can be defined by setting the parameter d0v to a
+comma-separated string of values, for example "d0v=US,SE,DE". If d0v is
+empty, all values of the base dimension will be returned.
+
+
+A typical query string looks like this:
+
+ http://localhost:8086/?t0=20090601&t1=20090630&unit=plays&d0=country&d0v=DE,SE,US
+
+This example query would return the number of clips streamed for the
+time span between the first and last of June broken down by the
+countries Sweden, Germany and the United States.
+
+
+The API supports JSONP via the jsonp parameter. By setting this
+parameter, the returned JSON is wrapped in a function call.
+
+
+
+PLOTTING THE DATA
+-----------------
+
+There is an example client bundled with Zohmg. It is served by the Zohmg server
+at http://localhost:8086/graph/ and is quite useful for exploring your dataset.
+
+You may also want to peek at the javascript code to gain some inspiration and
+insight into how the beast works.
+
+The graphing tool uses Javascript to query the data server, and plots
+graphs with the help of Google Charts.
+
+
+
+KNOWN ISSUES
+------------
+
+Zohmg is alpha software and is still learning how to behave properly in mixed
+company. You will spot more than a few minor quirks while using it and might
+perhaps even run into the odd show-stopper. If you do, please let us know!
+
+Zohmg currently only supports mappers written in Python. Eventually, you will
+also be able to write mappers in Java.
+\end{verbatim}
 
 
 \end{document}
