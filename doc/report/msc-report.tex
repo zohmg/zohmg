@@ -12,13 +12,131 @@
 \documentclass[a4paper,10pt]{report}
 \usepackage{graphicx}
 \usepackage{listings}
+\usepackage{chngpage}
 
-\author{Per Andersson, Fredrik M{\"o}llerstrand}
-\title{Zohmg---a large scale data store for aggregated time-series-based
-data. [DRAFT]}
 
 \begin{document}
-\maketitle
+
+\newpage
+\changepage{60mm}{}{}{-39mm}{}{-45mm}{}{}{}
+
+\renewcommand\thepage{}
+
+\begin{center}
+    \includegraphics{chalmers-header.eps}
+\end{center}
+
+
+\vspace{60mm}
+
+\begin{adjustwidth}[]{20mm}{-40mm}
+    {\huge \textbf{Zohmg---a large scale data store for \\
+    aggregated time-series-based data. [DRAFT]}}
+
+    \vspace{6pt}
+
+    \noindent {\large \textit{Master of Science Thesis}}
+
+
+    \vspace{36pt}
+
+
+    \noindent {\Large \textbf{PER ANDERSSON}}
+
+    \noindent {\Large \textbf{FREDRIK M{\"O}LLERSTRAND}}
+
+
+    \vfill
+
+
+    \noindent Department of Computer Science and Engineering
+
+    \noindent CHALMERS UNIVERSITY OF TECHNOLOGY
+
+    \noindent G{\"o}teborg, Sweden, 2009
+\end{adjustwidth}
+
+\newpage
+\renewcommand\thepage{\arabic{page}}
+\changepage{-60mm}{}{}{39mm}{}{47mm}{}{}{}
+
+
+\pagebreak
+
+
+\setcounter{page}{1}
+
+\noindent The Author grants to Chalmers University of Technology and University
+of Gothenburg the non-exclusive right to publish the Work electronically and in
+a non-commercial purpose make it accessible on the Internet.
+
+\vspace{12pt}
+
+\noindent The Author warrants that he/she is the author to the Work, and
+warrants that the Work does not contain text, pictures or other material that
+violates copyright law.
+
+\vspace{12pt}
+
+\noindent The Author shall, when transferring the rights of the Work to a third
+party (for example a publisher or a company), acknowledge the third party about
+this agreement. If the Author has signed a copyright agreement with a third
+party regarding the Work, the Author warrants hereby that he/she has obtained
+any necessary permission from this third party to let Chalmers University of
+Technology and University of Gothenburg store the Work electronically and make
+it accessible on the Internet.
+
+\vspace{64pt}
+
+\noindent Zohmg---a large scale data store for aggregated time-series-based
+data.
+
+
+\vspace{24pt}
+
+
+\noindent PER ANDERSSON
+
+\noindent FREDRIK M{\"O}LLERSTRAND
+
+
+\vspace{12pt}
+
+
+\noindent {\copyright} PER ANDERSSON, August 2009
+
+\noindent {\copyright} FREDRIK M{\"O}LLERSTRAND, August 2009
+
+
+\vspace{12pt}
+
+
+\noindent Examiner: DAVID SANDS
+
+
+\vspace{72pt}
+
+
+\noindent Department of Computer Science and Engineering
+
+\noindent Chalmers University of Technology
+
+\noindent SE-412 96 Göteborg
+
+\noindent Sweden
+
+\noindent Telephone + 46 (0)31-772 1000
+
+
+\vfill
+
+
+\noindent Department of Computer Science and Engineering
+
+\noindent G{\"o}teborg, Sweden, 2009
+
+\pagebreak
+
 
 \noindent {\Large \textbf{Abstract}}
 \vspace{12pt}
