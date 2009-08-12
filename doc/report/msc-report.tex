@@ -1262,53 +1262,17 @@ more interested in finding all entries with status code 200, it would make sense
 to set up the projection so that status code is the first dimension.
 
 
-\section{Data Interchange}
+\subsection{Internal Data Interchange}
 
-The reducer needs to communicate to the OutputReader under what row key,
-column-family and qualifier to store the computed sum. It does this by
-emitting the row key as the key and a JSON-serialized map of the form \\
+The reducer needs to communicate to the output reader under what row and column
+the computed aggregate is to be stored. The reducer does this by emitting the
+row key as key, and a JSON-serialized hash table, which is called a dict in
+python, as value. The structure of the map is of the form \\
 \texttt{\{"column-family:qualifier" : value\}}.
 
-The OutputReader interprets the JSON and persists the data. Et voila!
-
-
-\subsection*{Internal}
-
-Using JSON for data interchange between map and reduce parts in Zohmg import
-jobs.
-
-For better performance typed bytes may be used. This is what Dumbo uses
-internally.
-
-
-\subsubsection{Input Formats}
-
-An input format is a Java class which Hadoop uses for interpreting the input
-data.
-
-The simplest input format would be the TextInputFormat, this is used to parse
-flat text files which reside on HDFS.
-
-Hadoop is able to read LZO compressed files with the LzoInputFormat. In order to
-be able to do so effectively the compressed files first have to be indexed with
-a tool that is provided with Hadoop.
-
-% TODO: When is the TableInputFormat used.
-The TableInputFormat is able read input to a Hadoop program from an HBase table.
-
-
-\subsubsection{Output Formats}
-
-% TODO: not truly correct
-% TODO: A detailed explanation of generally everything in the darling dir.
-The Darling output format for HBase. Between Dumbo, which Zohmg uses for data
-import, and JSON is used for serializing data.
-
-The Darling output format increased import speed by a factor ten, compared to
-using Thrift. The HBase Thrift interface is slow because it first spawns a Java
-HBase client which interprets everything from the HBase Thrift server.
-This actually adds an extra step to the interaction with HBase making it slower
-than talking to it natively with Java.
+The output reader, which is a Java class that is executed within the Hadoop
+framework, de-serializes the JSON structure and constructs an HBase object that
+is persisted to the underlying HBase data store.
 
 
 \section{Exporting Data}
