@@ -1220,20 +1220,50 @@ stored in the data store.
 
 \section{Storage / Data Model}
 
-% TODO: renskriv.
-The typical use case for Zohmg is to read one or more column-qualifiers,
-which correspond to one or more points in n-space, over a range of time.
-Therefor, the keys are made up of the time and unit of the measurement,
-and the qualifier queried for represents the point in n-space. More on
-this in the data model section.
+The underlying data store is HBase, which is a column-oriented database. Column
+families are pre-defined, but everything else, such as column qualifiers and
+rowkeys, can assume arbitrary values.
 
-Explain our data model, the relation between column-families, column-qualifiers
-and projections and dimensions.
+Zohmg models the aggregated data with this in mind. An HBase table is created
+for each data set, and in the table is a single column family called 'unit'. For
+every unit that the data set contains there will be a column qualifier. For
+example, 'unit:pageviews' would be one such column qualifier in the example
+above. Employing the qualifier to encode arbitrary unit names means that the
+user can add new units to his data set configuration without having to change
+the schema of the HBase table.
+
+Zohmg stores one or more projections of the data, and each projection is made up
+of one or more dimensions in addition to the ever-present time dimension. Every
+dimension is a tuple of dimension name and dimension value. The dimension tuples
+of the projection are stored in the rowkey. The rowkey is a string; the
+dimension names and values are separated by a dash. As such, the dash is one of
+the few disallowed characters in dimension names and values.
+
+For example, a rowkey for the projection of the user agent and status code
+dimensions might look like this:
+
+\begin{lstlisting}[caption=Example of rowkeys,captionpos=b]
+    useragent-firefox-statuscode-200-20090420
+    useragent-firefox-statuscode-200-20090421
+    useragent-firefox-statuscode-200-20090422
+    ..
+    useragent-firefox-statuscode-404-20090420
+    useragent-firefox-statuscode-404-20090421
+    useragent-firefox-statuscode-404-20090422
+    ..
+    useragent-safari-statuscode-200-20090420
+    useragent-safari-statuscode-200-20090421
+    ..
+\end{lstlisting}
+
+The rowkeys are sorted lexicographically. This means that all entries for the
+user agent 'firefox' will be found close to each other. If the data analyst is
+more interested in finding all entries with status code 200, it would make sense
+to set up the projection so that status code is the first dimension.
 
 
 \section{Data Interchange}
 
-% TODO: data interchange.
 The reducer needs to communicate to the OutputReader under what row key,
 column-family and qualifier to store the computed sum. It does this by
 emitting the row key as the key and a JSON-serialized map of the form \\
@@ -1272,7 +1302,7 @@ The TableInputFormat is able read input to a Hadoop program from an HBase table.
 % TODO: not truly correct
 % TODO: A detailed explanation of generally everything in the darling dir.
 The Darling output format for HBase. Between Dumbo, which Zohmg uses for data
-import, and Hadoop JSON is used for serializing data.
+import, and JSON is used for serializing data.
 
 The Darling output format increased import speed by a factor ten, compared to
 using Thrift. The HBase Thrift interface is slow because it first spawns a Java
