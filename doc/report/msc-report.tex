@@ -559,12 +559,13 @@ interesting: storing aggregates for the slices of the cube that is
 interesting is both a time and space save, and in many cases the only
 feasible solution.
 
-TODO: -- Limits on cardinality --
-
-[What are the limits of our system? How high cardinality do we support? (This
-is closely tied to hbase and the qualifier-limit.) If Martin is going to have
-\textit{normalized\_path} as one of his dimensions, we might run into trouble.]
-
+Because of the distributed nature of HBase and its ability to store a very large
+number of rows, there is no actual upper bound on the cardinality supported by
+Zohmg. There may however be complex queries that have filters on
+high-cardinality that Zohmg will be unable to answer. This can be remedied in
+part by setting up projections that cater especially to those queries, but the
+issue can not be fully avoided. The authors have successfully stored data where
+the cardinality of the dimensions exceeded millions.
 
 % export.
 Due to the several different data sources, there exist several different types
@@ -954,12 +955,6 @@ more even utilization of the cluster. Time-series analysis is also the most
 common for logs, since each entry is time-stamped. \cite{discoveringweb} Since
 Zohmg only supports time-series, each query has to be made over a time range.
 
-It was decided that the row keys should consist of unit and time-stamp. This
-would keep related data within close range, e.g. all rows with the same unit
-would be stored next to each other. This means reading data with different units
-would imply expensive jumps within the stored data. Because of this it was
-decided that queries only support a single unit to be queried.
-
 All measures are integers. Sum is the only supported aggregation function. The
 data store does not support reach-like data (i.e. number of unique visitors)
 since it is not sumable.
@@ -976,8 +971,6 @@ Storing the analyzed data can be done in different ways, for instance storing
 the raw data or just aggregates. Storing the raw data is very expensive, since
 it would basically copy the data to the data store. Because of this the decision
 was made to only store aggregates.
-
-TODO: add summary on cardinality limits on cardinality here.
 
 
 \section*{Summary}
