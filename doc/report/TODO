@@ -9,6 +9,9 @@ report:
 + discussion:
 + write about related work.
 
+* MapReduce framework description is too brief. Expand!
+
+
 * 2.2 is a bit off.
 * Why starsql scales worse -> [[citation needed], pretty typing]
 * ch4,software,benchmarks -> add benchmarks and text

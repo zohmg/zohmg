@@ -22,14 +22,13 @@ data. [DRAFT]}
 
 \noindent {\Large \textbf{Abstract}}
 \vspace{12pt}
-\noindent
 
 % TODO: use less buzzwords; focus on the problem.
 
-Analyzing data at a massive scale is one of the biggest challenges that
-Last.fm is facing. Interpreting patterns in user behaviour becomes a challenge
-when millions of users interact in billions of combinations; the data sets
-must be analyzed, summarized and presented visually.
+\noindent Analyzing data at a massive scale is one of the biggest challenges
+that Last.fm is facing. Interpreting patterns in user behaviour becomes a
+challenge when millions of users interact in billions of combinations; the data
+sets must be analyzed, summarized and presented visually.
 
 This thesis describes a data store for multi-dimensional time-series-based data.
 Measurements are summarized across multiple dimensions. The data store is
@@ -41,6 +40,52 @@ as their backing database. The novelty of our approach is to model
 multidimensional data cubes on top of a distributed, column-oriented database to
 reap the scalability benefits of such databases.
 
+\vspace{48pt}
+
+\noindent {\Large \textbf{Sammanfattning}}
+\vspace{12pt}
+
+% TODO: sync with english abstract.
+
+\noindent Att analysera data p{\aa} en massiv skala {\"a}r en av de st{\"o}rsta
+utmaningarna som Last.fm st{\aa}r inf{\"o}r. Att tolka m{\"o}nster i
+anv{\"a}ndarbeteende blir en utmaning n{\"a}r miljoner anv{\"a}ndare samspelar i
+miljarder kombinationer. Datam{\"a}ngderna m{\aa}ste analyseras, summeras och
+presenteras visuellt.
+
+Detta examensarbete beskriver ett datalager f{\"o}r multidimensionell
+tidsseriebaserad data. M{\aa}tt {\"a}r summerade {\"o}ver multipla dimensioner.
+Datalagret {\"a}r optimerat f{\"o}r dataextraheringshastighet: Ett av
+designm{\aa}len {\"a}r att servera data i musklickshastighet f{\"o}r att
+fr{\"a}mja utforskning av data i realtid.
+
+Liknande datalager existerar men de anv{\"a}nder oftast relationella
+databassystem som databas f{\"o}r back-end. Nyheten i v{\aa}rt angripss{\"a}tt
+{\"a}r att modellera multidimensionella datakuber ovanp{\aa} en distribuerad,
+kolumnorienterad databas f{\"o}r att utnyttja skalbarhetsf{\"o}rdelarna av
+s{\aa}dana databaser.
+
+\pagebreak
+\phantom{ }
+\pagebreak
+
+\noindent {\Large \textbf{Preface}}
+\vspace{12pt}
+
+\noindent Per Andersson and Fredrik M{\"o}llerstrand both study Computer Science
+at Chalmers University of Technology. This report is part of their master thesis
+degree. The work was performed at Last.fm's office in London during spring 2009.
+
+The authors would like to specially thank the supervisors---David Sands at
+Chalmers and Johan Oskarsson and Martin Dittus at Last.fm---for their help and
+support.
+
+The authors would also like to thank the staff at Last.fm and their family and
+friends for moral support before, during, and after the thesis work.
+
+\pagebreak
+\phantom{ }
+\pagebreak
 
 \tableofcontents
 \vfill
@@ -434,7 +479,7 @@ As the name implies, MapReduce is made up of two parts or phases: map and
 reduce. The user specifies a map function that consumes a single key/value pair
 to generate a set of intermediate key/value pairs, and a reduce function that
 merges all intermediate values that belongs to the same key. The abstraction of
-two functions to process skmall parts of the large data set was inspired by the
+two functions to process small parts of the large data set was inspired by the
 map and reduce functions commonly found in functional programming languages such
 as Lisp. The use of this model allows the framework to easily parallelize the
 computations. In the inevitable case of a failure at a computational node, the
@@ -1605,6 +1650,13 @@ The data server serves static files from the project's \texttt{clients} from
 \chapter{Glossary}
 
 \begin{tabular}[t]{lp{100mm}}
+\textbf{Column-oriented} &
+A column-oriented database stores its content by column rather than by row.
+This is an advantage for databases such as data warehouses, where aggregates
+computed over large numbers of similar data items.
+
+ \\
+
 \textbf{JSON} &
 JavaScript Object Notation, a lightweight text-based human-readable data
 interchange format. It is used for representing simple data structures and
@@ -1621,7 +1673,10 @@ user queries.
  \\
 
 \textbf{Replication} &
-.
+The process of sharing information for ensurance of consistency between
+redundant sources. For instance multiple databases on different machines share
+the same content for sake of redundancy, the information is not lost if one
+machine fails.
 
  \\
 
@@ -1634,7 +1689,11 @@ object it was in before the serialization. \\
  \\
 
 \textbf{Sharding} &
-.
+A method for horizontal partitioning in a database. Horizontal partinioning is a
+design principle whereby rows of a database table are held seperately. Each
+partition forms a so called \textit{shard}, which may be located on a separate
+database server. The advantage is the number of rows in each table is reduced,
+which reduces index size and thus performance.
 \end{tabular}
 
 
@@ -2004,60 +2063,6 @@ perhaps even run into the odd show-stopper. If you do, please let us know!
 Zohmg currently only supports mappers written in Python. Eventually, you will
 also be able to write mappers in Java.
 \end{verbatim}
-
-
-
-
-\chapter{Text with no home and no current purpose}
-
-\section{It's not like the movies}
-
-Luckily, this is a problem that has already been solved. Google has published
-papers on the MapReduce framework \cite{mapreduce}, which allows for parallel
-processing of large data sets, and The Google File System \cite{gfs}, a
-scalable, distributed file system. The Apache Hadoop \cite{hadoop} project has
-published free software implementations of a MapReduce framework and a
-distributed file system, both of which build on the ideas in the papers
-published by Google.
-
-
-\section{Techniques and tools}
-
-TODO: Why do we chose HBase in favour of other techniques (i.e. SQL)?
-
-In actual practice, the main difference between the two models is that
-querying is highly restricted in a BigTable-like data store---there are no
-joins, for example---whereas the relational database was born to be queried.
-On the other hand, the restrictions placed upon the BigTable models are
-what allows it to scale to such a large data set. Indeed, BigTable was born
-to scale.
-
-TODO: elaborate on reasons to why starsql does not scale
-
-Many applications have the behaviour where they write data once and read it
-a lot more, log analysers for instance. This writing-once-reading-many
-behaviour is precisely what BigTable is designed for. BigTable is designed
-for sequential, as opposed to random, data access. A typical use case is
-the scan, where a large number of rows are read in sequence and a certain
-column or column-family are picked up and returned. Certainly, you will
-want to store those data points that are likely to be needed simultaneously
-close to each other. \cite{bigtable}
-
-Sparseness is a big thing. Null values are free of charge. TODO: *Describe
-how we leverage sparsity*.
-
-
-\section{Electromagnetic field theory}
-
--- A truly magnetic data store - the idea of enabling the user --
-
-From a user's perspective, storing aggregates in Zohmg is as simple as writing
-a map function (in the MapReduce sense) and letting Zohmg run that map function
-over the data set. The user's map function is called \textit{user map function}
-from here on. In order to let Zohmg know what output to expect from the mapper,
-the user also defines the dimensions and units of his data. After all, the user
-most likely knows his own data better than anyone else.
-
 
 
 \end{document}
