@@ -10,7 +10,6 @@ report:
 + write about related work.
 
 * Example of dataset configuration.
-* MapReduce framework description is too brief. Expand!
 
 * 2.2 is a bit off.
 * Why starsql scales worse -> [[citation needed], pretty typing]
