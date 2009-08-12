@@ -1001,81 +1001,115 @@ work, and luck is 90 percent.}{Guy Kawasaki}
 
 \section*{Introduction}
 
-This chapter will present the implementation of the Zohmg system. For a usage
-manual see the appendix.
+This chapter will present the implementation of Zohmg. For a usage manual, see
+the appendix.
 
 % TODO: Do we need to talk about the storage implementation?
 
 In the first section the implementation of project creation, configuration, and
-setup, will be presented. The second section features the data import
-implementation; it will present example data as well as an example user map
-function to import this. The third section presents the implementation of data
-interchange between Zohmg and other software, such as Hadoop, Dumbo, and HBase,
-but also throughout the Zohmg system. The third section also presents the
-implementation details of the Zohmg system's exporting component.
+setup will be presented. The second section features the data import
+implementation. It will present example data as well as an example user map
+function to show this. The third section presents the implementation of data
+interchange between Zohmg and other software such as Hadoop, Dumbo, and HBase.
+It also shows an overall of Zohmg. The third section also presents the
+implementation details of Zohmg's data export component.
 
 
 \section{Project Management}
 
-Zohmg uses the concept of projects. These projects are self contained
-application data directories which are used with Zohmg. A Zohmg project is
-necessary for using Zohmg; they are created with a management script, which is
-also used for interacting with the Zohmg system. When the user has created a
-Zohmg project directory further actions can be performed. The Zohmg projects
-reside within a project directory, which contains five directories:
-\texttt{clients}, \texttt{config}, \texttt{lib}, \texttt{mappers}, and
-\texttt{transformers}. The details of these directories are presented throughout
-this chapter.
+Zohmg employes the concept of projects. A project is a self contained
+application data directory. A Zohmg project is necessary for using Zohmg; they
+are created with a management script, which is also used for interacting with
+the Zohmg system. When the user has created a Zohmg project directory further
+actions can be performed. The Zohmg projects reside within a project directory,
+which contains five directories: \texttt{clients}, \texttt{config},
+\texttt{lib}, and \texttt{mappers}. The details of these directories are
+presented throughout this chapter.
 
 
 \subsection*{Configuration}
 
-The Zohmg system needs configuration of the user's data sets and the environment
-for Hadoop and Dumbo. When the data set files are configured, the user runs the
-management script, which executes the configuration and creates tables in HBase
-according to the configuration.
+Zohmg needs configuration of the user's data sets and the environment for Hadoop
+and Dumbo. When the data set files are configured, the user runs the management
+script, which executes the configuration and creates tables in HBase according
+to the configuration.
 
 
 \subsubsection*{Data Sets}
 
-% TODO: define what a data set is, and what makes it different from a project.
+A data set is any set of data that the user has. Zohmg requires the user to
+write a configuration that describes the attributes of the data. The
+configuration of a data set is a list of dimensions and projections. This
+configuration will be read during the import phase to match analysed data
+against the schema definition.
 
-In this context a data set is the schema that the user defines for wanted data
-sets to be handled by Zohmg. The configuration of a data set is simply a list
-of dimensions and projections, which will layout the HBase tables according to
-the schema. This configuration will also be read during the import phase, for
-handling data to be imported.
+The data set configuration files reside in the project's \texttt{config}
+directory. The data sets are configured using YAML\footnote{YAML Ain't a Markup
+Language}, a human-readable data serialization format. Any human-readable
+configure file method could have been chosen. YAML was chosen because it is is
+very simple for humans to read and edit, and likewise for machines. The Python
+module PyYAML was used to implement the YAML configuration reading part.
+\cite{pyyaml}
 
-The data set files reside in the project's \texttt{config} directory. The data
-sets are configured using YAML\footnote{YAML Ain't a Markup Language}, a
-human-readable data serialization format. Any human-readable configure file
-method could have been chosen. YAML was chosen because it is is very simple
-for humans to read and edit, and likewise for machines. The Python module
-PyYAML was used to implement the YAML configuration reading part. \cite{pyyaml}
+A typical configuration looks like this:
+
+\begin{lstlisting}[caption=A data set configuration example.,captionpos=b]
+dataset: submissions
+
+dimensions:
+ - artist
+ - track
+ - user
+
+projections:
+ - artist
+ - user
+ - user-artist
+ - user-track
+ - artist-track
+
+units:
+ - scrobbles
+ - loves
+ - bans
+ \end{lstlisting}
 
 
 \subsubsection*{Environment}
 
-The environment is a Python script which defines run-time variables, required by
-Hadoop and Dumbo. Using a Python script for run-time variables leaves the
-problem of validation to Python. The environment configuration file resides in
-the project's \texttt{config} directory.
+The execution environment is described by a Python script. In it are defined
+run-time variables which are required by Hadoop and Dumbo, namely the Java class
+path (CLASSPATH) and the absolute path to the Hadoop directory (HADOOP_HOME).
 
-
+By using a Python script for run-time variables leaves the problem of validation
+to Python. The environment configuration file resides in the project's
+\texttt{config} directory.
 
 
 \section{Importing}
 
-In order to import data to Zohmg, the user writes a map function in Python which
-Zohmg wraps; interpreting the output from the mapper program and storing it in
-HBase.
+In order to import data to Zohmg, the user writes a map function in Python.
+Zohmg employs Dumbo to run the map function on the Hadoop instance defined by
+the HADOOP_HOME variable.
 
 A standard MapReduce map function emits key-value pairs. The Zohmg user map
-function, instead, emits triples (tuples with three values), which consist of a
+function emits triples (tuples with three values), which consist of a
 time-stamp, a hash table of dimensions and their respective values, and a hash
-table with measurements (values). In effect, the dimensions and the time-stamp
-specify a point in n-space and the measurements represent the observations made
-at that point.
+table with units and their respective measurements (values). In effect, the
+dimensions and the time-stamp specify a point in n-space (the key) and the
+measurements represent the observations made at that point (the value(s)).
+
+A reducer function that is specific to Zohmg is employed to perform aggregation
+on the output from the map phase. The reducer sums the measurements for each
+point in n-space and for each unit and emits the resulting aggregates.
+
+The output from the reducer is interpreted by a custom output reader. Commonly,
+an output reader stores the output of the reduce phase on disk. The output
+reader that Zohmg employs instead stores the aggregates in HBase. It is written
+in Java.
+
+\subsection*{Example of Importing}
+
 
 % TODO: move apache logs to introduction perhaps.
 An example data source is the Apache HTTP Server access logs. The Combined Log
@@ -1112,10 +1146,10 @@ Apache access logs.},captionpos=b]
       dimensions = {'useragent' : log.useragent,
                     'path'      : log.path,
                     'status'    : log.statuscode}
-      values = {'pageviews' : 1,
-                'bytes'     : log.size}
+      measurements = {'pageviews' : 1,
+                      'bytes'     : log.size}
 
-      yield log.timestamp,dimensions,measurements
+      yield log.timestamp, dimensions, measurements
 \end{lstlisting}
 
 \vspace{12pt}
@@ -1175,8 +1209,7 @@ that persists the data to HBase.
 The user will import a day worth of logs by invoking
 
 \begin{verbatim}
-   zohmg import mappers/apache.py \
-   /data/weblogs/2009/04/20
+   zohmg import mappers/apache.py /data/weblogs/2009/04/20
 \end{verbatim}
 
 This will instruct Zohmg to apply the map function found in \texttt{apache.py}
