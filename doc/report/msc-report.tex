@@ -1072,7 +1072,7 @@ units:
 
 The execution environment is described by a Python script. In it are defined
 run-time variables which are required by Hadoop and Dumbo, namely the Java class
-path (CLASSPATH) and the absolute path to the Hadoop directory (HADOOP_HOME).
+path and the absolute path to the Hadoop directory.
 
 By using a Python script for run-time variables leaves the problem of validation
 to Python. The environment configuration file resides in the project's
@@ -1083,7 +1083,7 @@ to Python. The environment configuration file resides in the project's
 
 In order to import data to Zohmg, the user writes a map function in Python.
 Zohmg employs Dumbo to run the map function on the Hadoop instance defined by
-the HADOOP_HOME variable.
+the hadoop home variable.
 
 A standard MapReduce map function emits key-value pairs. The Zohmg user map
 function emits triples (tuples with three values), which consist of a
@@ -1636,6 +1636,375 @@ object it was in before the serialization. \\
 \textbf{Sharding} &
 .
 \end{tabular}
+
+
+\chapter{Zohmg README}
+
+\begin{verbatim}
+INTRODUCING: ZOHMG.
+-------------------
+
+Zohmg is a data store for aggregation of multi-dimensional time series data. It
+is built on top of Hadoop, Dumbo and HBase. The core idea is to pre-compute
+aggregates and store them in a read-efficient manner – Zohmg is
+wasteful with storage in order to answer queries faster.
+
+This README assumes a working installation of zohmg. Please see INSTALL for
+installation instructions.
+
+Zohmg is alpha software. Be gentle.
+
+
+CONTACT
+-------
+
+IRC:           #zohmg at freenode
+Code:          http://github.com/zohmg/zohmg/tree/master
+User list:     http://groups.google.com/group/zohmg-user
+Dev list:      http://groups.google.com/group/zohmg-dev
+
+
+RUN THE ZOHMG
+-------------
+
+Zohmg is installed as a command line script. Try it out:
+
+  $> zohmg help
+
+
+AN EXAMPLE: TELEVISION!
+-----------------------
+
+Imagine that you are the director of operations of a web-based
+television channel. Your company streams videos, called "clips".
+
+Every time a clip is streamed across the intertubes, your software
+makes a note of it in a log file. The log contains information about
+the clip (id, length, producer) and about the user watching it
+(country of origin, player).
+
+Your objective is to analyze the logs to find out how many people
+watch a certain clip over time, broken down by country and player,
+etc.
+
+The rest of this text will show you by example how to make sense of
+logs using Zohmg.
+
+
+THE ANATOMY OF YOUR DATA SET
+----------------------------
+
+Each line of the logfile has the following space-delimited format:
+ 
+timestamp clipid producerid length usercountry player love
+
+Examples:
+1245775664 1440 201 722 GB VLC 0
+1245775680 1394 710 2512 GB VLC 1
+1245776010 1440 201 722 DE QUICKTIME 0
+
+The timestamp is a UNIX timestamp, the length is counted in seconds
+and the id's are all integers. Usercountry is a two-letter ISO
+standard code while the player is an arbitrary string.
+
+The last field -- "love" -- is a boolean that indicates whether the user
+clicked the heart shaped icon, meaning that she was truly moved by the
+clip.
+
+
+DO YOU SPEAK ZOHMG?
+-------------------
+
+In the parlance of Zohmg, clip and producer as well as country and
+player are dimensions. 1440, 'GB', 'VLC', etc, are called attributes of
+those dimensions.
+
+The length of a clip, whether it was loved, etc, are called
+measurements. In the configuration, which we will take a look at
+shortly, we define the units of measurements. Measurements must be
+integers so that they can be summed.
+
+Simple enough!
+
+
+CREATE YOUR FIRST 'PROJECT'
+---------------------------
+
+Every Zohmg project lives in its own directory. A project is created
+like so:
+
+  $> zohmg create television
+
+This creates a project directory named 'television'. Its contents are:
+
+ config     - environment and dataset configuration.
+ lib        - eggs or jars that will be automatically included in job jar.
+ mappers    - mapreduce mappers (you will write these!)
+
+
+CONFIGURE YOUR 'PROJECT'
+------------------------
+
+The next step is to configure environment.py and dataset.yaml.
+
+
+config/environment.py:
+
+Define HADOOP_HOME and set the paths for all three jars (hadoop, hadoop-streaming,
+hbase). You might need to run 'ant package' in $HADOOP_HOME to have
+the streaming jar built for you.
+
+
+config/dataset.yaml:
+
+Defining your data set means defining dimensions, projections and
+units.
+
+The dimensions lets Zohmg know what your data looks like while the
+projections hints at what queries you will want to ask. Once you get
+more comfortable with Zohmg you will want to optimize your projections
+for efficiency.
+
+For example, if you wish to find out how many times a certain clip has
+been watched broken down by country, you would want to set up a
+projection where clip is the first dimension and country is the second
+one.
+
+For the television station, something like the following will do just
+fine.
+
+
+## config/dataset.yaml
+
+dataset: television
+
+dimensions:
+ - clip
+ - producer
+ - country
+ - player
+
+projections:
+ - clip
+ - player
+ - country
+ - clip-country
+ - producer-country
+ - producer-clip-player
+
+units:
+ - plays
+ - loves
+ - seconds
+
+
+After you've edited environment.py and dataset.yaml:
+
+  $> zohmg setup
+
+This command creates an HBase table with the same name as your dataset.
+
+Verify that the table was created:
+
+  $> hbase shell
+  hbase(main):001:0> list
+  television
+  1 row(s) in 0.1337 seconds
+
+Brilliant!
+
+
+DATA IMPORT
+-----------
+
+After the project is created and setup correctly it is time to import some
+data.
+
+Data import is a process in two steps: write a map function that analyzes
+the data line for line, and run that function over the data. The data
+is normally stored on HDFS, but it is also possible to run on local data.
+
+
+WRITE A  MAPPER
+----------------
+
+First we'll write the mapper. It will have this signature:
+
+  def map(key, value)
+
+The 'key' argument defines the line number of the input data and is
+usually (but not always!) not very interesting. The 'value' argument is a
+string - it represents a single line of input.
+
+Analyzing a single line of input is straightforward: split the line
+on spaces and collect the debris.
+
+## mappers/mapper.py
+
+import time
+
+def map(key, value):
+    # split on space; make sure there are 7 parts.
+    parts = value.split(' ')
+    if len(parts) < 7: return
+
+    # extract values.
+    epoch = parts[0]
+    clipid, producerid, length = parts[1:4]
+    country, player, love      = parts[4:7]
+
+    # format timestamp as yyyymmdd.
+    ymd = "%d%02d%02d" % time.localtime(float(epoch))[0:3]
+
+    # dimension attributes are strings.
+    dimensions = {}
+    dimensions['clip']     = str(clipid)
+    dimensions['producer'] = str(producerid)
+    dimensions['country']  = country
+    dimensions['player']   = player
+
+    # measurements are integers.
+    measurements = {}
+    measurements['plays']   = 1
+    measurements['seconds'] = int(length)
+    measurements['loves']   = int(love)
+
+    yield ymd, dimensions, measurements
+
+
+The output of the mapper is a three-tuple: the first element is a
+string of format yyyymmdd (i.e. "20090601") and the other two elements
+are dictionaries.
+
+The mapper's output is fed to a reducer that sums the values of the
+units and passes the data on to the underlying data store.
+
+
+
+RUN THE MAPPER
+--------------
+
+Populate a file with a small data sample:
+
+  $> cat > data/short.log
+  1245775664 1440 201 722 GB VLC 0
+  1245775680 1394 710 2512 GB VLC 1
+  1245776010 1440 201 722 DE QUICKTIME 0
+  ^D
+
+Perform a local test-run:
+
+  $> zohmg import mappers/mapper.py data/short.log --local
+
+The first argument to import is the path to the python file containing the map
+function, the second is a path on the local file system.
+
+The local run will direct its output to a file instead of writing to
+the data store. Inspect it like so:
+
+  $> cat /tmp/zohmg-output
+  'clip-1440-country-DE-20090623' '{"unit:length": {"value": 722}}'
+  'clip-1440-country-DE-20090623' '{"unit:plays": {"value": 1}}'
+  'clip-all-country-DE-20090623'  '{"unit:length": {"value": 722}}'
+  [..]
+
+
+If Hadoop and HBase are up, run the mapper on the cluster:
+
+  $> zohmg import mappers/mapper.py /data/television/20090620.log
+
+Assuming the mapper finished successfully there is now some data in
+the HBase table. Verify this by firing up the HBase shell:
+
+  $> hbase shell
+  hbase(main):001:0> scan 'television'
+  [..]
+
+Lots of data scrolling by? Good! (Interrupt with CTRL-C at your leisure.)
+
+
+SERVE DATA
+----------
+
+Start the Zohmg server:
+
+  $> zohmg server
+
+The Zohmg server listens on port 8086 at localhost by default. Browse
+http://localhost:8086/ and have a look!
+
+
+
+THE API
+-------
+
+Zohmg's data server exposes the data store through an HTTP API. Every
+request returns a JSON-formatted string.
+
+The JSON looks something like this:
+
+[{"20090601": {"DE": 270, "US": 21, "SE": 5547}}, {"20090602": {"DE":
+9020, "US": 109, "SE": 11497}}, {"20090603": {"DE": 10091, "US": 186,
+"SE": 8863}}]
+
+
+The API is extremely simple: it supports a single type of GET request
+and there is no authentication.
+
+There are four required parameters: t0, t1, unit and d0.
+
+The parameters t0 and t1 define the time span. They are strings of the
+format "yyyymmdd", i.e. "t0=20090601&t1=20090630".
+
+The unit parameter defines the one unit for which you query, for
+example 'unit=plays'.
+
+The parameter d0 defines the base dimension, for example 'd0=country'.
+
+Values for d0 can be defined by setting the parameter d0v to a
+comma-separated string of values, for example "d0v=US,SE,DE". If d0v is
+empty, all values of the base dimension will be returned.
+
+
+A typical query string looks like this:
+
+ http://localhost:8086/?t0=20090601&t1=20090630&unit=plays&d0=country&d0v=DE,SE,US
+
+This example query would return the number of clips streamed for the
+time span between the first and last of June broken down by the
+countries Sweden, Germany and the United States.
+
+
+The API supports JSONP via the jsonp parameter. By setting this
+parameter, the returned JSON is wrapped in a function call.
+
+
+
+PLOTTING THE DATA
+-----------------
+
+There is an example client bundled with Zohmg. It is served by the Zohmg server
+at http://localhost:8086/graph/ and is quite useful for exploring your dataset.
+
+You may also want to peek at the javascript code to gain some inspiration and
+insight into how the beast works.
+
+The graphing tool uses Javascript to query the data server, and plots
+graphs with the help of Google Charts.
+
+
+
+KNOWN ISSUES
+------------
+
+Zohmg is alpha software and is still learning how to behave properly in mixed
+company. You will spot more than a few minor quirks while using it and might
+perhaps even run into the odd show-stopper. If you do, please let us know!
+
+Zohmg currently only supports mappers written in Python. Eventually, you will
+also be able to write mappers in Java.
+\end{verbatim}
+
 
 
 
