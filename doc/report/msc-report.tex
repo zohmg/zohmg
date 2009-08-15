@@ -1608,7 +1608,53 @@ are entirely user-definable.
 
 \section{Discussion}
 
-Discussion here.
+
+The decision to implement the import functionality on Hadoop was driven by both
+practical and environmental reasons: it is unfeasible to analyse large data sets
+on a non-distributed system so some sort of distributed computation model was
+needed to reach a satisfiable performance, and Last.fm already has a large
+Hadoop cluster and a technology culture in which Hadoop is used extensively. The
+decision to use Hadoop was in the end a non-decision, an already made
+conclusion.
+
+The reasons behind using Dumbo and writing Zohmg in Python are similar. Last.fm
+was already moving towards writing a larger set of its analysis tools in Python
+thanks to Dumbo, which is a product of another intern at the company. Python is
+a language which allows for rapid prototyping and is as such well suited for
+writing both the user's map function and indeed the whole of Zohmg.
+
+The main point of contention was which backing store to use. A number of
+different systems that fitted the requirements were tried out but none of them
+proved to be either very dissimilar from the BigTable apporach of HBase, or
+indeed ready for production. HBase has the advantage of being closely tied to
+Hadoop which means that there was already tools available for writing
+HBase-centric MapReduce jobs in Hadoop. The technology culture at Last.fm again
+proved to be the main reason: there were already projects within the company
+that were using HBase, so the needed infrastructure and know-how was there.
+
+The import facility makes use of MapReduce and a custom mapper and reducer.
+There is still the unresolved issue of whether it would be more efficient to not
+use a reducer at all and write to HBase directly from the mapper. The argument
+is that HBase is better at handling writes to random locations in the key space.
+The downside of this would be that summing for aggregation would have to be done
+at every cell update.
+
+The data export uses a simple HTTP server. The query and response fit well into
+the HTTP primitives and the ubiquity of HTTP clients and libraries makes it a
+good choice for a simple and quick interface. The HTTP server queries HBase over
+Thrift, which is quick enough but less than optimal. A more advanced solution
+would be to implement a Thrift server in Java and offer a Thrift interface to
+Zohmg. That would presumably be more efficient. There could also be situations
+where a MapReduce job would be well-served to use the aggregates as input. That
+situation would be resolved by providing an custom input format that reads
+straight from the HBase table.
+
+The decision to use JSON was based on the fact that JSON is lighweight and
+efficient to parse, and has support for the few primitives that are needed to
+describe the exported data. Also, JSON parsers are ubiquitious and libraries are
+available in almost any language.
+
+
 
 
 \section{Future Work}
