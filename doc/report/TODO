@@ -1,6 +1,5 @@
 report:
 + graphs! images! examples!
-  - graphical element in 2.2.2 to describe mapreduces
 + abstract: non-buzzword; focus on problem
 + introduction: introduce time-series, data warehousing, mapreduce, bigtable
 + introduction: why is time important? we query for time, etc.
@@ -12,16 +11,7 @@ report:
 * 2.2 is a bit off.
 * Why starsql scales worse -> [[citation needed], pretty typing]
 * ch4,software,benchmarks -> add benchmarks and text
-* 5.3 and 5.4 seem like unfinished notes.
 * Chapter 6 needs to be finished.
-* I noticed that the repository contains some other material (documentation,
- FAQ's). I think it might make sense to include these as an appendix too. The
- README is a rather useful complement to the thesis. Perhaps you can reference
- that from the main document, or perhaps include some of this info in the main
- document.
-* Limits on cardinality
- + ch3, System Components -> TODO: Limits on cardinality
- + 4.3 Scope -> TODO: add summary on limits on cardinality
 * p9
   + Your review suggests that there was nothing before MapReduce. But there seems to have been a lot of other work on datawarehousing before mapreduce appeared on the scene.
 * Existing Software
