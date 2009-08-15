@@ -1575,6 +1575,36 @@ the user to query Zohmg.
 
 \chapterquote{When we can't dream any longer we die.}{Emma Goldman}
 
+\section{Results}
+
+
+The goal of this thesis was to build a tool that allows its user to perform
+multi-dimensional analysis of a large corpus of data. That goal has been
+achieved by implementing a data store that leverages HBase as a backing store
+and utilizes the Hadoop MapReduce framework as its import functionality.
+
+The resulting software is a command line application written in Python. The
+command line application is the sole interface to the data store. From here the
+user can initiate import jobs, start a server for exporting data, and manage
+projects folders.
+
+The import jobs are executed on the Hadoop MapReduce framework. The job
+execution is delegated to Dumbo, a python module for running Hadoop jobs that
+are not written in Java. The job consist of a map function that wraps around the
+map function written by the user, and a reducer function that sums together
+measurements for each point in the multi-dimensional measurement space. The
+output from the MapReduce job is stored in an HBase table.
+
+Data is exported from the data store through an HTTP interface. Queries to the
+data store are made with HTTP GET requests. The response is encoded as JSON, a
+lightweight computer interchange format. The exports are not parallelized; they
+are performed as one or more scans over an HBase table.
+
+The data store is time series based, meaning that all data points are specified
+along the time axis, as well as any number of other dimensional axes. A single
+level of granularity is used throughout each data set. The values of dimensions
+are entirely user-definable.
+
 
 \section{Discussion}
 
