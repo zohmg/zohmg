@@ -1655,60 +1655,30 @@ describe the exported data. Also, JSON parsers are ubiquitious and libraries are
 available in almost any language.
 
 
-
-
 \section{Future Work}
 
-Says Wikipedia: "Organizations generally start off with relatively simple use
-of data warehousing. Over time, more sophisticated use of data warehousing
-evolves." Zohmg is that relatively simple data warehouse; the seed from which
-a more sophisticated data warehouse may evolve.
+Says Wikipedia: "Organizations generally start off with relatively simple use of
+data warehousing. Over time, more sophisticated use of data warehousing
+evolves." Zohmg is a simple data warehouse; the seed from which a more
+sophisticated data warehouse may evolve.
 
 There is as of yet no support for specifying granularities. The only supported
-resolution of time is the day.
+resolution of time is the day. Future work could include adding support for
+querying data at any level of granularity.
 
-The single aggregation performed is summing of the measurements. Future work
-may include average, max and min, etc.
+The single act of aggregation performed is the summing of the measurements.
+Future work may include average, max and min, etcetera.
 
-There is no metadata store. It would be very helpful for the application
-writer to know what the known values are for each dimension.
-
-It'd be interesting to think a bit about how the data store could be fully
-elastic, i.e. not require any data set definition from the user and instead
-create column-families on the fly based on the dimensions output from the
-user's map.
-
-
-\subsection*{Multiple Data Sets}
-
-Proper support for multiple data sets in a Zohmg project.
-
-
-\subsection*{Metadata}
-
-data set introspection
-
-roll-up and drill-down
-
-good when creating apps
-
-
-\subsection*{Updating Data Set Files}
-
-Update tables on changes in configuration---data set files.
-
-
-\subsection*{Importing Without MapReduce}
-
-Importing content without firing of a MapReduce job, e.g. via a Thrift
-service.
-
+There is no metadata store. It would be very helpful for the application writer
+to know what the known values are for each dimension. Future work could include
+a metadata service with a simple Thrift interface at which the user can query
+for dimensions, their respective cardinalities and values, etcetera.
 
 
 \section{Conclusion}
 
-Last.fm is investigating the possibility for using Zohmg for multiple
-application areas, such as radio stats and web page stats.
+Last.fm will use for Zohmg in multiple instances of data analysis, most
+prominently in the field of web log analysis.
 
 
 \pagebreak
