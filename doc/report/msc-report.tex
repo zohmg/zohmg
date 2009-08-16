@@ -547,10 +547,15 @@ longer access times for those aggregates that were not pre-computed.
 
 \section{New Techniques}
 
-One new techniques which can be used for OLAP data warehouses include Google's
-BigTable, which is a distributed column-oriented schema-less database.
+The OLAP field contains much research, for instance complete techniques such as
+Dwarf \cite{dwarf}, which is an OLAP engine, the Stanford Data Warehousing
+Project \cite{thestanford}, and DROLAP \cite{drolap}.
 
-Google's MapReduce is a new technique for distributed parallel computations.
+Google is the originator of two recent techniques: BigTable---a distributed
+column-oriented schema-less database---and MapReduce---a framework for
+distributed parallel computations.
+
+The following sections will present and review these two techniques.
 
 
 \subsection{BigTable}
