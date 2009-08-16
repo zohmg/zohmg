@@ -466,6 +466,14 @@ number of nails sold is a measure while country, month and type of nail are
 dimensions. It is from OLAP that [we] have appropriated the concept of a data
 cube.
 
+Modelling OLAP cubes can be done in different ways, using different techniques.
+The two main techniques are: MOLAP\footnote{Multidimensional On-Line Analytical
+Processing} (or just OLAP), and ROLAP\footnote{Relational On-Line Analytical
+Processing}. Data warehouses designed after the MOLAP principle use optimized
+multi-dimensional array storage whereas ROLAP data warehouses use relational
+databases as storage. When designing a ROLAP data warehouse a star or snowflake
+schema would be used to model the dimensions.
+
 
 \subsection*{Data cubes}
 
@@ -539,12 +547,11 @@ longer access times for those aggregates that were not pre-computed.
 
 \section{New Techniques}
 
-Classic data warehouses use relational databases as storage. A star or snowflake
-schema would be used to model the dimensions.
+One new techniques which can be used for OLAP data warehouses include Google's
+BigTable, which is a distributed column-oriented schema-less database.
 
-New techniques that have appeared include column-oriented, schema free
-databases. Google's BigTable is such a database. Another new technique for
-distributed processing is Google's MapReduce.
+Google's MapReduce is a new technique for distributed parallel computations.
+
 
 \subsection{BigTable}
 
