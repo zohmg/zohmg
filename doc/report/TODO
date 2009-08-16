@@ -12,9 +12,6 @@ report:
 * Why starsql scales worse -> [[citation needed], pretty typing]
 * ch4,software,benchmarks -> add benchmarks and text
 * Chapter 6 needs to be finished.
-* p9
-  + Your review suggests that there was nothing before MapReduce. But there seems to have been a lot of other work on datawarehousing before mapreduce appeared on the scene.
-* Existing Software
 * p20
   In this section I'd like to see a big graphic of the overall architecture
   and workflow.
