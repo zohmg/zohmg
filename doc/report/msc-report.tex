@@ -630,17 +630,20 @@ data sets. The computations are run in parallel across a network of computers.
 As the name implies, MapReduce is made up of two parts or phases: map and
 reduce. The user specifies a map function that consumes a single key/value pair
 to generate a set of intermediate key/value pairs, and a reduce function that
-merges all intermediate values that belongs to the same key. The abstraction of
-two functions to process small parts of the large data set was inspired by the
-map and reduce functions commonly found in functional programming languages such
-as Lisp. The use of this model allows the framework to easily parallelize the
-computations. In the inevitable case of a failure at a computational node, the
-computations that failed can simply be re-executed on another node.
+merges all intermediate values that belongs to the same key.
+
+MapReduce is not a new concept. The abstraction of two functions to process
+small parts of the large data set was inspired by the map and reduce functions
+commonly found in functional programming languages such as Lisp.
 
 MapReduce splits the input into \textit{n} pieces and assigns each computational
 node of the cluster to work on one or more piece. The map function runs on each
 node and emits key/value pairs. These are passed to the reduce function where
 the values are collated by the reduce function.
+
+The use of this model allows the framework to easily parallelize the
+computations. In the inevitable case of a failure at a computational node, the
+computations that failed can simply be re-executed on another node.
 
 \vspace{12pt}
 
@@ -1117,10 +1120,8 @@ Regarding scalability Hadoop and HBase scales close to linearly when nodes are
 added to the cluster.
 
 While relational databases can be made highly available and reliable with load
-balancing and so called \textit{sharding}, the setup is non-trivial. Regarding
-scalability, relational databases are highly dependent on having data in working
-memory; thus they scale poorly.
-% TODO: [citation needed]
+balancing and so called \textit{sharding}, the setup is non-trivial.
+
 
 
 \section{Scope}
