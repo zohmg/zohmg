@@ -505,7 +505,7 @@ country dimension: the measurements in the new cube represent the global sales
 of each nail type for each month.
 
 
-\subsubsection*{Slice and dice}
+\subsubsection*{Slice and Dice}
 
 % TODO: this is actually exactly the same thing as projection.
 
@@ -1049,7 +1049,7 @@ Foundation. HBase is still in its infancy and few organizations use it for
 mission-critical applications. \cite{hbase}
 
 
-\subsubsection{Physical storage}
+\subsubsection{Physical Storage}
 
 Each column-family is stored as a single file in HBase; it is then subdivided
 into column-qualifiers within this file. This is important to consider when
@@ -1471,7 +1471,7 @@ more interested in finding all entries with status code 200, it would make sense
 to set up the projection so that status code is the first dimension.
 
 
-\subsection{Internal Data Interchange}
+\subsection*{Internal Data Interchange}
 
 The reducer needs to communicate to the output reader under what row and column
 the computed aggregate is to be stored. The reducer does this by emitting the
@@ -1786,7 +1786,7 @@ MapReduce program needs to be created. The reduce step is taken care of by
 Zohmg, which uses sum reducer that simply sums up values with the same keys.
 
 
-\subsection*{User mappers}
+\subsection*{User Mappers}
 
 Import jobs use mappers written either in Python or Java. User mappers import
 each line from the input file and set the arguments to the map function, key and
