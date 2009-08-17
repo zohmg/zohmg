@@ -1249,28 +1249,30 @@ very simple for humans to read and edit, and likewise for machines. The Python
 module PyYAML was used to implement the YAML configuration reading part.
 \cite{pyyaml}
 
-A typical configuration looks like this:
+Listing 5.1 shows an example data set configuration.
+
+\vspace{12pt}
 
 \begin{lstlisting}[caption=A data set configuration example.,captionpos=b]
-dataset: submissions
+   dataset: submissions
 
-dimensions:
- - artist
- - track
- - user
+   dimensions:
+    - artist
+    - track
+    - user
 
-projections:
- - artist
- - user
- - user-artist
- - user-track
- - artist-track
+   projections:
+    - artist
+    - user
+    - user-artist
+    - user-track
+    - artist-track
 
-units:
- - scrobbles
- - loves
- - bans
- \end{lstlisting}
+   units:
+    - scrobbles
+    - loves
+    - bans
+\end{lstlisting}
 
 
 \subsubsection*{Environment}
