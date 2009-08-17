@@ -574,7 +574,7 @@ row key, which means that all sub-domains of any domain are next to each other
 
 \subsubsection{Data Model}
 
-BigTable's data model can indeed be thought of as a sparse, distributed, sorted,
+BigTable's data model can be thought of as a sparse, distributed, sorted,
 multidimensional map. In concept, this multidimensional map is identical to a
 nested hash table. The dimensions of the map are: row key, column family and
 column qualifier, and a version time-stamp.
@@ -1639,12 +1639,12 @@ The reasons behind using Dumbo and writing Zohmg in Python are similar. Last.fm
 was already moving towards writing a larger set of its analysis tools in Python
 thanks to Dumbo, which is a product of another intern at the company. Python is
 a language which allows for rapid prototyping and is as such well suited for
-writing both the user's map function and indeed the whole of Zohmg.
+writing both the user's map function and the whole of Zohmg.
 
 The main point of contention was which backing store to use. A number of
 different systems that fitted the requirements were tried out but none of them
 proved to be either very dissimilar from the BigTable apporach of HBase, or
-indeed ready for production. HBase has the advantage of being closely tied to
+ready for production. HBase has the advantage of being closely tied to
 Hadoop which means that there was already tools available for writing
 HBase-centric MapReduce jobs in Hadoop. The technology culture at Last.fm again
 proved to be the main reason: there were already projects within the company
