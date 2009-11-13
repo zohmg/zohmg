@@ -19,7 +19,6 @@ msc-report: msc-report.tex
 #	$(PDFLATEX) $@
 	$(DVIPSPDF) $@
 	$(PS2PDF) msc-report.ps msc-report.pdf
-	-rm -rf *.aux *.log
 
 clean:
 	-rm -rf *.dvi *.aux *.log *.bbl *.blg *.lof *.lot *.toc
