@@ -1,4 +1,4 @@
-example zohmg project, PARSING APACHE LOGS.
+a zohmg example project: PARSING APACHE LOGS.
 
 this project contains a mapper that parses log files from the apache web server.
 the log files are assumed to be in the canonical formats 'common' or 'combined'.
@@ -17,12 +17,27 @@ Let Zohmg create some HBase tables.
 :$> zohmg setup
 creating table 'apache'
 could not setup thrift transport.
-is the thrift server turned on?
+is the thrift server switched on?
 
-(Make sure HBase's thrift service is on.)
+(Make sure HBase's thrift service is switched on.)
 
 :$> hbase thrift start
 :$> zohmg setup
 creating table 'apache'
 ok.
+
+
+Check out the logics in mappers/apache.py.
+
+:$> cat mappers/apache.py
+
+
+Fetch some log data.
+
+:$> wget http://bit.ly/randomapachelog -O data/example.log
+
+
+Fire off a job:
+
+:$> zohmg import mappers/apache.py data/example.log
 
