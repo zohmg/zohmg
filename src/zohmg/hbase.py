@@ -1,3 +1,4 @@
+import sys
 from thrift import Thrift
 from thrift.transport import TSocket
 from thrift.transport import TTransport
@@ -28,8 +29,12 @@ class ZohmgHBase:
 
 
     @classmethod
-    def create_table(self, client, table_name, families=[]):
+    def create_table(self, table_name, families=[], client=None):
         """."""
+        if not client:
+            # default to localhost.
+            client = ZohmgHBase.transport("localhost")
+
         try:
             columns = []
             for family in families:
@@ -38,7 +43,7 @@ class ZohmgHBase:
             client.createTable(table_name, columns)
 
         except AlreadyExists:
-            sys.stderr.write("oh noes, %s already exists.\n" % t)
+            sys.stderr.write("oh noes, %s already exists.\n" % table_name)
             exit(2)
         except IOError, e:
             sys.stderr.write("bust: IOError: "+ str(e) + "\n")
@@ -47,3 +52,31 @@ class ZohmgHBase:
             sys.stderr.write("error: " + str(e) + "\n")
             sys.stderr.write(" => bust\n")
             exit(4)
+
+    @classmethod
+    def delete_table(self, table_name, client=None):
+        if not client:
+            # default to localhost.
+            client = ZohmgHBase.transport("localhost")
+        ZohmgHBase.disable_table(table_name, client) and \
+        ZohmgHBase.drop_table(table_name, client)
+
+    @classmethod
+    def disable_table(self, table_name, client=None):
+        try:
+            client.disableTable(table_name)
+            print "%s disabled." % table_name
+        except IOError, e:
+            print "error: %s" % e
+            raise
+        return True
+
+    @classmethod
+    def drop_table(self, table_name, client=None):
+        try:
+            client.deleteTable(table_name)
+            print "%s dropped." % table_name
+        except IOError, e:
+            print "IOError: %s" % e
+            raise
+        return True

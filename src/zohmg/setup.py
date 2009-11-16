@@ -26,7 +26,5 @@ class Setup(object):
         column_family = ["unit"]
 
         print "creating table '%s'" % dataset
-
-        client = ZohmgHBase.transport("localhost")
-        ZohmgHBase.create_table(client, dataset, column_family)
+        ZohmgHBase.create_table(dataset, column_family)
         print 'ok.'

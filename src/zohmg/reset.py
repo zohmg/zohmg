@@ -18,8 +18,8 @@
 import sys
 from zohmg.setup import Setup
 from zohmg.config import Config
-from zohmg.utils import setup_transport, disable, drop
-from hbase.ttypes import IOError
+from zohmg.hbase import ZohmgHBase
+from hbase_thrift.ttypes import IOError
 
 class Reset(object):
     def please(self):
@@ -30,31 +30,27 @@ class Reset(object):
         print "reset will *wipe all data* in dataset '%s'." % table
         print "ARE YOU QUITE SURE? ('yes' to confirm.)"
 
-        response = sys.stdin.readline().strip()
-        if response.lower() not in ["yes", "yes!"]:
-            print 'phew!'
+        try:
+            response = sys.stdin.readline().strip()
+            if response.lower() not in ["yes", "yes!"]:
+                print 'phew!'
+                sys.exit(0)
+        except KeyboardInterrupt:
+            print 'hyorgh!'
             sys.exit(0)
 
         # disable+drop.
-        print "ok, wiping!"
         try:
-            c = setup_transport(host)
-            disable(c, table)
-            drop(c, table)
+            print "ok, wiping!"
+            ZohmgHBase.delete_table(table)
+            # recreate.
+            print
+            print "recreating."
+            Setup().go()
         except Exception, e:
             print 'reset failed :-('
             print 'error: ' + str(e)
             sys.exit(1)
-        except IOError:
-            # problem is, hbase.ttypes.IOError isn't very expressive.
-            print 'reset failed :-('
-            print '(does the table perhaps not exist?)'
-            sys.exit(1)
-
-        # recreate (with the help of our dear friend setup).
-        print
-        print "recreating."
-        Setup().go()
 
         print
         print "%s reset'd" % table
