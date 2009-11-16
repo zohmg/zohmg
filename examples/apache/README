@@ -1,0 +1,5 @@
+example zohmg project, PARSING APACHE LOGS.
+
+this project contains a mapper that parses log files from the apache web server.
+the log files are assumed to be in the canonical formats 'common' or 'combined'.
+
