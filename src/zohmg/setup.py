@@ -15,8 +15,9 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import sys
+from zohmg.hbase import ZohmgHBase
 from zohmg.config import Config
-from utils import *
 
 # reads conf, creates table.
 class Setup(object):
@@ -26,11 +27,5 @@ class Setup(object):
 
         print "creating table '%s'" % dataset
 
-        try:
-            c = setup_transport("localhost")
-        except:
-            sys.stderr.write("could not setup thrift transport.\n")
-            sys.stderr.write("is the thrift server turned on?\n")
-            sys.exit(1)
-
-        create_or_bust(c, dataset, column_family)
+        client = ZohmgHBase.transport("localhost")
+        ZohmgHBase.create_table(client, dataset, column_family)

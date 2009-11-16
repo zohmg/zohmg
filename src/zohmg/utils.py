@@ -18,47 +18,6 @@
 import string, sys, time
 from random import Random
 
-# TODO: move all hbase utils to it's own module.
-
-#
-# HBase helpers
-#
-def setup_transport(host):
-    from thrift import Thrift
-    from thrift.transport import TSocket
-    from thrift.transport import TTransport
-    from thrift.protocol import TBinaryProtocol
-    from hbase import Hbase
-    try:
-        transport = TSocket.TSocket(host, 9090)
-        transport = TTransport.TBufferedTransport(transport)
-        protocol = TBinaryProtocol.TBinaryProtocol(transport)
-        client = Hbase.Client(protocol)
-        transport.open()
-        return client
-    except:
-        raise
-
-
-def create_or_bust(c, t, cfs=['fam']):
-    from hbase.ttypes import ColumnDescriptor, AlreadyExists, IOError, IllegalArgument
-    try:
-        cds = []
-        for cf in cfs:
-            cd = ColumnDescriptor({'name' : str(cf)+":" })
-            cds.append(cd)
-        c.createTable(t, cds)
-    except AlreadyExists:
-        sys.stderr.write("oh noes, %s already exists.\n" % t)
-        exit(2)
-    except IOError:
-        sys.stderr.write("bust: IOError\n")
-        exit(3)
-    except IllegalArgument, e:
-        sys.stderr.write("error: " + str(e) + "\n")
-        sys.stderr.write("create_or_bust => bust\n")
-        exit(3)
-
 def random_string(size):
     # subopt for larger sizes.
     if size > len(string.letters):
