@@ -23,3 +23,6 @@ is the thrift server turned on?
 
 :$> hbase thrift start
 :$> zohmg setup
+creating table 'apache'
+ok.
+

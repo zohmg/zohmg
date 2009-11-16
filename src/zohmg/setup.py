@@ -29,3 +29,4 @@ class Setup(object):
 
         client = ZohmgHBase.transport("localhost")
         ZohmgHBase.create_table(client, dataset, column_family)
+        print 'ok.'
