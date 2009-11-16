@@ -1,1 +1,3 @@
 *.pyc
+config/environment.py
+data/
