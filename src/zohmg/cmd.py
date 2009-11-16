@@ -39,7 +39,7 @@ def usage(reason = None):
     print "usage:"
     print zohmg + " create <dir>"
     print zohmg + " setup"
-    print zohmg + " import <mapper> <hdfs-input-dir> [--local] [--lzo]"
+    print zohmg + " import <mapper> <input-dir> [--local] [--lzo]"
     print zohmg + " server [--host=<host>] [--port=<port>]"
     print zohmg + " reset"
     print zohmg + " help"
