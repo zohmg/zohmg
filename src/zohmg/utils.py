@@ -43,38 +43,6 @@ def timing_p(func):
         return elapsed
     return wrapper
 
-
-def disable(c, table):
-    try:
-        c.disableTable(table)
-        print "%s disabled." % table
-    except IOError, e:
-        print "error: %s" % e
-        return False
-    return True
-
-
-def enable(c, table):
-    try:
-        c.enableTable(table)
-        print "%s enabled." % table
-    except IOError, e:
-        print "error: %s" % e
-        return False
-    return True
-
-
-def drop(c, table):
-    try:
-        c.deleteTable(table)
-        print "%s dropped." % table
-    except IOError, e:
-        print "IOError: %s" % e
-        exit(128)
-    except NotFound, e:
-        print "NotFound: %s" % e
-
-
 #
 # General helpers
 #
