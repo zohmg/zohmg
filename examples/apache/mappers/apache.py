@@ -2,6 +2,7 @@
 # log lines are in the 'combined' format.
 
 from apachelogparser import ApacheLogParser
+from useragent import UserAgent
 import time
 
 def ymd(epoch):
@@ -23,7 +24,7 @@ def map(key, logline):
     dimensions['path']     = parsed['path']
     dimensions['status']   = parsed['status']
     dimensions['referrer'] = parsed['referrer']
-    dimensions['agent']    = parsed['agent']
+    dimensions['agent']    = UserAgent(parsed['agent']).classify()
 
     # measurements are integers.
     measurements = {}
