@@ -3,3 +3,23 @@ example zohmg project, PARSING APACHE LOGS.
 this project contains a mapper that parses log files from the apache web server.
 the log files are assumed to be in the canonical formats 'common' or 'combined'.
 
+
+ORDER OF BUSINESS.
+------------------
+
+Where it's at.
+
+:$> cd zohmg/examples/apache
+
+
+Let Zohmg create some HBase tables.
+
+:$> zohmg setup
+creating table 'apache'
+could not setup thrift transport.
+is the thrift server turned on?
+
+(Make sure HBase's thrift service is on.)
+
+:$> hbase thrift start
+:$> zohmg setup
