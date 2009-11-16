@@ -11,7 +11,7 @@ dimensions:
 projections:
   - path-agent
   - path-method-status
-  - agent-method--status
+  - agent-method-status
   - host-method-path-status-referrer-agent
 
 units:
