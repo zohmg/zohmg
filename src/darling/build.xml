@@ -19,7 +19,7 @@
  -->
 
 <project name="darling" default="jar">
-  <property name="version" value="0.0.6"/>
+  <property name="version" value="0.0.8"/>
   <property name="Name" value="darling"/>
   <property name="final.name" value="darling-${version}"/>
   <property name="year" value="2009"/>
