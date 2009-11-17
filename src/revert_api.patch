@@ -1,0 +1,146 @@
+diff --git a/src/darling/src/java/fm/last/darling/hbase/HBaseIdentifierResolver.java b/src/darling/src/java/fm/last/darling/hbase/HBaseIdentifierResolver.java
+index 2489874..4d518cc 100644
+--- a/src/darling/src/java/fm/last/darling/hbase/HBaseIdentifierResolver.java
++++ b/src/darling/src/java/fm/last/darling/hbase/HBaseIdentifierResolver.java
+@@ -16,20 +16,17 @@
+  * specific language governing permissions and limitations
+  * under the License.
+  */
+-
+ package fm.last.darling.hbase;
+ 
+-import org.apache.hadoop.hbase.client.Put;
++import org.apache.hadoop.hbase.io.BatchUpdate;
+ import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
+ import org.apache.hadoop.streaming.io.IdentifierResolver;
+ import org.apache.hadoop.streaming.io.TextInputWriter;
+ 
+ /**
+  * By setting <tt>stream.io.identifier.resolver.class=HBaseIdentifierResolver</tt> and giving
+- * <tt>-outputformat org.apache.hadoop.hbase.mapred.TableOutputFormat</tt> to dumbo
+- * you will be able to store stuff in * HBase.
+- *
+- * Pro-tip: Remember to set <tt>hbase.mapred.outputtable</tt>.
++ * <tt>-outputformat org.apache.hadoop.hbase.mapred.TableOutputFormat</tt> to dumbo you will be able to store stuff in
++ * HBase. Pro-tip: Remember to set <tt>hbase.mapred.outputtable</tt>.
+  */
+ public class HBaseIdentifierResolver extends IdentifierResolver {
+   public static final String HBASE_ID = "hbase";
+@@ -42,7 +39,7 @@ public class HBaseIdentifierResolver extends IdentifierResolver {
+       setInputWriterClass(TextInputWriter.class);
+       setOutputReaderClass(HBaseJSONOutputReader.class);
+       setOutputKeyClass(ImmutableBytesWritable.class);
+-      setOutputValueClass(Put.class);
++      setOutputValueClass(BatchUpdate.class);
+     } else {
+       super.resolve(identifier);
+     }
+diff --git a/src/darling/src/java/fm/last/darling/hbase/HBaseJSONOutputReader.java b/src/darling/src/java/fm/last/darling/hbase/HBaseJSONOutputReader.java
+index 44d2ec7..6a87978 100644
+--- a/src/darling/src/java/fm/last/darling/hbase/HBaseJSONOutputReader.java
++++ b/src/darling/src/java/fm/last/darling/hbase/HBaseJSONOutputReader.java
+@@ -27,7 +27,7 @@ import java.util.Map;
+ import java.util.Set;
+ 
+ import org.apache.hadoop.conf.Configuration;
+-import org.apache.hadoop.hbase.client.Put;
++import org.apache.hadoop.hbase.io.BatchUpdate;
+ import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
+ import org.apache.hadoop.io.Text;
+ import org.apache.hadoop.streaming.PipeMapRed;
+@@ -38,12 +38,13 @@ import org.apache.hadoop.util.UTF8ByteArrayUtils;
+ import org.apache.noggit.ObjectBuilder;
+ 
+ /**
+- * OutputReader that transforms the client's JSON output into HBase Puts.
++ * OutputReader that transforms the client's JSON output into BatchUpdates.
++ * Uses the old API since streaming does.
+  */
+-public class HBaseJSONOutputReader extends OutputReader<ImmutableBytesWritable, Put> {
++public class HBaseJSONOutputReader extends OutputReader<ImmutableBytesWritable, BatchUpdate> {
+ 
+   private ImmutableBytesWritable rowkey;
+-  private Put put;
++  private BatchUpdate batchupdate;
+ 
+   // save the last seen line of output as Text
+   // and the bytes, so that getLastOutput can recreate it as a string.
+@@ -62,6 +63,7 @@ public class HBaseJSONOutputReader extends OutputReader<ImmutableBytesWritable,
+     super.initialize(pipeMapRed);
+ 
+     rowkey = new ImmutableBytesWritable();
++    batchupdate = new BatchUpdate();
+     line = new Text();
+ 
+     datainput    = pipeMapRed.getClientInput();
+@@ -74,6 +76,7 @@ public class HBaseJSONOutputReader extends OutputReader<ImmutableBytesWritable,
+ 
+   @Override
+   public boolean readKeyValue() throws IOException {
++    System.err.println("readKeyValue()\n");
+     if (lineReader.readLine(line) <= 0)
+       return false;
+     bytes = line.getBytes();
+@@ -108,7 +111,7 @@ public class HBaseJSONOutputReader extends OutputReader<ImmutableBytesWritable,
+     byte[] keyBytes = trimOuterBytes(k);
+ 
+     rowkey = new ImmutableBytesWritable(keyBytes);
+-    put = new Put(keyBytes);
++    batchupdate = new BatchUpdate(keyBytes);
+ 
+     String tmpV = v.toString();
+     String json = tmpV.substring(1, tmpV.length() - 1);
+@@ -121,26 +124,20 @@ public class HBaseJSONOutputReader extends OutputReader<ImmutableBytesWritable,
+ 
+     Set<Map.Entry<String, Map>> entries = payload.entrySet();
+     for (Map.Entry<String, Map> entry : entries) {
+-      String cfq = entry.getKey(); // let's consider not joining family and qualifier at emitter.
+-      String[] parts = cfq.split(":");
+-      if (parts.length < 2)
+-         continue;      	
+-      String family    = parts[0];
+-      String qualifier = parts[1];
+-
++      String cfq = entry.getKey();
+       Map dict = entry.getValue(); // unchecked.
+ 
+       // expecting dict to carry 'value',
+       Object value = dict.get("value");
+       if (value == null)
+-        continue; // no good.
++        return; // no good.
+ 
+       // ..and possibly 'timestamp'.
+       //Object ts = 0;
+       //if (dict.containsKey("timestamp"))
+         //ts = dict.get("timestamp");
+ 
+-      put.add(family.getBytes("UTF-8"), qualifier.getBytes("UTF-8"), value.toString().getBytes("UTF-8"));
++      batchupdate.put(cfq, value.toString().getBytes("UTF-8"));
+     }
+   }
+ 
+@@ -156,8 +153,8 @@ public class HBaseJSONOutputReader extends OutputReader<ImmutableBytesWritable,
+   }
+ 
+   @Override
+-  public Put getCurrentValue() throws IOException {
+-    return put;
++  public BatchUpdate getCurrentValue() throws IOException {
++    return batchupdate;
+   }
+ 
+   @Override
+diff --git a/src/zohmg/process.py b/src/zohmg/process.py
+index fb0091b..9081ca1 100644
+--- a/src/zohmg/process.py
++++ b/src/zohmg/process.py
+@@ -28,7 +28,7 @@ class Process(object):
+         jobname = "%s %s" % (table, input) # overrides any name specified on cli.
+ 
+         resolver = 'fm.last.darling.hbase.HBaseIdentifierResolver'
+-        outputformat = 'org.apache.hadoop.hbase.mapreduce.TableOutputFormat'
++        outputformat = 'org.apache.hadoop.hbase.mapred.TableOutputFormat'
+ 
+         opts = [('jobconf', "hbase.mapred.outputtable=" + table),
+                 ('jobconf', 'stream.io.identifier.resolver.class=' + resolver),
