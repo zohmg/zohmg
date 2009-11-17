@@ -38,7 +38,7 @@ import org.apache.hadoop.util.UTF8ByteArrayUtils;
 import org.apache.noggit.ObjectBuilder;
 
 /**
- * OutputReader that transforms the client's output HBasey BatchUpdates.
+ * OutputReader that transforms the client's JSON output into HBase Puts.
  */
 public class HBaseJSONOutputReader extends OutputReader<ImmutableBytesWritable, Put> {
 
