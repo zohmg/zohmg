@@ -85,7 +85,7 @@ class Process(object):
                     msg = "error: jar defined in config/environment is not a file: %s." % jar
                     fail(msg)
                 else:
-                    print 'import: adding %s to jobar.' % jar
+                    print 'import: adding %s to jobjar.' % jar
                     opts.append(('libjar', jar))
         else:
             msg = "error: CLASSPATH in config/environment is empty."
