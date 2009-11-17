@@ -1,4 +1,4 @@
-import calendar, time, re
+import calendar, time, sys, re
 
 class ApacheLogParser:
     def __init__(self):
@@ -32,6 +32,8 @@ class ApacheLogParser:
             parsed['path']     = mo.group(4)
             parsed['status']   = mo.group(5)
             parsed['size']     = mo.group(6)
+            if parsed['size'] == '-':
+                parsed['size'] = 0
             parsed['referrer'] = mo.group(7)
             parsed['agent']    = mo.group(8)
         except AttributeError: raise ValueError()

@@ -12,7 +12,9 @@ def ymd(epoch):
     return time.strftime("%Y%m%d", time_tuple)
 
 def map(key, logline):
-    parsed = ApacheLogParser().parse(logline)
+    try:
+        parsed = ApacheLogParser().parse(logline)
+    except: return
 
     # timestamp of format yyyymmdd.
     timestamp = ymd(parsed['epoch'])
