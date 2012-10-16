@@ -1,3 +1,13 @@
+DEPRECATING: ZOHMG.
+-------------------
+
+Zohmg was a research project written in 2009 by Per Andersson and Fredrik Möllerstrand.
+
+The code is now wildly out-of-date with the current Hadoop and HBase implementations and is left here to slowly bitwither.
+
+The original README follows:
+
+
 
 INTRODUCING: ZOHMG.
 -------------------
@@ -11,15 +21,6 @@ This README assumes a working installation of zohmg. Please see INSTALL for
 installation instructions.
 
 Zohmg is alpha software. Be gentle.
-
-
-CONTACT
--------
-
-IRC:           #zohmg at freenode
-Code:          http://github.com/zohmg/zohmg/tree/master
-User list:     http://groups.google.com/group/zohmg-user
-Dev list:      http://groups.google.com/group/zohmg-dev
 
 
 RUN THE ZOHMG
